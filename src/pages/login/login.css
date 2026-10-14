@@ -1,0 +1,655 @@
+/* ==========================================================================
+   NexSuite — login.css
+   Metodología BEM  ·  Mobile first (móvil → tablet → portátil)
+   Pantalla fija (position: fixed): sin scroll en ningún tamaño.
+   Usa las variables de index.css (debe estar importado en main.jsx).
+   ========================================================================== */
+
+/* Evita que los inputs se salgan de su contenedor */
+.login,
+.login *,
+.login *::before,
+.login *::after { box-sizing: border-box; }
+
+.login {
+  --login-gold: #ffc83d;
+  --login-gold-deep: #ff9a1f;
+  --login-radius: 24px;
+  --power-ms: 2400ms; /* igual a LOADING_MS en Login.jsx */
+}
+
+/* ==========================================================================
+   BLOQUE: logo (los colores cambian según el contenedor)
+   ========================================================================== */
+.logo {
+  --logo-bg: var(--red-600);
+  --logo-fg: var(--white);
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.logo__traces { fill: none; stroke: var(--logo-bg); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.logo__nodes { fill: var(--logo-fg); stroke: var(--logo-bg); stroke-width: 2.5; }
+.logo__hex { fill: var(--logo-bg); stroke: var(--logo-bg); stroke-width: 6; stroke-linejoin: round; }
+.logo__ring { fill: none; stroke: var(--logo-fg); stroke-width: 1.5; opacity: 0.35; }
+.logo__n { fill: none; stroke: var(--logo-fg); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+.logo__dots { fill: var(--logo-fg); }
+
+/* ==========================================================================
+   BLOQUE: login — MÓVIL (base)
+   ========================================================================== */
+.login {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2.4dvh, 24px);
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(214, 24, 46, 0.14), transparent 45%),
+    radial-gradient(circle at 100% 100%, rgba(214, 24, 46, 0.18), transparent 50%),
+    var(--tint);
+  color: var(--color-text);
+}
+
+/* ---------- login__deco: fondo decorativo ---------- */
+.login__deco {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(214, 24, 46, 0.2) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 78%);
+}
+
+.login__hex {
+  position: absolute;
+  background: rgba(214, 24, 46, 0.09);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  animation: login-float 7s ease-in-out infinite;
+}
+.login__hex--1 { top: 6%; left: -40px; width: 150px; height: 150px; }
+.login__hex--2 { right: -60px; bottom: 8%; width: 220px; height: 220px; animation-delay: -3s; }
+.login__hex--3 { top: 42%; right: 8%; width: 56px; height: 56px; animation-delay: -5s; }
+
+/* ---------- login__brand ---------- */
+.login__brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(4px, 1dvh, 10px);
+  animation: login-rise 600ms ease both;
+}
+
+.login__logo {
+  width: clamp(56px, 11dvh, 96px);
+  filter: drop-shadow(0 10px 18px rgba(214, 24, 46, 0.3));
+  animation: login-float 5s ease-in-out infinite;
+}
+.login__logo .logo__nodes circle { animation: login-node 2.4s ease-in-out infinite; }
+.login__logo .logo__nodes circle:nth-child(3n) { animation-delay: 0.4s; }
+.login__logo .logo__nodes circle:nth-child(3n + 1) { animation-delay: 0.9s; }
+.login__logo .logo__nodes circle:nth-child(3n + 2) { animation-delay: 1.5s; }
+
+.login__wordmark {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1.3rem, 3.6dvh, 1.75rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--gray-900);
+}
+.login__wordmark-nex { font-weight: 700; color: var(--red-600); }
+
+/* ---------- login__panel / login__card ---------- */
+.login__panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  border-radius: var(--login-radius);
+  animation: login-rise 600ms 120ms ease both;
+}
+
+.login__card {
+  position: relative;
+  padding: clamp(18px, 3.4dvh, 30px) 22px clamp(16px, 2.6dvh, 24px);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.94);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(214, 24, 46, 0.12);
+  border-radius: var(--login-radius);
+  box-shadow:
+    0 24px 48px -16px rgba(176, 18, 39, 0.28),
+    0 8px 20px rgba(26, 26, 26, 0.06);
+}
+/* Franja roja superior */
+.login__card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--red-700), var(--red-500), var(--red-400));
+}
+
+.login__card--shake { animation: login-shake 500ms cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+
+.login__title {
+  margin: 0 0 4px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1.4rem, 3.6dvh, 1.85rem);
+  line-height: 1.2;
+}
+
+.login__subtitle {
+  margin: 0 0 clamp(10px, 2.2dvh, 22px);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.login__footer {
+  margin: clamp(10px, 2dvh, 18px) 0 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* ==========================================================================
+   BLOQUE: form
+   ========================================================================== */
+.form { display: flex; flex-direction: column; gap: 2px; width: 100%; }
+
+/* Reserva el espacio del error para que el formulario no "salte" */
+.form__field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding-bottom: 20px;
+}
+
+.form__label { font-size: 0.82rem; font-weight: 600; color: var(--gray-700); }
+
+.form__control { position: relative; width: 100%; min-width: 0; }
+
+.form__icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--gray-500);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: translateY(-50%);
+  pointer-events: none;
+  transition: stroke 150ms ease;
+}
+.form__control:focus-within .form__icon { stroke: var(--red-600); }
+
+.form__input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 50px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 1rem; /* 16px evita el zoom automático en iOS */
+  color: var(--color-text);
+  background: var(--gray-50);
+  border: 1.5px solid var(--gray-200);
+  border-radius: 12px;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.form__input--icon { padding-left: 46px; }
+.form__input--password { padding-right: 50px; }
+.form__input::placeholder { color: var(--gray-500); opacity: 0.65; }
+.form__input:hover { border-color: var(--gray-300); }
+.form__input:focus {
+  outline: none;
+  background: var(--white);
+  border-color: var(--red-600);
+  box-shadow: 0 0 0 4px rgba(214, 24, 46, 0.14);
+}
+.form__input--invalid,
+.form__input--invalid:hover { background: var(--red-50); border-color: var(--danger); }
+.form__input--invalid:focus { box-shadow: 0 0 0 4px rgba(180, 35, 24, 0.16); }
+
+/* Autocompletado del navegador sin fondo amarillo */
+.form__input:-webkit-autofill,
+.form__input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--gray-50) inset;
+  transition: background-color 9999s ease-out;
+}
+
+.form__toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 100%;
+  padding: 0;
+  color: var(--gray-500);
+  background: none;
+  border: 0;
+  border-radius: 0 12px 12px 0;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+.form__toggle:hover { color: var(--red-600); }
+.form__toggle:focus-visible { outline: 3px solid rgba(214, 24, 46, 0.35); outline-offset: -3px; }
+
+.form__eye {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.form__error {
+  position: absolute;
+  bottom: 0;
+  left: 2px;
+  margin: 0;
+  max-width: 100%;
+  font-size: 0.75rem;
+  line-height: 16px;
+  white-space: nowrap;
+  color: var(--danger);
+  animation: login-fade 250ms ease both;
+}
+
+.form__link {
+  align-self: flex-end;
+  margin-bottom: clamp(8px, 1.6dvh, 14px);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--red-600);
+  text-decoration: none;
+}
+.form__link:hover { color: var(--red-800); text-decoration: underline; }
+
+/* ==========================================================================
+   BLOQUE: button
+   ========================================================================== */
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 20px;
+  overflow: hidden;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: box-shadow 200ms ease, transform 150ms ease, filter 150ms ease;
+}
+.button:focus-visible { outline: 3px solid rgba(214, 24, 46, 0.35); outline-offset: 3px; }
+.button:active { transform: translateY(1px) scale(0.99); }
+
+.button__icon {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 200ms ease;
+}
+.button:hover .button__icon { transform: translateX(4px); }
+
+.button--primary {
+  color: var(--white);
+  background: linear-gradient(135deg, var(--red-500), var(--red-700));
+  box-shadow: 0 10px 22px -8px rgba(214, 24, 46, 0.6);
+}
+.button--primary:hover { box-shadow: 0 14px 28px -8px rgba(214, 24, 46, 0.75); filter: brightness(1.05); }
+
+/* Brillo que cruza el botón */
+.button--primary::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  transition: left 600ms ease;
+}
+.button--primary:hover::after { left: 130%; }
+
+/* ==========================================================================
+   BLOQUE: power — animación de carga (aura de poder)
+   ========================================================================== */
+.login__power { position: absolute; inset: 0; z-index: 5; border-radius: var(--login-radius); }
+
+.power {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2.4dvh, 20px);
+  overflow: hidden;
+  background: var(--white);
+  animation: login-fade 300ms ease both;
+}
+
+.power__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(130px, 26dvh, 180px);
+  height: clamp(130px, 26dvh, 180px);
+}
+
+.power__logo {
+  --logo-bg: var(--red-600);
+  --logo-fg: var(--white);
+  position: relative;
+  z-index: 3;
+  width: 76%;
+  animation: power-tremble 90ms linear infinite;
+}
+
+/* Aura dorada que late */
+.power__aura {
+  position: absolute;
+  z-index: 1;
+  width: 105%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 200, 61, 0.95) 0%, rgba(255, 154, 31, 0.55) 45%, rgba(255, 154, 31, 0) 72%);
+  filter: blur(8px);
+  animation: power-pulse 600ms ease-in-out infinite alternate;
+}
+
+/* Rayos giratorios */
+.power__spikes {
+  position: absolute;
+  z-index: 2;
+  width: 130%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 200, 61, 0.95) 0deg 5deg, rgba(255, 200, 61, 0) 5deg 16deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 36%, #000 46%, transparent 70%);
+  mask-image: radial-gradient(circle, transparent 36%, #000 46%, transparent 70%);
+  animation: power-spin 1.4s linear infinite, power-flicker 160ms steps(2) infinite;
+}
+
+/* Ondas de energía que se expanden */
+.power__ring {
+  position: absolute;
+  z-index: 0;
+  width: 70%;
+  aspect-ratio: 1;
+  border: 2px solid var(--login-gold-deep);
+  border-radius: 50%;
+  opacity: 0;
+  animation: power-ring 1.5s ease-out infinite;
+}
+.power__ring:nth-child(2) { animation-delay: 0.5s; }
+.power__ring:nth-child(3) { animation-delay: 1s; }
+
+.power__text {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.power__bar {
+  width: 70%;
+  max-width: 260px;
+  height: 8px;
+  overflow: hidden;
+  background: var(--gray-200);
+  border-radius: 999px;
+}
+.power__fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--red-600), var(--login-gold-deep), var(--login-gold));
+  border-radius: inherit;
+  transform-origin: left;
+  animation: power-fill var(--power-ms) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Modificador: acceso concedido → explosión final */
+.power--done .power__aura { animation: power-burst 700ms ease-out forwards; }
+.power--done .power__spikes { animation: power-spin 0.6s linear infinite; }
+.power--done .power__logo { animation: none; }
+.power--done .power__text { color: var(--success); }
+
+/* ==========================================================================
+   KEYFRAMES
+   ========================================================================== */
+@keyframes login-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes login-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes login-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes login-node {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+@keyframes login-shake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-8px); }
+  40%, 60% { transform: translateX(8px); }
+}
+@keyframes power-tremble {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(1.5px, -1px); }
+  50% { transform: translate(-1px, 1.5px); }
+  75% { transform: translate(-1.5px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes power-pulse {
+  from { transform: scale(0.85); opacity: 0.8; }
+  to { transform: scale(1.15); opacity: 1; }
+}
+@keyframes power-spin { to { transform: rotate(360deg); } }
+@keyframes power-flicker { 0% { opacity: 1; } 100% { opacity: 0.55; } }
+@keyframes power-ring {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(2.1); opacity: 0; }
+}
+@keyframes power-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes power-burst {
+  0% { transform: scale(1); opacity: 1; }
+  60% { transform: scale(2.4); opacity: 0.9; }
+  100% { transform: scale(1.4); opacity: 0.5; }
+}
+
+/* ==========================================================================
+   MÓVIL BAJITO (pantallas de poca altura): se compacta para no hacer scroll
+   ========================================================================== */
+@media (max-height: 700px) {
+  .login__subtitle,
+  .login__footer { display: none; }
+  .login__title { margin-bottom: 10px; }
+  .form__input { height: 46px; }
+  .button { min-height: 48px; }
+}
+@media (max-height: 560px) {
+  .login__wordmark { display: none; }
+}
+
+/* ==========================================================================
+   TABLET  (≥ 768px)
+   ========================================================================== */
+@media (min-width: 768px) {
+  .login { padding: 32px; }
+
+  .login__hex--1 { width: 240px; height: 240px; left: -60px; }
+  .login__hex--2 { width: 360px; height: 360px; }
+  .login__hex--3 { width: 90px; height: 90px; }
+
+  .login__logo { width: clamp(72px, 15dvh, 130px); }
+  .login__wordmark { font-size: clamp(1.6rem, 4.4dvh, 2.25rem); }
+
+  .login__panel { max-width: 460px; }
+  .login__card { padding: clamp(24px, 4dvh, 40px) 40px clamp(20px, 3dvh, 32px); }
+
+  .login__title { font-size: clamp(1.6rem, 4dvh, 2rem); }
+  .login__subtitle { font-size: 1rem; }
+
+  .form__input { height: 52px; }
+}
+
+/* Celulares en horizontal: formulario y logo lado a lado */
+@media (max-height: 520px) and (min-width: 600px) {
+  .login { flex-direction: row; gap: 32px; padding: 12px 24px; }
+  .login__brand { flex: 1; }
+  .login__logo { width: clamp(70px, 30dvh, 120px); }
+  .login__panel { flex: 1; max-width: 400px; }
+  .login__card { padding: 16px 22px 12px; }
+  .login__wordmark { display: block; font-size: 1.4rem; }
+  .login__title { font-size: 1.3rem; margin-bottom: 8px; }
+  .form__field { padding-bottom: 18px; }
+  .form__input { height: 42px; }
+  .button { min-height: 44px; }
+}
+
+/* ==========================================================================
+   PORTÁTIL  (≥ 1024px) — pantalla dividida: marca | formulario
+   ========================================================================== */
+@media (min-width: 1024px) {
+  .login {
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: stretch;
+    gap: 0;
+    padding: 0;
+    background: var(--white);
+  }
+  .login__deco { display: none; }
+
+  /* Panel de marca (izquierda, rojo) */
+  .login__brand {
+    flex: 1 1 55%;
+    justify-content: center;
+    gap: 20px;
+    overflow: hidden;
+    background:
+      radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(135deg, var(--red-500) 0%, var(--red-700) 60%, var(--red-900) 100%);
+  }
+  .login__brand::before,
+  .login__brand::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    pointer-events: none;
+  }
+  .login__brand::before { width: 720px; height: 720px; background: rgba(255, 255, 255, 0.06); transform: translate(-50%, -50%); animation: login-spin-slow 60s linear infinite; }
+  .login__brand::after { width: 500px; height: 500px; background: rgba(255, 255, 255, 0.08); transform: translate(-50%, -50%); animation: login-spin-slow 40s linear infinite reverse; }
+
+  .login__logo {
+    --logo-bg: var(--white);
+    --logo-fg: var(--red-600);
+    position: relative;
+    z-index: 1;
+    width: clamp(220px, 36dvh, 320px);
+    filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.28));
+  }
+  .login__wordmark { position: relative; z-index: 1; font-size: clamp(2.4rem, 6dvh, 3.5rem); color: var(--white); }
+  .login__wordmark-nex { color: var(--white); }
+
+  /* Panel del formulario (derecha) */
+  .login__panel {
+    display: flex;
+    flex: 1 1 45%;
+    align-items: center;
+    justify-content: center;
+    max-width: none;
+    padding: 32px 48px;
+    border-radius: 0;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(214, 24, 46, 0.08), transparent 45%),
+      var(--white);
+  }
+  .login__card {
+    width: 100%;
+    max-width: 430px;
+    padding: 0;
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .login__card::before { display: none; }
+  .login__power { border-radius: 0; }
+
+  .login__title { font-size: clamp(2rem, 5dvh, 2.5rem); }
+}
+
+@keyframes login-spin-slow { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+/* ==========================================================================
+   PANTALLAS GRANDES  (≥ 1440px)
+   ========================================================================== */
+@media (min-width: 1440px) {
+  .login__card { max-width: 460px; }
+}
+
+/* ==========================================================================
+   Accesibilidad: sin animaciones si el usuario lo prefiere
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .login *,
+  .login *::before,
+  .login *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .power__fill { animation-duration: var(--power-ms) !important; }
+}
