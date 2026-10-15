@@ -1,0 +1,223 @@
+/* ==========================================================================
+   branches-page — Administrativo · Sucursales
+   ========================================================================== */
+.branches-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.branches-page__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.branches-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.branches-page__title {
+  margin: 0 0 4px;
+  font-family: var(--font-brand);
+  font-style: italic;
+  font-size: 1.8rem;
+  line-height: 1.15;
+}
+
+.branches-page__subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.branches-page__toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.branches-page__search {
+  position: relative;
+  flex: 1;
+}
+
+.branches-page__search-icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 19px;
+  height: 19px;
+  color: var(--gray-500);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.branches-page__search-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 44px 0 42px;
+  font: inherit;
+  font-size: 1rem; /* 16px evita el zoom automático en iOS */
+  color: var(--color-text);
+  background: var(--white);
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.branches-page__search-input::placeholder {
+  color: var(--gray-500);
+  opacity: 0.7;
+}
+
+.branches-page__search-input:hover {
+  border-color: var(--gray-300);
+}
+
+.branches-page__search-input:focus {
+  outline: none;
+  border-color: var(--red-600);
+  box-shadow: 0 0 0 4px rgba(214, 24, 46, 0.14);
+}
+
+.branches-page__search-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: var(--gray-500);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.branches-page__search-clear:hover {
+  color: var(--red-700);
+  background: var(--red-50);
+}
+
+.branches-page__search-clear:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 1px;
+}
+
+.branches-page__search-clear-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.branches-page__count {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.branches-page__card {
+  padding: 16px;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: 0 2px 10px rgba(26, 26, 26, 0.04);
+}
+
+/* ---------- Estado de carga (skeleton) ---------- */
+.branches-page__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.branches-page__skeleton-row {
+  height: 96px;
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 37%, var(--gray-100) 63%);
+  background-size: 400% 100%;
+  border-radius: 16px;
+  animation: branches-page-shimmer 1.4s ease infinite;
+}
+
+.branches-page__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.branches-page__add {
+  width: 100%;
+}
+
+@keyframes branches-page-shimmer {
+  from { background-position: 100% 50%; }
+  to { background-position: 0 50%; }
+}
+
+/* ==========================================================================
+   TABLET (≥ 768px)
+   ========================================================================== */
+@media (min-width: 768px) {
+  .branches-page__header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .branches-page__title {
+    font-size: 2.2rem;
+  }
+
+  .branches-page__toolbar {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .branches-page__search {
+    width: 320px;
+  }
+
+  .branches-page__count {
+    white-space: nowrap;
+  }
+
+  .branches-page__card {
+    padding: 22px;
+  }
+
+  .branches-page__skeleton-row {
+    height: 64px;
+  }
+
+  .branches-page__actions {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .branches-page__add {
+    width: auto;
+    flex-shrink: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .branches-page__skeleton-row {
+    animation-duration: 1ms;
+  }
+}

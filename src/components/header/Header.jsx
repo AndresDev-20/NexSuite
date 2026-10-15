@@ -1,25 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Icon from "../ui/Icon/Icon";
 import Menu from "../menu/Menu";
-import { clearSession } from "../../utils/session";
+import { clearSession, getUser } from "../../utils/session";
+import { getFullName, getInitials, getShortName } from "../../utils/userDisplay";
 import "./header.css";
-
-// TODO: el usuario real vendrá de la sesión cuando conozcamos la respuesta del login
-const DEFAULT_USER = { name: "Usuario NexSuite", role: "Administrador" };
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
 
-const getInitials = (name) =>
-  name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase();
-
-const Header = ({ user = DEFAULT_USER, notifications = 0 }) => {
+const Header = ({ notifications = 0 }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -27,7 +16,13 @@ const Header = ({ user = DEFAULT_USER, notifications = 0 }) => {
   const [userOpen, setUserOpen] = useState(false); // menú del usuario
   const userMenuRef = useRef(null);
 
-  const initials = getInitials(user.name);
+  // Usuario de la sesión (lo guardó el login)
+  const user = useMemo(() => getUser(), []);
+  const shortName = getShortName(user) || "Usuario";
+  const fullName = getFullName(user) || "Usuario";
+  const initials = getInitials(user) || "U";
+  const roleName = user?.role?.nameRole ?? "";
+  const email = user?.email ?? "";
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -115,8 +110,8 @@ const Header = ({ user = DEFAULT_USER, notifications = 0 }) => {
               >
                 <span className="user-menu__avatar">{initials}</span>
                 <span className="user-menu__info">
-                  <span className="user-menu__name">{user.name}</span>
-                  <span className="user-menu__role">{user.role}</span>
+                  <span className="user-menu__name">{shortName}</span>
+                  {roleName && <span className="user-menu__role">{roleName}</span>}
                 </span>
                 <Icon
                   name="chevron"
@@ -130,9 +125,10 @@ const Header = ({ user = DEFAULT_USER, notifications = 0 }) => {
               >
                 <div className="user-menu__header">
                   <span className="user-menu__avatar user-menu__avatar--lg">{initials}</span>
-                  <div>
-                    <p className="user-menu__header-name">{user.name}</p>
-                    <p className="user-menu__header-role">{user.role}</p>
+                  <div className="user-menu__header-text">
+                    <p className="user-menu__header-name">{fullName}</p>
+                    {roleName && <p className="user-menu__header-role">{roleName}</p>}
+                    {email && <p className="user-menu__header-email">{email}</p>}
                   </div>
                 </div>
 
@@ -183,9 +179,9 @@ const Header = ({ user = DEFAULT_USER, notifications = 0 }) => {
       >
         <div className="drawer__user">
           <span className="user-menu__avatar user-menu__avatar--lg">{initials}</span>
-          <div>
-            <p className="drawer__user-name">{user.name}</p>
-            <p className="drawer__user-role">{user.role}</p>
+          <div className="drawer__user-text">
+            <p className="drawer__user-name">{shortName}</p>
+            {roleName && <p className="drawer__user-role">{roleName}</p>}
           </div>
         </div>
 

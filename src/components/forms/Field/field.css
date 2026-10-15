@@ -1,0 +1,67 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.field__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.field__required {
+  color: var(--red-600);
+}
+
+.field__input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 1rem; /* 16px evita el zoom automático en iOS */
+  color: var(--color-text);
+  background: var(--gray-50);
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.field__input::placeholder {
+  color: var(--gray-500);
+  opacity: 0.65;
+}
+
+.field__input:hover {
+  border-color: var(--gray-300);
+}
+
+.field__input:focus {
+  outline: none;
+  background: var(--white);
+  border-color: var(--red-600);
+  box-shadow: 0 0 0 4px rgba(214, 24, 46, 0.14);
+}
+
+.field__input--invalid,
+.field__input--invalid:hover {
+  background: var(--red-50);
+  border-color: var(--danger);
+}
+
+.field__input--invalid:focus {
+  box-shadow: 0 0 0 4px rgba(180, 35, 24, 0.16);
+}
+
+.field__message {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.field__message--error {
+  color: var(--danger);
+}
