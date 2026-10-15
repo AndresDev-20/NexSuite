@@ -1,24 +1,22 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet } from "react-router-dom";
+import Header from "../components/header/Header";
+import Menu from "../components/menu/Menu";
 import "./mainLayout.css";
-import Header from './header/Header.jsx';
-import Menu from './menu/Menu.jsx';
-// Importa aquí tus componentes de Menú, Header, etc.
 
-function MainLayout() {
-  return (
-    <div className="app-container">
-        <Header/>
-      <div>
-        <aside className="Home__menu">
-          <Menu />
-        </aside>
-        
-        <main className="Home__content">
-          <Outlet /> 
-        </main>
-      </div>
+const MainLayout = () => (
+  <div className="main-layout">
+    <Header />
+
+    <div className="main-layout__body">
+      <aside className="main-layout__menu">
+        <Menu />
+      </aside>
+
+      <main className="main-layout__content">
+        <Outlet />
+      </main>
     </div>
-  );
-}
+  </div>
+);
 
 export default MainLayout;

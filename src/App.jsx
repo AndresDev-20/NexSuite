@@ -1,25 +1,24 @@
-import { useState } from 'react'
-import './App.css'
-import { Route, Routes } from 'react-router-dom'
-import Login from './pages/login/Login'
-import Home from './pages/home/Home'
-import MainLayout from './components/MainLayout'
+import { Route, Routes } from "react-router-dom";
+import Login from "./pages/login/Login";
+import Home from "./pages/home/Home";
+import MainLayout from "./components/MainLayout";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="App">
-      <Routes>
-        <Route path="/" element={<Login />} />
+    <Routes>
+      <Route path="/" element={<Login />} />
 
+      <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
-        <Route path="/welcome" element={<Home />} />
-        </Route>
+          <Route path="/welcome" element={<Home />} />
 
-      </Routes>
-    </div>
-  )
+          {/* Temporal: se reemplaza por las páginas reales en las próximas tareas */}
+          <Route path="/administrativo/*" element={<p>Próximamente</p>} />
+        </Route>
+      </Route>
+    </Routes>
+  );
 }
 
-export default App
+export default App;

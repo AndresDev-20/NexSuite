@@ -1,0 +1,149 @@
+/* ==========================================================================
+   menu — navegación vertical (menú lateral y, luego, drawer móvil)
+   ========================================================================== */
+.menu {
+  width: 100%;
+}
+
+.menu__list,
+.menu__sublist {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---------- menu__link (primer nivel) ---------- */
+.menu__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--gray-700);
+  text-align: left;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.menu__link:hover {
+  color: var(--red-700);
+  background: var(--red-50);
+}
+
+.menu__link:focus-visible,
+.menu__sublink:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 2px;
+}
+
+.menu__link--active {
+  font-weight: 600;
+  color: var(--red-700);
+  background: var(--red-50);
+  box-shadow: inset 3px 0 0 var(--red-600);
+}
+
+.menu__icon-box {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  color: var(--red-600);
+  background: var(--red-50);
+  border-radius: 10px;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.menu__link--active .menu__icon-box {
+  color: var(--white);
+  background: var(--red-600);
+}
+
+.menu__icon {
+  width: 20px;
+  height: 20px;
+}
+
+.menu__text {
+  flex: 1;
+}
+
+.menu__chevron {
+  width: 16px;
+  height: 16px;
+  color: var(--gray-500);
+  transition: transform 250ms ease;
+}
+
+.menu__chevron--open {
+  transform: rotate(180deg);
+}
+
+/* ---------- menu__submenu (se despliega animado) ---------- */
+.menu__submenu {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows 300ms ease, visibility 0s linear 300ms;
+}
+
+.menu__submenu--open {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.menu__submenu-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.menu__sublist {
+  gap: 2px;
+  margin-left: 28px;
+  padding: 6px 0 4px 14px;
+  border-left: 2px solid var(--gray-200);
+}
+
+.menu__sublink {
+  display: block;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--gray-700);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.menu__sublink:hover {
+  color: var(--red-700);
+  background: var(--red-50);
+}
+
+.menu__sublink--active {
+  font-weight: 600;
+  color: var(--red-600);
+  background: var(--red-50);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu__submenu,
+  .menu__chevron,
+  .menu__link,
+  .menu__icon-box,
+  .menu__sublink {
+    transition-duration: 1ms;
+  }
+}

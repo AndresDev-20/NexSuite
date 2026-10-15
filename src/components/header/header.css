@@ -1,37 +1,13 @@
 /* ==========================================================================
-   NexSuite — header.css
-   Metodología BEM  ·  Mobile first (móvil → tablet → portátil → pantalla grande)
-   Usa las variables de index.css (debe estar importado en main.jsx).
+   header — barra superior + drawer de navegación (móvil y tablet)
+   La navegación vive en el componente Menu:
+   · Portátil (≥ 1024px): Menu dentro del sidebar del MainLayout.
+   · Móvil y tablet: Menu dentro del drawer de este archivo.
+   Usa --header-h definido en index.css.
    ========================================================================== */
 
-.header,
-.header *,
-.header *::before,
-.header *::after,
-.drawer,
-.drawer *,
-.drawer *::before,
-.drawer *::after { box-sizing: border-box; }
-
-/* ==========================================================================
-   BLOQUE: icon (SVG de línea reutilizable)
-   ========================================================================== */
-.icon {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* ==========================================================================
-   BLOQUE: header — MÓVIL (base)
-   ========================================================================== */
+/* ---------- header ---------- */
 .header {
-  --header-h: 60px;
   --header-pad: 16px;
   position: sticky;
   top: 0;
@@ -56,13 +32,10 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  max-width: 1600px;
   height: var(--header-h);
-  margin: 0 auto;
   padding: 3px var(--header-pad) 0;
 }
 
-/* ---------- header__logo ---------- */
 .header__logo {
   display: flex;
   align-items: center;
@@ -72,7 +45,11 @@
   text-decoration: none;
   border-radius: 10px;
 }
-.header__logo:focus-visible { outline: 3px solid rgba(214, 24, 46, 0.35); outline-offset: 3px; }
+
+.header__logo:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 3px;
+}
 
 .header__logo-image {
   display: block;
@@ -81,20 +58,24 @@
   object-fit: contain;
   transition: transform 300ms ease;
 }
-.header__logo:hover .header__logo-image { transform: rotate(-6deg) scale(1.06); }
+
+.header__logo:hover .header__logo-image {
+  transform: rotate(-6deg) scale(1.06);
+}
 
 .header__logo-text {
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: var(--font-brand);
   font-style: italic;
   font-size: 1.4rem;
   line-height: 1;
   letter-spacing: 0.02em;
   color: var(--gray-900);
 }
-.header__logo-nex { font-weight: 700; color: var(--red-600); }
 
-/* Navegación de escritorio: oculta en móvil y tablet */
-.header__nav { display: none; }
+.header__logo-nex {
+  font-weight: 700;
+  color: var(--red-600);
+}
 
 .header__actions {
   display: flex;
@@ -103,9 +84,7 @@
   margin-left: auto;
 }
 
-/* ==========================================================================
-   BLOQUE: icon-button (campana de notificaciones)
-   ========================================================================== */
+/* ---------- icon-button (campana) ---------- */
 .icon-button {
   position: relative;
   display: grid;
@@ -120,9 +99,20 @@
   cursor: pointer;
   transition: background 150ms ease, color 150ms ease;
 }
-.icon-button:hover { color: var(--red-600); background: var(--red-50); }
-.icon-button:focus-visible { outline: 3px solid rgba(214, 24, 46, 0.35); outline-offset: 2px; }
-.icon-button:hover .icon-button__icon { animation: header-ring 600ms ease; }
+
+.icon-button:hover {
+  color: var(--red-600);
+  background: var(--red-50);
+}
+
+.icon-button:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 2px;
+}
+
+.icon-button:hover .icon-button__icon {
+  animation: header-ring 600ms ease;
+}
 
 .icon-button__badge {
   position: absolute;
@@ -142,9 +132,7 @@
   border-radius: 999px;
 }
 
-/* ==========================================================================
-   BLOQUE: burger (botón hamburguesa animado)
-   ========================================================================== */
+/* ---------- burger (hamburguesa animada) ---------- */
 .burger {
   display: grid;
   place-items: center;
@@ -157,11 +145,25 @@
   cursor: pointer;
   transition: background 200ms ease, transform 150ms ease;
 }
-.burger:hover { background: var(--red-100); }
-.burger:active { transform: scale(0.93); }
-.burger:focus-visible { outline: 3px solid rgba(214, 24, 46, 0.35); outline-offset: 2px; }
 
-.burger__box { position: relative; width: 22px; height: 16px; }
+.burger:hover {
+  background: var(--red-100);
+}
+
+.burger:active {
+  transform: scale(0.93);
+}
+
+.burger:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 2px;
+}
+
+.burger__box {
+  position: relative;
+  width: 22px;
+  height: 16px;
+}
 
 .burger__line {
   position: absolute;
@@ -172,14 +174,17 @@
   border-radius: 2px;
   transition: transform 300ms cubic-bezier(0.68, -0.4, 0.27, 1.4), opacity 200ms ease, width 250ms ease, background 200ms ease;
 }
+
 .burger__line:nth-child(1) { top: 0; }
 .burger__line:nth-child(2) { top: 7px; width: 70%; }
 .burger__line:nth-child(3) { top: 14px; width: 85%; }
 
 .burger:hover .burger__line:nth-child(2),
-.burger:hover .burger__line:nth-child(3) { width: 100%; }
+.burger:hover .burger__line:nth-child(3) {
+  width: 100%;
+}
 
-/* Modificador: menú abierto → se convierte en X */
+/* Menú abierto: la hamburguesa se convierte en X */
 .burger--open { background: var(--red-600); }
 .burger--open:hover { background: var(--red-700); }
 .burger--open .burger__line { width: 100%; background: var(--white); }
@@ -187,10 +192,11 @@
 .burger--open .burger__line:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .burger--open .burger__line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-/* ==========================================================================
-   BLOQUE: user-menu (oculto en móvil; avatar en tablet; completo en portátil)
-   ========================================================================== */
-.user-menu { position: relative; display: none; }
+/* ---------- user-menu (oculto en móvil; avatar en tablet; completo en portátil) ---------- */
+.user-menu {
+  position: relative;
+  display: none;
+}
 
 .user-menu__trigger {
   display: flex;
@@ -205,9 +211,17 @@
   cursor: pointer;
   transition: background 150ms ease, border-color 150ms ease;
 }
+
 .user-menu__trigger:hover,
-.user-menu__trigger[aria-expanded="true"] { background: var(--gray-50); border-color: var(--color-border); }
-.user-menu__trigger:focus-visible { outline: 3px solid rgba(214, 24, 46, 0.35); outline-offset: 2px; }
+.user-menu__trigger[aria-expanded="true"] {
+  background: var(--gray-50);
+  border-color: var(--color-border);
+}
+
+.user-menu__trigger:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 2px;
+}
 
 .user-menu__avatar {
   position: relative;
@@ -223,7 +237,12 @@
   background: linear-gradient(135deg, var(--red-500), var(--red-800));
   border-radius: 50%;
 }
-.user-menu__avatar--lg { width: 46px; height: 46px; font-size: 1rem; }
+
+.user-menu__avatar--lg {
+  width: 46px;
+  height: 46px;
+  font-size: 1rem;
+}
 
 /* Punto verde de "en línea" */
 .user-menu__avatar::after {
@@ -238,14 +257,27 @@
   border-radius: 50%;
 }
 
-.user-menu__info { display: none; flex-direction: column; align-items: flex-start; line-height: 1.2; }
+.user-menu__info {
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
 .user-menu__name { font-size: 0.85rem; font-weight: 600; }
 .user-menu__role { font-size: 0.72rem; color: var(--color-text-muted); }
 
-.user-menu__chevron { width: 16px; height: 16px; color: var(--gray-500); transition: transform 250ms ease; }
-.user-menu__chevron--open { transform: rotate(180deg); }
+.user-menu__chevron {
+  width: 16px;
+  height: 16px;
+  color: var(--gray-500);
+  transition: transform 250ms ease;
+}
 
-/* ---------- user-menu__dropdown ---------- */
+.user-menu__chevron--open {
+  transform: rotate(180deg);
+}
+
 .user-menu__dropdown {
   position: absolute;
   top: calc(100% + 12px);
@@ -262,6 +294,7 @@
   transform-origin: top right;
   transition: opacity 180ms ease, transform 180ms ease, visibility 0s linear 180ms;
 }
+
 .user-menu__dropdown--open {
   visibility: visible;
   opacity: 1;
@@ -278,6 +311,7 @@
   background: var(--tint);
   border-radius: 12px;
 }
+
 .user-menu__header-name { margin: 0; font-size: 0.92rem; font-weight: 700; }
 .user-menu__header-role { margin: 2px 0 0; font-size: 0.78rem; color: var(--color-text-muted); }
 
@@ -298,66 +332,31 @@
   cursor: pointer;
   transition: background 150ms ease, color 150ms ease;
 }
-.user-menu__item:hover { color: var(--red-700); background: var(--red-50); }
-.user-menu__item:focus-visible { outline: 3px solid rgba(214, 24, 46, 0.35); outline-offset: -2px; }
-.user-menu__item-icon { width: 19px; height: 19px; }
+
+.user-menu__item:hover {
+  color: var(--red-700);
+  background: var(--red-50);
+}
+
+.user-menu__item:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: -2px;
+}
+
+.user-menu__item-icon {
+  width: 19px;
+  height: 19px;
+}
 
 .user-menu__item--danger { color: var(--danger); }
-.user-menu__item--danger:hover { color: var(--white); background: var(--red-600); }
 
-.user-menu__divider { height: 1px; margin: 6px 4px; background: var(--color-border); border: 0; }
-
-/* ==========================================================================
-   BLOQUE: nav (lista de enlaces; variantes: bar y drawer)
-   ========================================================================== */
-.nav { display: flex; margin: 0; padding: 0; list-style: none; }
-
-.nav__link {
-  display: flex;
-  align-items: center;
-  color: var(--gray-700);
-  text-decoration: none;
-  transition: background 150ms ease, color 150ms ease;
+.user-menu__item--danger:hover {
+  color: var(--white);
+  background: var(--red-600);
 }
-.nav__link:focus-visible { outline: 3px solid rgba(214, 24, 46, 0.35); outline-offset: 2px; }
 
-/* ---- Variante drawer (vertical) ---- */
-.nav--drawer { flex-direction: column; gap: 4px; }
-
-.nav--drawer .nav__link {
-  gap: 14px;
-  padding: 10px 12px;
-  font-size: 1rem;
-  font-weight: 500;
-  border-radius: 14px;
-}
-.nav--drawer .nav__link:hover { color: var(--red-700); background: var(--red-50); }
-
-.nav__icon-box {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 38px;
-  height: 38px;
-  color: var(--red-600);
-  background: var(--red-50);
-  border-radius: 11px;
-  transition: background 150ms ease, color 150ms ease;
-}
-.nav__icon { width: 20px; height: 20px; }
-
-.nav__link--active { color: var(--red-700); font-weight: 600; }
-.nav--drawer .nav__link--active { background: var(--red-50); box-shadow: inset 3px 0 0 var(--red-600); }
-.nav--drawer .nav__link--active .nav__icon-box { color: var(--white); background: var(--red-600); }
-
-/* ---- Variante bar (horizontal, escritorio) ---- */
-.nav--bar { align-items: center; gap: 4px; }
-.nav--bar .nav__icon-box { display: none; }
-
-/* ==========================================================================
-   BLOQUE: overlay
-   ========================================================================== */
-.overlay {
+/* ---------- drawer-overlay ---------- */
+.drawer-overlay {
   position: fixed;
   inset: 0;
   z-index: 200;
@@ -368,14 +367,17 @@
   backdrop-filter: blur(3px);
   transition: opacity 300ms ease, visibility 0s linear 300ms;
 }
-.overlay--visible { visibility: visible; opacity: 1; transition-delay: 0s; }
 
-/* ==========================================================================
-   BLOQUE: drawer (menú lateral móvil / tablet)
-   ========================================================================== */
+.drawer-overlay--visible {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: 0s;
+}
+
+/* ---------- drawer (móvil y tablet) ---------- */
 .drawer {
   position: fixed;
-  top: 63px; /* altura del header + borde */
+  top: calc(var(--header-h) + 1px); /* +1px del borde del header */
   right: 0;
   bottom: 0;
   z-index: 250;
@@ -391,7 +393,12 @@
   transform: translateX(100%);
   transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1), visibility 0s linear 350ms;
 }
-.drawer--open { visibility: visible; transform: translateX(0); transition-delay: 0s; }
+
+.drawer--open {
+  visibility: visible;
+  transform: translateX(0);
+  transition-delay: 0s;
+}
 
 .drawer__user {
   display: flex;
@@ -402,24 +409,29 @@
   border: 1px solid var(--red-100);
   border-radius: 16px;
 }
+
 .drawer__user-name { margin: 0; font-size: 1rem; font-weight: 700; }
 .drawer__user-role { margin: 2px 0 0; font-size: 0.82rem; color: var(--color-text-muted); }
 
-.drawer__nav { flex: 1; min-height: 0; overflow-y: auto; }
+.drawer__nav {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Los ítems del Menu entran uno por uno cada vez que se abre el drawer */
+.drawer--open .menu__item {
+  animation: header-slide-in 400ms ease both;
+  animation-delay: calc(var(--i) * 60ms + 150ms);
+}
 
 .drawer__footer {
   padding: 16px 0 calc(16px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--color-border);
 }
 
-/* Los enlaces entran uno por uno al abrir el drawer */
-.drawer--open .nav__item { animation: header-slide-in 400ms ease both; animation-delay: calc(var(--i) * 60ms + 150ms); }
-
-/* ==========================================================================
-   BLOQUE: button (botón de cerrar sesión del drawer)
-   ========================================================================== */
-.button {
-  display: inline-flex;
+.drawer__logout {
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
@@ -428,25 +440,40 @@
   padding: 0 20px;
   font: inherit;
   font-weight: 700;
-  border: 1.5px solid transparent;
+  color: var(--red-700);
+  background: var(--white);
+  border: 1.5px solid var(--red-200);
   border-radius: 12px;
   cursor: pointer;
   transition: background 150ms ease, color 150ms ease, border-color 150ms ease, transform 150ms ease;
 }
-.button:active { transform: scale(0.98); }
-.button:focus-visible { outline: 3px solid rgba(214, 24, 46, 0.35); outline-offset: 3px; }
-.button__icon { width: 20px; height: 20px; }
 
-.button--logout { color: var(--red-700); background: var(--white); border-color: var(--red-200); }
-.button--logout:hover { color: var(--white); background: var(--red-600); border-color: var(--red-600); }
+.drawer__logout:hover {
+  color: var(--white);
+  background: var(--red-600);
+  border-color: var(--red-600);
+}
 
-/* ==========================================================================
-   KEYFRAMES
-   ========================================================================== */
+.drawer__logout:active {
+  transform: scale(0.98);
+}
+
+.drawer__logout:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 3px;
+}
+
+.drawer__logout-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* ---------- keyframes ---------- */
 @keyframes header-slide-in {
   from { opacity: 0; transform: translateX(24px); }
   to { opacity: 1; transform: translateX(0); }
 }
+
 @keyframes header-ring {
   0%, 100% { transform: rotate(0); }
   20% { transform: rotate(14deg); }
@@ -456,77 +483,44 @@
 }
 
 /* ==========================================================================
-   TABLET  (≥ 768px)
+   TABLET (≥ 768px)
    ========================================================================== */
 @media (min-width: 768px) {
-  .header { --header-h: 68px; --header-pad: 32px; }
-  .drawer { top: 72px; width: 380px; padding: 24px 20px 0; }
+  .header { --header-pad: 32px; }
 
   .header__logo { gap: 10px; }
   .header__logo-image { width: 44px; height: 44px; }
   .header__logo-text { font-size: 1.7rem; }
-
   .header__actions { gap: 10px; }
 
-  /* Aparece el avatar con menú desplegable */
+  .drawer { width: 380px; padding: 24px 20px 0; }
+
+  /* Aparece el avatar con menú desplegable; el usuario ya no hace falta en el drawer */
   .user-menu { display: block; }
-  .drawer__user { display: none; } /* el usuario ya está en la barra */
+  .drawer__user { display: none; }
 }
 
 /* ==========================================================================
-   PORTÁTIL  (≥ 1024px) — navegación en la barra, sin hamburguesa
+   PORTÁTIL (≥ 1024px): el menú pasa al sidebar, sin hamburguesa ni drawer
    ========================================================================== */
 @media (min-width: 1024px) {
-  .header { --header-h: 72px; --header-pad: 40px; }
-
-  .header__inner { gap: 32px; }
-
-  .header__nav { display: block; flex: 1; }
+  .header { --header-pad: 40px; }
 
   .burger,
-  .overlay,
-  .drawer { display: none; }
-
-  .nav--bar .nav__link {
-    position: relative;
-    padding: 9px 14px;
-    font-size: 0.92rem;
-    font-weight: 500;
-    border-radius: 10px;
-  }
-  .nav--bar .nav__link:hover { color: var(--red-700); background: var(--red-50); }
-
-  /* Indicador rojo inferior del enlace activo */
-  .nav--bar .nav__link--active { color: var(--red-600); font-weight: 600; }
-  .nav--bar .nav__link--active::after {
-    content: "";
-    position: absolute;
-    right: 14px;
-    bottom: -15px;
-    left: 14px;
-    height: 3px;
-    background: var(--red-600);
-    border-radius: 3px 3px 0 0;
-    animation: header-indicator 300ms ease both;
+  .drawer-overlay,
+  .drawer {
+    display: none;
   }
 
   .user-menu__info { display: flex; }
   .user-menu__trigger { padding-right: 12px; }
 }
 
-@keyframes header-indicator {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-
 /* ==========================================================================
-   PANTALLAS GRANDES  (≥ 1440px)
+   PANTALLAS GRANDES (≥ 1440px)
    ========================================================================== */
 @media (min-width: 1440px) {
   .header { --header-pad: 56px; }
-  .nav--bar { gap: 8px; }
-  .nav--bar .nav__link { padding: 9px 18px; font-size: 0.95rem; }
-  .nav--bar .nav__link--active::after { right: 18px; left: 18px; }
 }
 
 /* ==========================================================================
@@ -537,9 +531,9 @@
   .header *::before,
   .header *::after,
   .drawer,
-  .drawer *,
-  .overlay {
-    animation-duration: 1ms !important;
-    transition-duration: 1ms !important;
+  .drawer-overlay,
+  .drawer--open .menu__item {
+    animation-duration: 1ms;
+    transition-duration: 1ms;
   }
 }

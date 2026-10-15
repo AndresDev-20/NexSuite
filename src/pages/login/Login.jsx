@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
+import useAuthentication from "../../hooks/useAuthentication";
 
 // Tiempos de las animaciones (deben coincidir con --power-ms en login.css)
 const LOADING_MS = 2400;
@@ -98,13 +99,14 @@ function Login() {
   const [status, setStatus] = useState("idle"); // idle | loading | success
   const timers = useRef([]);
 
+  const { logginUser } = useAuthentication(); // Hook para manejar la autenticación (login, logout, etc.)
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({
-    mode: "onTouched",
-    defaultValues: { cedula: "", password: "" },
+    mode: "onTouched"
   });
 
   // Limpia los temporizadores si el componente se desmonta
@@ -116,7 +118,7 @@ function Login() {
   // Datos correctos: se muestran en consola y arranca la animación de carga
   const onValid = (data) => {
     console.log("Datos del login:", data);
-
+    logginUser(data);
     setStatus("loading");
     timers.current.push(
       setTimeout(() => setStatus("success"), LOADING_MS),
@@ -172,7 +174,7 @@ function Login() {
                   autoComplete="username"
                   placeholder="Ej: 1053123456"
                   aria-invalid={errors.cedula ? "true" : "false"}
-                  {...register("cedula", {
+                  {...register("cc", {
                     required: "Ingresa tu número de cédula",
                     pattern: {
                       value: /^\d{6,10}$/,
