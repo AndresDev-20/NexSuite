@@ -142,7 +142,7 @@ const Header = ({ user = DEFAULT_USER, notifications = 3 }) => {
     // Aquí limpia tu sesión: token, localStorage, contexto, etc.
     setMenuOpen(false);
     setUserOpen(false);
-    navigate("/login"); // cambia la ruta si tu login está en otra
+    navigate("/"); // cambia la ruta si tu login está en otra
   };
 
   const goTo = (path) => {
