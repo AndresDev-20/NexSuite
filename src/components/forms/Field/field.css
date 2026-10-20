@@ -15,6 +15,10 @@
   color: var(--red-600);
 }
 
+.field__control {
+  position: relative;
+}
+
 .field__input {
   display: block;
   width: 100%;
@@ -24,10 +28,14 @@
   font: inherit;
   font-size: 1rem; /* 16px evita el zoom automático en iOS */
   color: var(--color-text);
-  background: var(--gray-50);
+  background-color: var(--gray-50);
   border: 1.5px solid var(--color-border);
   border-radius: 12px;
-  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+
+.field__input--with-end {
+  padding-right: 48px;
 }
 
 .field__input::placeholder {
@@ -41,19 +49,51 @@
 
 .field__input:focus {
   outline: none;
-  background: var(--white);
+  background-color: var(--white);
   border-color: var(--red-600);
   box-shadow: 0 0 0 4px rgba(214, 24, 46, 0.14);
 }
 
 .field__input--invalid,
 .field__input--invalid:hover {
-  background: var(--red-50);
+  background-color: var(--red-50);
   border-color: var(--danger);
 }
 
 .field__input--invalid:focus {
   box-shadow: 0 0 0 4px rgba(180, 35, 24, 0.16);
+}
+
+/* Botón de ojo del campo de contraseña */
+.field__toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 100%;
+  padding: 0;
+  color: var(--gray-500);
+  background: none;
+  border: 0;
+  border-radius: 0 12px 12px 0;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.field__toggle:hover {
+  color: var(--red-600);
+}
+
+.field__toggle:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: -3px;
+}
+
+.field__toggle-icon {
+  width: 21px;
+  height: 21px;
 }
 
 .field__message {

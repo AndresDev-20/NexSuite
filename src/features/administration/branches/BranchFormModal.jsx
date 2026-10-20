@@ -9,8 +9,6 @@ import "./branchFormModal.css";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^\+?[\d\s()-]{7,20}$/;
 
-const EMPTY_FORM = { nameBranch: "", address: "", email: "", number: "", web: "" };
-
 const isHttpUrl = (value) => {
   try {
     const { protocol } = new URL(value);
@@ -20,12 +18,24 @@ const isHttpUrl = (value) => {
   }
 };
 
-/** Recorta los textos y omite los campos vacíos. */
-const buildPayload = (values) =>
+const toFormValues = (branch) => ({
+  nameBranch: branch?.nameBranch ?? "",
+  address: branch?.address ?? "",
+  email: branch?.email ?? "",
+  number: branch?.number ?? "",
+  web: branch?.web ?? "",
+});
+
+/**
+ * Recorta los textos. Al crear, los campos vacíos se omiten;
+ * al editar, se envían como null para poder borrar un dato.
+ */
+const buildPayload = (values, isEdit) =>
   Object.fromEntries(
     Object.entries(values)
       .map(([key, value]) => [key, value.trim()])
-      .filter(([, value]) => value !== "")
+      .filter(([key, value]) => isEdit || key === "nameBranch" || value !== "")
+      .map(([key, value]) => [key, value === "" ? null : value])
   );
 
 /* Reglas de validación. El backend vuelve a validar: esto es solo para dar respuesta rápida. */
@@ -49,103 +59,121 @@ const RULES = {
   },
 };
 
-/**
- * onSubmit(payload) debe ser async y lanzar el error si algo falla;
- * este componente lo muestra dentro del formulario.
- */
-const BranchFormModal = ({ open, onClose, onSubmit }) => {
+/* ---------- Formulario (solo existe mientras el modal está abierto) ---------- */
+const BranchForm = ({ branch, busy, onCancel, onSubmit }) => {
+  const isEdit = Boolean(branch);
   const [serverError, setServerError] = useState("");
 
   const {
     register,
     handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm({ defaultValues: EMPTY_FORM });
-
-  const handleClose = () => {
-    reset(EMPTY_FORM);
-    setServerError("");
-    onClose();
-  };
+    formState: { errors },
+  } = useForm({ defaultValues: toFormValues(branch) });
 
   const submit = handleSubmit(async (values) => {
     setServerError("");
     try {
-      await onSubmit(buildPayload(values));
-      reset(EMPTY_FORM);
+      await onSubmit(buildPayload(values, isEdit));
     } catch (error) {
-      setServerError(getErrorMessage(error, "No se pudo crear la sucursal. Inténtalo de nuevo."));
+      setServerError(
+        getErrorMessage(
+          error,
+          isEdit
+            ? "No se pudo guardar la sucursal. Inténtalo de nuevo."
+            : "No se pudo crear la sucursal. Inténtalo de nuevo."
+        )
+      );
     }
   });
 
   return (
-    <Modal open={open} title="Nueva sucursal" onClose={handleClose} busy={isSubmitting}>
-      <form className="branch-form" onSubmit={submit} noValidate>
-        {serverError && (
-          <p className="branch-form__error" role="alert">
-            {serverError}
-          </p>
-        )}
+    <form className="branch-form" onSubmit={submit} noValidate>
+      {serverError && (
+        <p className="branch-form__error" role="alert">
+          {serverError}
+        </p>
+      )}
 
+      <Field
+        label="Nombre de la sucursal"
+        required
+        placeholder="Ej: Sucursal Centro"
+        autoComplete="off"
+        data-autofocus
+        error={errors.nameBranch?.message}
+        {...register("nameBranch", RULES.nameBranch)}
+      />
+
+      <Field
+        label="Dirección"
+        placeholder="Ej: Calle 10 # 20-30"
+        autoComplete="off"
+        error={errors.address?.message}
+        {...register("address")}
+      />
+
+      <div className="branch-form__row">
         <Field
-          label="Nombre de la sucursal"
-          required
-          placeholder="Ej: Sucursal Centro"
+          label="Correo"
+          type="email"
+          placeholder="sucursal@empresa.com"
           autoComplete="off"
-          data-autofocus
-          error={errors.nameBranch?.message}
-          {...register("nameBranch", RULES.nameBranch)}
+          error={errors.email?.message}
+          {...register("email", RULES.email)}
         />
-
         <Field
-          label="Dirección"
-          placeholder="Ej: Calle 10 # 20-30"
+          label="Teléfono"
+          type="tel"
+          inputMode="tel"
+          placeholder="3001234567"
           autoComplete="off"
-          error={errors.address?.message}
-          {...register("address")}
+          error={errors.number?.message}
+          {...register("number", RULES.number)}
         />
+      </div>
 
-        <div className="branch-form__row">
-          <Field
-            label="Correo"
-            type="email"
-            placeholder="sucursal@empresa.com"
-            autoComplete="off"
-            error={errors.email?.message}
-            {...register("email", RULES.email)}
-          />
-          <Field
-            label="Teléfono"
-            type="tel"
-            inputMode="tel"
-            placeholder="3001234567"
-            autoComplete="off"
-            error={errors.number?.message}
-            {...register("number", RULES.number)}
-          />
-        </div>
+      <Field
+        label="Sitio web"
+        type="url"
+        inputMode="url"
+        placeholder="https://empresa.com"
+        autoComplete="off"
+        hint="Opcional. Incluye https://"
+        error={errors.web?.message}
+        {...register("web", RULES.web)}
+      />
 
-        <Field
-          label="Sitio web"
-          type="url"
-          inputMode="url"
-          placeholder="https://empresa.com"
-          autoComplete="off"
-          hint="Opcional. Incluye https://"
-          error={errors.web?.message}
-          {...register("web", RULES.web)}
-        />
+      <div className="branch-form__actions">
+        <Button variant="outline" onClick={onCancel} disabled={busy}>
+          Cancelar
+        </Button>
+        <Button type="submit" icon={isEdit ? "check" : "plus"} disabled={busy}>
+          {busy ? "Guardando…" : isEdit ? "Guardar cambios" : "Crear sucursal"}
+        </Button>
+      </div>
+    </form>
+  );
+};
 
-        <div className="branch-form__actions">
-          <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
-            Cancelar
-          </Button>
-          <Button type="submit" icon="plus" disabled={isSubmitting}>
-            {isSubmitting ? "Guardando…" : "Crear sucursal"}
-          </Button>
-        </div>
-      </form>
+/**
+ * branch = null → crear · branch = {…} → editar.
+ * onSubmit(payload) debe ser async y lanzar el error si algo falla.
+ */
+const BranchFormModal = ({ open, branch = null, onClose, onSubmit }) => {
+  const [busy, setBusy] = useState(false);
+
+  const handleSubmit = async (payload) => {
+    setBusy(true);
+    try {
+      await onSubmit(payload);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Modal open={open} title={branch ? "Editar sucursal" : "Nueva sucursal"} onClose={onClose} busy={busy}>
+      <BranchForm branch={branch} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />
     </Modal>
   );
 };

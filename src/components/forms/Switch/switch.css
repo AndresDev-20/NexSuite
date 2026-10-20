@@ -1,0 +1,82 @@
+.switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 12px 14px;
+  background: var(--white);
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.switch__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.switch__text {
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.switch__description {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--color-text-muted);
+}
+/* El input real queda oculto pero sigue siendo enfocable con el teclado */
+.switch__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.switch__track {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 26px;
+  background: var(--gray-300);
+  border-radius: 999px;
+  transition: background 200ms ease;
+}
+
+.switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: var(--white);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(26, 26, 26, 0.25);
+  transition: transform 220ms cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.switch__input:checked + .switch__track {
+  background: var(--red-600);
+}
+
+.switch__input:checked + .switch__track .switch__thumb {
+  transform: translateX(18px);
+}
+
+.switch__input:focus-visible + .switch__track {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch__track,
+  .switch__thumb {
+    transition-duration: 1ms;
+  }
+}

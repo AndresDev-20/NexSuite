@@ -1,18 +1,19 @@
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import usePermissions from "../../features/auth/usePermissions";
 import Icon from "../ui/Icon/Icon";
 import "./menu.css";
 
-/* Opciones de navegación. Cuando agreguemos permisos, esta lista se filtrará. */
+/* Opciones de navegación. Una opción sin "permission" es visible para todos. */
 const NAV_ITEMS = [
   { label: "Inicio", to: "/welcome", icon: "home" },
   {
     label: "Administrativo",
     icon: "shield",
     children: [
-      { label: "Usuarios", to: "/administrativo/usuarios" },
-      { label: "Roles y permisos", to: "/administrativo/roles" },
-      { label: "Sucursales", to: "/administrativo/sucursales" },
+      { label: "Usuarios", to: "/administrativo/usuarios", permission: "usuarios.ver" },
+      { label: "Roles", to: "/administrativo/roles", permission: "roles.ver" },
+      { label: "Sucursales", to: "/administrativo/sucursales", permission: "sucursales.ver" },
     ],
   },
 ];
@@ -57,8 +58,18 @@ const MenuGroup = ({ item, index, id, isActive, isOpen, onToggle, onNavigate }) 
 
 const Menu = ({ onNavigate }) => {
   const { pathname } = useLocation();
+  const { can } = usePermissions();
   const baseId = useId(); // el Menu se monta en el sidebar y en el drawer: los ids no pueden repetirse
   const [toggled, setToggled] = useState({});
+
+  // Deja solo lo que el usuario puede ver; un grupo sin opciones desaparece
+  const items = useMemo(
+    () =>
+      NAV_ITEMS.map((item) =>
+        item.children ? { ...item, children: item.children.filter((child) => can(child.permission)) } : item
+      ).filter((item) => (item.children ? item.children.length > 0 : can(item.permission))),
+    [can]
+  );
 
   const isGroupActive = (item) => item.children.some((child) => pathname.startsWith(child.to));
   const isGroupOpen = (item) => toggled[item.label] ?? isGroupActive(item);
@@ -68,7 +79,7 @@ const Menu = ({ onNavigate }) => {
   return (
     <nav className="menu" aria-label="Navegación principal">
       <ul className="menu__list">
-        {NAV_ITEMS.map((item, index) =>
+        {items.map((item, index) =>
           item.children ? (
             <MenuGroup
               key={item.label}

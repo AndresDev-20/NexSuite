@@ -1,0 +1,100 @@
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.user-cell__avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--white);
+  background: linear-gradient(135deg, var(--red-500), var(--red-800));
+  border-radius: 50%;
+}
+
+.user-cell__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.user-cell__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.user-cell__you {
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--red-700);
+  background: var(--red-50);
+  border-radius: 999px;
+}
+
+.user-cell__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+  text-decoration: none;
+}
+
+a.user-cell__link:hover {
+  color: var(--red-700);
+  text-decoration: underline;
+}
+
+.user-cell__link-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--red-600);
+}
+
+.user-cell__role {
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--red-700);
+  background: var(--red-50);
+  border-radius: 999px;
+}
+
+.user-cell__branches {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.user-cell__branch {
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--gray-700);
+  background: var(--gray-100);
+  border-radius: 999px;
+}
+
+@media (min-width: 768px) {
+  .user-cell__branches {
+    justify-content: flex-start;
+  }
+}

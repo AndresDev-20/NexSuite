@@ -1,0 +1,11 @@
+.user-form__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .user-form__row {
+    grid-template-columns: 1fr 1fr;
+  }
+}

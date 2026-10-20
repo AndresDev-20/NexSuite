@@ -1,0 +1,49 @@
+.permission-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.permission-groups__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.permission-groups__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.permission-groups__count {
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--red-700);
+  background: var(--red-50);
+  border-radius: 999px;
+}
+
+.permission-groups__list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.permission-groups__item {
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .permission-groups__list {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}

@@ -2,12 +2,6 @@ import { useCallback, useState } from "react";
 import api from "../../../api/client";
 import getErrorMessage from "../../../utils/getErrorMessage";
 
-import {
-  isDemoMode,
-  getDemoBranches,
-  createDemoBranch,
-} from "../../../demo/demoData.js";
-
 /**
  * Deja solo lo que la interfaz necesita. Así datos sensibles
  * (como el hash de la contraseña) nunca quedan en el estado de React.
@@ -37,7 +31,7 @@ const useBranches = () => {
       setLoading(true);
       setError("");
     }
-    /*
+
     try {
       const { data } = await api.get("/branches");
       const list = Array.isArray(data?.data) ? data.data : [];
@@ -46,52 +40,41 @@ const useBranches = () => {
       if (!silent) setError(getErrorMessage(err, "No se pudieron cargar las sucursales."));
     } finally {
       if (!silent) setLoading(false);
-    }*/
-    try {
-      if (isDemoMode) {
-        setBranches(getDemoBranches().map(normalizeBranch));
-        return;
-      }
-
-      const { data } = await api.get("/branches");
-      const list = Array.isArray(data?.data) ? data.data : [];
-      setBranches(list.map(normalizeBranch));
-    } catch (err) {
-      if (!silent) {
-        setError(getErrorMessage(err, "No se pudieron cargar las sucursales."));
-      }
-    } finally {
-      if (!silent) setLoading(false);
     }
   }, []);
 
-  /** Crea la sucursal y refresca la lista. Si falla, lanza el error para que lo muestre el formulario. */
-  /*
+  /* Las tres acciones de escritura refrescan la lista y, si fallan,
+     lanzan el error para que lo muestre el formulario o el diálogo. */
+
   const createBranch = useCallback(
     async (payload) => {
       const { data } = await api.post("/branches", payload);
       await getAllBranches({ silent: true });
       return data;
     },
-    [getAllBranches],
-  );*/
-
-  const createBranch = useCallback(
-    async (payload) => {
-      if (isDemoMode) {
-        const branch = createDemoBranch(payload);
-        await getAllBranches({ silent: true });
-        return branch;
-      }
-
-      const { data } = await api.post("/branches", payload);
-      await getAllBranches({ silent: true });
-      return data;
-    },
-    [getAllBranches],
+    [getAllBranches]
   );
 
-  return { branches, loading, error, getAllBranches, createBranch };
+  // Contrato asumido: PUT /branches/:id con el mismo cuerpo que el de crear
+  const updateBranch = useCallback(
+    async (id, payload) => {
+      const { data } = await api.put(`/branches/${id}`, payload);
+      await getAllBranches({ silent: true });
+      return data;
+    },
+    [getAllBranches]
+  );
+
+  // Contrato asumido: DELETE /branches/:id
+  const deleteBranch = useCallback(
+    async (id) => {
+      await api.delete(`/branches/${id}`);
+      await getAllBranches({ silent: true });
+    },
+    [getAllBranches]
+  );
+
+  return { branches, loading, error, getAllBranches, createBranch, updateBranch, deleteBranch };
 };
 
 export default useBranches;

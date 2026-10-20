@@ -55,3 +55,15 @@
   background: var(--red-50);
   border-color: var(--red-300);
 }
+
+.btn--danger {
+  color: var(--white);
+  background: var(--danger);
+  box-shadow: 0 8px 18px -8px rgba(180, 35, 24, 0.6);
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: #912018;
+  box-shadow: 0 12px 24px -8px rgba(180, 35, 24, 0.7);
+}
+

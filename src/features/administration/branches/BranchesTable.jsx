@@ -1,4 +1,6 @@
 import Icon from "../../../components/ui/Icon/Icon";
+import DataTable from "../../../components/tables/DataTable/DataTable";
+import { RowAction, RowActions } from "../../../components/tables/RowActions/RowActions";
 import { getFullName, getInitials } from "../../../utils/userDisplay";
 import "./branchesTable.css";
 
@@ -20,107 +22,112 @@ const usersLabel = (count) => {
   return `${count} ${count === 1 ? "usuario" : "usuarios"}`;
 };
 
-const BranchesTable = ({ branches }) => (
-  <div className="branches-table">
-    <table className="branches-table__element">
-      <caption className="branches-table__sr">Listado de sucursales</caption>
-      <thead>
-        <tr>
-          <th>Sucursal</th>
-          <th>Dirección</th>
-          <th>Contacto</th>
-          <th>Usuarios</th>
-        </tr>
-      </thead>
+const columns = [
+  {
+    key: "branch",
+    header: "Sucursal",
+    primary: true,
+    render: (branch) => {
+      const hostname = branch.web ? getHostname(branch.web) : null;
 
-      <tbody>
-        {branches.map((branch, index) => {
-          const hostname = branch.web ? getHostname(branch.web) : null;
-          const visibleUsers = branch.users.slice(0, MAX_AVATARS);
-          const hiddenUsers = branch.users.length - visibleUsers.length;
+      return (
+        <div className="branch-cell">
+          <span className="branch-cell__name">{branch.nameBranch}</span>
+          {hostname && (
+            <a className="branch-cell__link" href={branch.web} target="_blank" rel="noopener noreferrer">
+              <Icon name="globe" className="branch-cell__link-icon" />
+              {hostname}
+            </a>
+          )}
+        </div>
+      );
+    },
+  },
+  {
+    key: "address",
+    header: "Dirección",
+    render: (branch) =>
+      branch.address ? (
+        <span className="branch-cell__line">
+          <Icon name="pin" className="branch-cell__link-icon" />
+          {branch.address}
+        </span>
+      ) : (
+        EMPTY
+      ),
+  },
+  {
+    key: "contact",
+    header: "Contacto",
+    render: (branch) => {
+      if (!branch.email && !branch.number) return EMPTY;
 
-          return (
-            <tr className="branches-table__row" key={branch.id} style={{ "--i": index }}>
-              <td className="branches-table__cell branches-table__cell--main" data-label="Sucursal">
-                <span className="branches-table__name">{branch.nameBranch}</span>
-                {hostname && (
-                  <a
-                    className="branches-table__link"
-                    href={branch.web}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Icon name="globe" className="branches-table__link-icon" />
-                    {hostname}
-                  </a>
-                )}
-              </td>
+      return (
+        <div className="branch-cell__contact">
+          {branch.email && (
+            <a className="branch-cell__line" href={`mailto:${branch.email}`}>
+              <Icon name="mail" className="branch-cell__link-icon" />
+              {branch.email}
+            </a>
+          )}
+          {branch.number && (
+            <a className="branch-cell__line" href={`tel:${branch.number.replace(/[^\d+]/g, "")}`}>
+              <Icon name="phone" className="branch-cell__link-icon" />
+              {branch.number}
+            </a>
+          )}
+        </div>
+      );
+    },
+  },
+  {
+    key: "users",
+    header: "Usuarios",
+    render: (branch) => {
+      const visible = branch.users.slice(0, MAX_AVATARS);
+      const hidden = branch.users.length - visible.length;
 
-              <td className="branches-table__cell" data-label="Dirección">
-                {branch.address ? (
-                  <span className="branches-table__line">
-                    <Icon name="pin" className="branches-table__line-icon" />
-                    {branch.address}
-                  </span>
-                ) : (
-                  EMPTY
-                )}
-              </td>
+      return (
+        <div className="branch-cell__users">
+          {visible.length > 0 && (
+            <div className="branch-cell__avatars">
+              {visible.map((user) => (
+                <span className="branch-cell__avatar" key={user.id} title={getFullName(user)} aria-hidden="true">
+                  {getInitials(user)}
+                </span>
+              ))}
+              {hidden > 0 && (
+                <span className="branch-cell__avatar branch-cell__avatar--more" aria-hidden="true">
+                  +{hidden}
+                </span>
+              )}
+            </div>
+          )}
+          <span className="branch-cell__count">{usersLabel(branch.users.length)}</span>
+        </div>
+      );
+    },
+  },
+];
 
-              <td className="branches-table__cell" data-label="Contacto">
-                {branch.email || branch.number ? (
-                  <div className="branches-table__contact">
-                    {branch.email && (
-                      <a className="branches-table__line" href={`mailto:${branch.email}`}>
-                        <Icon name="mail" className="branches-table__line-icon" />
-                        {branch.email}
-                      </a>
-                    )}
-                    {branch.number && (
-                      <a
-                        className="branches-table__line"
-                        href={`tel:${branch.number.replace(/[^\d+]/g, "")}`}
-                      >
-                        <Icon name="phone" className="branches-table__line-icon" />
-                        {branch.number}
-                      </a>
-                    )}
-                  </div>
-                ) : (
-                  EMPTY
-                )}
-              </td>
-
-              <td className="branches-table__cell" data-label="Usuarios">
-                <div className="branches-table__users">
-                  {visibleUsers.length > 0 && (
-                    <div className="branches-table__avatars">
-                      {visibleUsers.map((user) => (
-                        <span
-                          className="branches-table__avatar"
-                          key={user.id}
-                          title={getFullName(user)}
-                          aria-hidden="true"
-                        >
-                          {getInitials(user)}
-                        </span>
-                      ))}
-                      {hiddenUsers > 0 && (
-                        <span className="branches-table__avatar branches-table__avatar--more" aria-hidden="true">
-                          +{hiddenUsers}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  <span className="branches-table__count">{usersLabel(branch.users.length)}</span>
-                </div>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  </div>
+const BranchesTable = ({ branches, onEdit, onDelete }) => (
+  <DataTable
+    caption="Listado de sucursales"
+    columns={columns}
+    rows={branches}
+    getRowKey={(branch) => branch.id}
+    renderActions={(branch) => (
+      <RowActions>
+        <RowAction icon="edit" label={`Editar ${branch.nameBranch}`} onClick={() => onEdit(branch)} />
+        <RowAction
+          icon="trash"
+          tone="danger"
+          label={`Eliminar ${branch.nameBranch}`}
+          onClick={() => onDelete(branch)}
+        />
+      </RowActions>
+    )}
+  />
 );
 
 export default BranchesTable;

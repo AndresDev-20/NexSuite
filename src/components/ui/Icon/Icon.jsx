@@ -110,6 +110,45 @@ const PATHS = {
       <path d="M3 13h5l1 3h6l1-3h5" />
     </>
   ),
+
+  edit: (
+    <>
+      <path d="M4 20h4L19 9l-4-4L4 16z" />
+      <path d="M13.5 6.5l4 4" />
+    </>
+  ),
+  trash: (
+    <>
+      <path d="M4 7h16M10 11v6M14 11v6" />
+      <path d="M6 7l1 13h10l1-13M9 7V4h6v3" />
+    </>
+  ),
+  arrowLeft: <path d="M19 12H5M11 6l-6 6 6 6" />,
+  key: (
+    <>
+      <circle cx="8" cy="15" r="4" />
+      <path d="M11 12l9-9M16 7l3 3" />
+    </>
+  ),
+  eye: (
+    <>
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" />
+      <circle cx="12" cy="12" r="3" />
+    </>
+  ),
+  eyeOff: (
+    <>
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" />
+      <circle cx="12" cy="12" r="3" />
+      <path d="M4 4l16 16" />
+    </>
+  ),
+  lock: (
+    <>
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </>
+  ),
   x: <path d="M6 6l12 12M18 6L6 18" />,
   check: <path d="M5 12l5 5L20 7" />,
   plus: <path d="M12 5v14M5 12h14" />,

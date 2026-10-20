@@ -1,0 +1,173 @@
+/* ==========================================================================
+   admin-page — estructura común de las páginas de Administrativo
+   ========================================================================== */
+.admin-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-page__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.admin-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.admin-page__title {
+  margin: 0 0 4px;
+  font-family: var(--font-brand);
+  font-style: italic;
+  font-size: 1.8rem;
+  line-height: 1.15;
+}
+
+.admin-page__subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.admin-page__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-page__toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-page__count {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.admin-page__add {
+  width: 100%;
+}
+
+.admin-page__card {
+  padding: 16px;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: 0 2px 10px rgba(26, 26, 26, 0.04);
+}
+
+/* Sin caja blanca: el contenido ya trae sus propias tarjetas */
+.admin-page__card--bare {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+/* ---------- Estado de carga (skeleton) ---------- */
+.admin-page__skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-page__skeleton-item {
+  height: 150px;
+  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 37%, var(--gray-100) 63%);
+  background-size: 400% 100%;
+  border-radius: 18px;
+  animation: admin-page-shimmer 1.4s ease infinite;
+}
+
+.admin-page__tip {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--gray-700);
+  background: var(--tint);
+  border: 1px solid var(--red-100);
+  border-radius: 12px;
+}
+
+.admin-page__tip code {
+  padding: 1px 6px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  background: var(--white);
+  border-radius: 6px;
+}
+
+@keyframes admin-page-shimmer {
+  from { background-position: 100% 50%; }
+  to { background-position: 0 50%; }
+}
+
+/* ==========================================================================
+   TABLET (≥ 768px)
+   ========================================================================== */
+@media (min-width: 768px) {
+  .admin-page__header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .admin-page__title {
+    font-size: 2.2rem;
+  }
+
+  .admin-page__actions {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .admin-page__toolbar {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .admin-page__search {
+    width: 300px;
+  }
+
+  .admin-page__count {
+    white-space: nowrap;
+  }
+
+  .admin-page__add {
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  .admin-page__card {
+    padding: 22px;
+  }
+
+  .admin-page__card--bare {
+    padding: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-page__skeleton-item {
+    animation-duration: 1ms;
+  }
+}
