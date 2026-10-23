@@ -8,20 +8,65 @@ import "./menu.css";
 const NAV_ITEMS = [
   { label: "Inicio", to: "/welcome", icon: "home" },
   {
+    label: "Inventarios",
+    icon: "box",
+    children: [
+      {
+        label: "Categorías",
+        to: "/inventario/categorias",
+        permission: "inventario.ver",
+      },
+      {
+        label: "Productos",
+        to: "/inventario/productos",
+        permission: "inventario.ver",
+      },
+    ],
+  },
+  {
+    label: "Compras",
+    icon: "bag",
+    children: [
+      {
+        label: "Proveedores",
+        to: "/compras/proveedores",
+        permission: "compras.ver",
+      },
+    ],
+  },
+  {
     label: "Administrativo",
     icon: "shield",
     children: [
-      { label: "Usuarios", to: "/administrativo/usuarios", permission: "usuarios.ver" },
+      {
+        label: "Usuarios",
+        to: "/administrativo/usuarios",
+        permission: "usuarios.ver",
+      },
       { label: "Roles", to: "/administrativo/roles", permission: "roles.ver" },
-      { label: "Sucursales", to: "/administrativo/sucursales", permission: "sucursales.ver" },
+      {
+        label: "Sucursales",
+        to: "/administrativo/sucursales",
+        permission: "sucursales.ver",
+      },
     ],
   },
 ];
 
-const getLinkClass = (block) => ({ isActive }) =>
-  `${block} ${isActive ? `${block}--active` : ""}`.trim();
+const getLinkClass =
+  (block) =>
+  ({ isActive }) =>
+    `${block} ${isActive ? `${block}--active` : ""}`.trim();
 
-const MenuGroup = ({ item, index, id, isActive, isOpen, onToggle, onNavigate }) => (
+const MenuGroup = ({
+  item,
+  index,
+  id,
+  isActive,
+  isOpen,
+  onToggle,
+  onNavigate,
+}) => (
   <li className="menu__item" style={{ "--i": index }}>
     <button
       type="button"
@@ -40,12 +85,19 @@ const MenuGroup = ({ item, index, id, isActive, isOpen, onToggle, onNavigate }) 
       />
     </button>
 
-    <div id={id} className={`menu__submenu ${isOpen ? "menu__submenu--open" : ""}`.trim()}>
+    <div
+      id={id}
+      className={`menu__submenu ${isOpen ? "menu__submenu--open" : ""}`.trim()}
+    >
       <div className="menu__submenu-inner">
         <ul className="menu__sublist">
           {item.children.map((child) => (
             <li key={child.to}>
-              <NavLink to={child.to} onClick={onNavigate} className={getLinkClass("menu__sublink")}>
+              <NavLink
+                to={child.to}
+                onClick={onNavigate}
+                className={getLinkClass("menu__sublink")}
+              >
                 {child.label}
               </NavLink>
             </li>
@@ -66,12 +118,20 @@ const Menu = ({ onNavigate }) => {
   const items = useMemo(
     () =>
       NAV_ITEMS.map((item) =>
-        item.children ? { ...item, children: item.children.filter((child) => can(child.permission)) } : item
-      ).filter((item) => (item.children ? item.children.length > 0 : can(item.permission))),
-    [can]
+        item.children
+          ? {
+              ...item,
+              children: item.children.filter((child) => can(child.permission)),
+            }
+          : item,
+      ).filter((item) =>
+        item.children ? item.children.length > 0 : can(item.permission),
+      ),
+    [can],
   );
 
-  const isGroupActive = (item) => item.children.some((child) => pathname.startsWith(child.to));
+  const isGroupActive = (item) =>
+    item.children.some((child) => pathname.startsWith(child.to));
   const isGroupOpen = (item) => toggled[item.label] ?? isGroupActive(item);
   const toggleGroup = (item) =>
     setToggled((prev) => ({ ...prev, [item.label]: !isGroupOpen(item) }));
@@ -93,14 +153,19 @@ const Menu = ({ onNavigate }) => {
             />
           ) : (
             <li className="menu__item" key={item.to} style={{ "--i": index }}>
-              <NavLink to={item.to} end onClick={onNavigate} className={getLinkClass("menu__link")}>
+              <NavLink
+                to={item.to}
+                end
+                onClick={onNavigate}
+                className={getLinkClass("menu__link")}
+              >
                 <span className="menu__icon-box">
                   <Icon name={item.icon} className="menu__icon" />
                 </span>
                 <span className="menu__text">{item.label}</span>
               </NavLink>
             </li>
-          )
+          ),
         )}
       </ul>
     </nav>

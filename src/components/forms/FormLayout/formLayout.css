@@ -22,10 +22,20 @@
   margin-top: 8px;
 }
 
+.form-layout__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+
 @media (min-width: 768px) {
   .form-layout__actions {
     flex-direction: row;
     justify-content: flex-end;
     gap: 12px;
+  }
+  .form-layout__row {
+    grid-template-columns: 1fr 1fr;
   }
 }

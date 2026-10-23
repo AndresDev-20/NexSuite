@@ -1,0 +1,20 @@
+.supplier-form__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .supplier-form__row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Tipo + número (+ DV cuando es NIT) */
+  .supplier-form__row--identification {
+    grid-template-columns: 1fr 1.2fr;
+  }
+
+  .supplier-form__row--identification:has(.field:nth-child(3)) {
+    grid-template-columns: 1fr 1.2fr 90px;
+  }
+}
