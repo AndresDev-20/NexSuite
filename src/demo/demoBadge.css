@@ -16,7 +16,6 @@
   border-radius: 999px;
   box-shadow: 0 10px 24px -10px rgba(124, 58, 237, 0.6);
   transform: translateX(-50%);
-  pointer-events: none;
 }
 
 .demo-badge__dot {
@@ -33,6 +32,29 @@
     opacity: 0.35;
     transform: scale(0.7);
   }
+}
+
+.demo-badge__reset {
+  margin-left: 4px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--on-accent);
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.demo-badge__reset:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.demo-badge__reset:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 /* En celular, solo lo esencial para no tapar la pantalla */
