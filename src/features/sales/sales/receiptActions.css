@@ -1,0 +1,54 @@
+/* Botones del comprobante (imprimir, PDF, correo) y el formulario de envío.
+   Se acomodan según el ancho de la caja (no de la pantalla): la misma pieza va en la ventana
+   angosta de "Venta registrada" y en la ancha del detalle de la venta. */
+.receipt-actions {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+/* Celular: uno debajo del otro, todos del mismo tamaño */
+.receipt-actions__buttons {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+/* Angosta (ventana "Venta registrada"): dos por fila */
+@container (min-width: 400px) {
+  .receipt-actions__buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.receipt-actions__buttons .btn {
+  width: 100%;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.receipt-actions__mail {
+  display: grid;
+  gap: 8px;
+}
+
+/* Ancha: los cuatro en una fila y el correo en una línea */
+@container (min-width: 640px) {
+  .receipt-actions__buttons {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .receipt-actions__mail {
+    grid-template-columns: 2fr 1fr auto;
+    align-items: start;
+  }
+
+  .receipt-actions__mail .btn {
+    margin-top: 26px;
+  }
+}

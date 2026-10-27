@@ -1,0 +1,67 @@
+/* Cartera de clientes: estado de cuenta y abonos */
+.receivables-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.receivables-note {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.receivables-preview {
+  padding: 12px 14px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+}
+
+.receivables-preview__title {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.receivables-preview__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.receivables-preview__list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.receivables-preview__list strong {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.receivables-preview__settled {
+  color: var(--success);
+  font-weight: 600;
+}
+
+/* Abonos y saldos anulados: se ven, pero apagados */
+.receivables-row--cancelled .sheet__row-title,
+.receivables-row--cancelled .sheet__number {
+  color: var(--gray-500);
+}
+
+.receivables-row--cancelled .sheet__number {
+  text-decoration: line-through;
+}
+
+.receivables-note--warning {
+  color: var(--warning-text);
+}

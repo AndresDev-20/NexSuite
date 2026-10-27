@@ -13,7 +13,7 @@
   height: 42px;
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--white);
+  color: var(--on-accent);
   background: linear-gradient(135deg, var(--red-500), var(--red-800));
   border-radius: 50%;
 }
@@ -25,12 +25,13 @@
   min-width: 0;
 }
 
+/* Corta entre palabras, nunca letra por letra */
 .user-cell__name {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 8px;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   font-size: 1rem;
   font-weight: 700;
 }
@@ -40,61 +41,83 @@
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--red-700);
-  background: var(--red-50);
+  background-color: var(--red-50);
   border-radius: 999px;
 }
 
-.user-cell__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  overflow-wrap: anywhere;
+/* Un correo largo se recorta con "…"; completo en "Ver" */
+.user-cell__email {
+  overflow: hidden;
   font-size: 0.85rem;
   color: var(--gray-700);
-  text-decoration: none;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-a.user-cell__link:hover {
-  color: var(--red-700);
-  text-decoration: underline;
+.user-cell__muted {
+  color: var(--color-text-muted);
 }
 
-.user-cell__link-icon {
-  width: 15px;
-  height: 15px;
-  color: var(--red-600);
-}
-
-.user-cell__role {
+.user-cell__role,
+.user-cell__status {
+  display: inline-block;
   padding: 4px 12px;
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--red-700);
-  background: var(--red-50);
+  white-space: nowrap;
   border-radius: 999px;
+}
+
+.user-cell__role {
+  color: var(--red-700);
+  background-color: var(--red-50);
+}
+
+.user-cell__status {
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
+}
+
+.user-cell__status--inactive {
+  color: var(--gray-700);
+  background-color: var(--gray-100);
 }
 
 .user-cell__branches {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  min-width: 0;
 }
 
 .user-cell__branch {
+  overflow: hidden;
   padding: 3px 10px;
   font-size: 0.78rem;
   font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   color: var(--gray-700);
-  background: var(--gray-100);
+  background-color: var(--gray-100);
   border-radius: 999px;
 }
 
-@media (min-width: 768px) {
-  .user-cell__branches {
-    justify-content: flex-start;
+.user-cell__branch--more {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+/* Mismo punto en que DataTable pasa a tabla */
+@container data-table (min-width: 880px) {
+  .user-cell {
+    min-width: 220px;
+  }
+
+  .user-cell__email {
+    max-width: 260px;
+  }
+
+  .user-cell__branch {
+    max-width: 160px;
   }
 }

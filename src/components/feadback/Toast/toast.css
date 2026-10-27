@@ -35,7 +35,7 @@
   width: 34px;
   height: 34px;
   color: var(--success);
-  background: #ddf5e7;
+  background: var(--success-soft);
   border-radius: 50%;
 }
 

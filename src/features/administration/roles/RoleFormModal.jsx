@@ -36,6 +36,8 @@ const RULES = {
 /* ---------- Formulario (solo existe mientras el modal está abierto) ---------- */
 const RoleForm = ({ role, busy, onCancel, onSubmit }) => {
   const isEdit = Boolean(role);
+  // Developer y Administrador conservan su nombre: el servidor no deja renombrarlos
+  const isSystem = Boolean(role?.systemKey);
   const [serverError, setServerError] = useState("");
 
   const {
@@ -68,7 +70,9 @@ const RoleForm = ({ role, busy, onCancel, onSubmit }) => {
         placeholder="Ej: Vendedor"
         autoComplete="off"
         maxLength={MAX_LENGTH}
-        data-autofocus
+        data-autofocus={isSystem ? undefined : true}
+        readOnly={isSystem}
+        hint={isSystem ? "Es un rol del sistema: su nombre no se cambia." : undefined}
         error={errors.nameRole?.message}
         {...register("nameRole", RULES.nameRole)}
       />

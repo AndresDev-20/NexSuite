@@ -1,0 +1,53 @@
+.branch-stock-table__level {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
+  border-radius: 999px;
+}
+
+.branch-stock-table__level--empty {
+  color: var(--danger);
+  background-color: var(--red-50);
+}
+
+.branch-stock-table__level--low {
+  color: var(--warning-text);
+  background-color: color-mix(in srgb, var(--warning-text) 12%, transparent);
+}
+
+.branch-stock-table__stock {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.branch-stock-table__min {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+.branch-stock-table__product {
+  overflow-wrap: anywhere;
+}
+
+.branch-stock-table__name {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.branch-stock-table__tag {
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--red-700);
+  background-color: var(--red-50);
+  border: 1px solid var(--red-200);
+  border-radius: 999px;
+}

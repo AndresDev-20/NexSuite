@@ -1,0 +1,52 @@
+/* Filtros: una columna en móvil, cuadrícula desde tablet */
+.movements-page__filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.movements-page__clear {
+  align-self: end;
+}
+
+.movements-page__branch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  background-color: var(--tint);
+  border: 1px solid var(--red-100);
+  border-radius: 12px;
+}
+
+/* Mientras llega la página siguiente, la actual se atenúa en lugar de desaparecer */
+.movements-page__results {
+  transition: opacity 150ms ease;
+}
+
+.movements-page__results--loading {
+  opacity: 0.55;
+}
+
+@media (min-width: 768px) {
+  .movements-page__filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .movements-page__filters {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .movements-page__results {
+    transition: none;
+  }
+}

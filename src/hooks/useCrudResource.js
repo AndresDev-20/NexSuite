@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import api from "../api/client";
 import getErrorMessage from "../utils/getErrorMessage";
 import { toList } from "../utils/apiResponse";
@@ -20,16 +20,21 @@ const useCrudResource = ({ path, normalize, compare, loadError = "No se pudo car
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  /** silent: refresca sin mostrar la carga ni reemplazar la lista por un error. */
+  /**
+   * silent: refresca sin mostrar la carga ni reemplazar la lista por un error.
+   * params: filtros que se envían al servidor (?search=…); se recuerdan para los refrescos.
+   */
+  const lastParams = useRef(undefined);
   const getAll = useCallback(
-    async ({ silent = false } = {}) => {
+    async ({ silent = false, params = lastParams.current } = {}) => {
+      lastParams.current = params;
       if (!silent) {
         setLoading(true);
         setError("");
       }
 
       try {
-        const list = toList(await api.get(path)).map(normalize);
+        const list = toList(await api.get(path, { params })).map(normalize);
         setItems(compare ? list.sort(compare) : list);
       } catch (err) {
         if (!silent) setError(getErrorMessage(err, loadError));

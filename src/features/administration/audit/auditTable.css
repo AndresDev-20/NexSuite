@@ -1,0 +1,58 @@
+.audit-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.audit-cell__secondary {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.audit-cell__badge {
+  align-self: flex-start;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  border-radius: 999px;
+}
+
+.audit-cell__badge--success {
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
+}
+
+.audit-cell__badge--info {
+  color: var(--info);
+  background-color: color-mix(in srgb, var(--info) 10%, transparent);
+}
+
+.audit-cell__badge--danger {
+  color: var(--danger);
+  background-color: var(--red-50);
+}
+
+.audit-cell__badge--warning {
+  color: color-mix(in srgb, var(--warning) 70%, var(--gray-900));
+  background-color: color-mix(in srgb, var(--warning) 16%, transparent);
+}
+
+.audit-cell__badge--neutral {
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+}
+
+/* En la tarjeta el contenido va a la derecha, como el resto de celdas */
+@container data-table (max-width: 879px) {
+  .audit-cell {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .data-table__cell--primary .audit-cell {
+    align-items: flex-start;
+    text-align: left;
+  }
+}

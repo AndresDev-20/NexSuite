@@ -39,7 +39,7 @@
 }
 
 .row-actions__button--danger:hover:not(:disabled) {
-  color: var(--white);
+  color: var(--on-accent);
   background: var(--danger);
   border-color: var(--danger);
 }
@@ -47,4 +47,16 @@
 .row-actions__icon {
   width: 19px;
   height: 19px;
+}
+/* Con texto visible: más ancho, ícono y texto en línea */
+.row-actions__button--text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
 }

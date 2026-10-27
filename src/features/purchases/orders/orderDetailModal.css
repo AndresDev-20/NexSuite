@@ -1,0 +1,316 @@
+.order-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.order-detail__loading {
+  margin: 0;
+  padding: 24px 0;
+  text-align: center;
+  color: var(--gray-500);
+}
+
+.order-detail__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.order-detail__number {
+  margin: 0;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.order-detail__cancelled {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  color: var(--red-700);
+  background-color: var(--red-50);
+  border: 1px solid var(--red-100);
+  border-radius: 12px;
+}
+
+.order-detail__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 16px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.order-detail__item {
+  min-width: 0;
+}
+
+.order-detail__item--wide {
+  grid-column: 1 / -1;
+}
+
+.order-detail__label {
+  margin-bottom: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.order-detail__value {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.95rem;
+}
+
+.order-detail__draft {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  border-radius: 12px;
+}
+
+.order-detail__section-title {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.order-detail__products {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.order-detail__product-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.order-detail__product-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.order-detail__product {
+  display: block;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.order-detail__sku {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--gray-500);
+}
+
+.order-detail__product-total {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.order-detail__split {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 0 0;
+  list-style: none;
+  border-top: 1px dashed var(--gray-200);
+}
+
+.order-detail__split-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.order-detail__split-branch strong {
+  margin-left: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.order-detail__serials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.order-detail__serials li {
+  padding: 2px 8px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  background-color: var(--gray-100);
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+
+.order-detail__missing {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--warning-text);
+}
+
+.order-detail__grand-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+}
+
+.order-detail__grand-total strong {
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.order-detail__link {
+  align-self: flex-start;
+  padding: 0;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--red-700);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.order-detail__cancel {
+  margin-right: auto;
+}
+
+/* ---------- Pagos ---------- */
+.order-payments {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.order-payments__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.order-payments__head .order-detail__section-title {
+  margin: 0;
+}
+
+.order-payments__note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--gray-700);
+}
+
+.order-payments__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px 16px;
+  margin: 0;
+}
+
+.order-payments__summary dt {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.order-payments__summary dd {
+  margin: 4px 0 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.order-payments__balance {
+  color: var(--red-700);
+}
+
+.order-payments__due {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gray-500);
+}
+
+.order-payments__due--late {
+  color: var(--danger);
+}
+
+.order-payments__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.order-payments__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 10px 12px;
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.order-payments__row--cancelled .order-payments__amount {
+  color: var(--gray-500);
+  text-decoration: line-through;
+}
+
+.order-payments__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.order-payments__amount {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.order-payments__cancelled {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.order-payments__add {
+  align-self: flex-start;
+}

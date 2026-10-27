@@ -1,14 +1,16 @@
 import { useCallback, useState } from "react";
 import api from "../../../api/client";
 import getErrorMessage from "../../../utils/getErrorMessage";
+import { toList } from "../../../utils/apiResponse";
 
-// Contrato asumido: ajústalo aquí si tus rutas son otras
 const ROLES_PATH = "/roles";
 
 const normalizeRole = (role) => ({
   id: role.id,
   nameRole: role.nameRole,
   description: role.description ?? "",
+  // "developer" | "administrador" en los roles del sistema (no se renombran, no se eliminan, sus permisos no cambian)
+  systemKey: role.systemkey ?? null,
   // null cuando el backend no incluye los permisos en el listado
   permissionCount: Array.isArray(role.permissions) ? role.permissions.length : null,
 });
@@ -26,9 +28,7 @@ const useRoles = () => {
     }
 
     try {
-      const { data } = await api.get(ROLES_PATH);
-      const list = Array.isArray(data) ? data : [];
-      setRoles(list.map(normalizeRole));
+      setRoles(toList(await api.get(ROLES_PATH)).map(normalizeRole));
     } catch (err) {
       if (!silent) setError(getErrorMessage(err, "No se pudieron cargar los roles."));
     } finally {

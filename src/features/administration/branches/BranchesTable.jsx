@@ -110,23 +110,36 @@ const columns = [
   },
 ];
 
-const BranchesTable = ({ branches, onEdit, onDelete }) => (
+/**
+ * onEdit / onDelete: opcionales; sin ellos el botón no aparece (falta el permiso).
+ * onView: abre la ficha; canView(branch) dice si es una sucursal del usuario (solo de esas hay ficha).
+ */
+const BranchesTable = ({ branches, onView, canView = () => false, onEdit, onDelete }) => (
   <DataTable
     caption="Listado de sucursales"
     columns={columns}
     rows={branches}
     getRowKey={(branch) => branch.id}
-    renderActions={(branch) => (
-      <RowActions>
-        <RowAction icon="edit" label={`Editar ${branch.nameBranch}`} onClick={() => onEdit(branch)} />
-        <RowAction
-          icon="trash"
-          tone="danger"
-          label={`Eliminar ${branch.nameBranch}`}
-          onClick={() => onDelete(branch)}
-        />
-      </RowActions>
-    )}
+    renderActions={
+      onView || onEdit || onDelete
+        ? (branch) => (
+            <RowActions>
+              {onView && canView(branch) && (
+                <RowAction icon="eye" label={`Ver la ficha de ${branch.nameBranch}`} onClick={() => onView(branch)} />
+              )}
+              {onEdit && <RowAction icon="edit" label={`Editar ${branch.nameBranch}`} onClick={() => onEdit(branch)} />}
+              {onDelete && (
+                <RowAction
+                  icon="trash"
+                  tone="danger"
+                  label={`Eliminar ${branch.nameBranch}`}
+                  onClick={() => onDelete(branch)}
+                />
+              )}
+            </RowActions>
+          )
+        : undefined
+    }
   />
 );
 

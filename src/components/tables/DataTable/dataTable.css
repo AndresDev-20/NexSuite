@@ -1,8 +1,13 @@
 /* ==========================================================================
-   data-table — móvil: tarjetas · tablet y portátil: tabla
+   data-table — tarjetas cuando el espacio es angosto · tabla cuando cabe.
+   Se decide por el ancho del propio contenedor (no de la ventana), porque
+   el menú lateral y los paneles reducen el espacio real de la tabla.
    ========================================================================== */
 .data-table {
+  position: relative; /* el caption oculto no debe escaparse y ensanchar la página */
   width: 100%;
+  overflow-x: auto;
+  container: data-table / inline-size;
 }
 
 .data-table__sr {
@@ -25,9 +30,10 @@
   display: none;
 }
 
+/* Tarjetas: una columna en móvil, varias cuando hay espacio */
 .data-table__element tbody {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: 12px;
 }
 
@@ -92,13 +98,9 @@
 }
 
 /* ==========================================================================
-   TABLET (≥ 768px): vuelve a ser tabla
+   Contenedor ≥ 880px: tabla
    ========================================================================== */
-@media (min-width: 768px) {
-  .data-table {
-    overflow-x: auto;
-  }
-
+@container data-table (min-width: 880px) {
   .data-table__element {
     display: table;
   }

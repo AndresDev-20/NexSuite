@@ -3,7 +3,7 @@ import Button from "../components/ui/Button/Button";
 import StateMessage from "../components/feadback/StateMessage/StateMessage";
 import usePermissions from "../features/auth/usePermissions";
 
-/** Deja pasar solo si el usuario tiene el permiso. Uso: <Route element={<PermissionRoute permission="usuarios.ver" />}> */
+/** Deja pasar solo si el usuario tiene el permiso. Uso: <Route element={<PermissionRoute permission="users.read" />}> */
 const PermissionRoute = ({ permission }) => {
   const { status, can, reload } = usePermissions();
   const navigate = useNavigate();

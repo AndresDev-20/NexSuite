@@ -1,0 +1,76 @@
+.customer-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.customer-cell__name {
+  overflow-wrap: anywhere;
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+.customer-cell__id {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.customer-cell__type {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.customer-cell__contact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.customer-cell__line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+  text-decoration: none;
+}
+
+a.customer-cell__line:hover {
+  color: var(--red-700);
+  text-decoration: underline;
+}
+
+.customer-cell__line-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--red-600);
+}
+
+@container data-table (max-width: 879px) {
+  /* En las tarjetas, el contenido va alineado a la derecha como el resto */
+  .customer-cell {
+    align-items: flex-end;
+    text-align: right;
+  }
+}
+
+/* Mismo punto en que DataTable pasa a tabla */
+@container data-table (min-width: 880px) {
+  .customer-cell__contact {
+    align-items: flex-start;
+  }
+}
+
+.customer-cell__tag {
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+}

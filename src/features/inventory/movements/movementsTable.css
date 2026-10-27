@@ -1,0 +1,41 @@
+.movement-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.movement-cell__note {
+  font-size: 0.85rem;
+  color: var(--gray-700);
+  overflow-wrap: anywhere;
+}
+
+.movement-cell__secondary {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+}
+
+.movement-delta {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border-radius: 999px;
+}
+
+.movement-delta--in {
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
+}
+
+.movement-delta--out {
+  color: var(--danger);
+  background-color: var(--red-50);
+}
+
+.movement-balance {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

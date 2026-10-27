@@ -6,8 +6,9 @@ const CATEGORIES_PATH = "/categories";
 const normalizeCategory = (category) => ({
   id: category.id,
   nameCategory: category.nameCategory ?? "",
-  // null cuando el backend no incluye los productos en el listado
-  productCount: Array.isArray(category.products) ? category.products.length : null,
+  isActive: category.isActive !== false,
+  // Productos que la usan: con alguno no se elimina, se desactiva
+  productCount: Number(category.productCount ?? 0),
 });
 
 const byName = (a, b) => a.nameCategory.localeCompare(b.nameCategory, "es");

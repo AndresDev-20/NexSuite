@@ -1,0 +1,310 @@
+/* ==========================================================================
+   sheet — fichas completas en un modal ancho (sucursal, proveedor…):
+   encabezado, cifras clave, secciones con filas, filtros por chip y estados
+   ========================================================================== */
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sheet__head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sheet__name {
+  margin: 0;
+  overflow-wrap: break-word;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.sheet__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+}
+
+.sheet__facts a {
+  color: inherit;
+}
+
+/* ---------- Cifras clave ---------- */
+.sheet__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  /* Las cifras de dos columnas no dejan huecos: las demás llenan el espacio libre */
+  grid-auto-flow: dense;
+  gap: 10px;
+}
+
+.sheet__kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.sheet__kpi-value {
+  font-size: 1.3rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--gray-900);
+  overflow-wrap: anywhere;
+}
+
+.sheet__kpi-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.sheet__kpi--empty .sheet__kpi-value {
+  color: var(--danger);
+}
+
+.sheet__kpi--low .sheet__kpi-value {
+  color: color-mix(in srgb, var(--warning) 70%, var(--gray-900));
+}
+
+.sheet__kpi--ok .sheet__kpi-value {
+  color: var(--success);
+}
+
+/* Montos de dinero: ocupan dos columnas y no se parten en dos líneas */
+.sheet__kpi--money {
+  grid-column: span 2;
+}
+
+.sheet__kpi--money .sheet__kpi-value {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+/* ---------- Secciones ---------- */
+.sheet__section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sheet__section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.sheet__section-count {
+  padding: 1px 9px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  border-radius: 999px;
+}
+
+.sheet__empty,
+.sheet__loading,
+.sheet__more {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.sheet__loading {
+  padding: 14px;
+  text-align: center;
+  background-color: var(--gray-50);
+  border-radius: 12px;
+}
+
+.sheet__error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  color: var(--danger);
+  background-color: var(--red-50);
+  border-radius: 12px;
+}
+
+.sheet__rows {
+  display: flex;
+  flex-direction: column;
+  max-height: 340px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.sheet__row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px;
+}
+
+.sheet__row + .sheet__row {
+  border-top: 1px solid var(--color-border);
+}
+
+.sheet__row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sheet__row-title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.sheet__row-meta {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.sheet__row-side {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.sheet__number {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.sheet__mono {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Etiquetas de estado ---------- */
+.sheet__badge {
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  border-radius: 999px;
+}
+
+.sheet__badge--ok {
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success) 12%, transparent);
+}
+
+.sheet__badge--low {
+  color: var(--gray-900);
+  background-color: color-mix(in srgb, var(--warning) 25%, var(--white));
+}
+
+.sheet__badge--empty {
+  color: var(--danger);
+  background-color: var(--red-50);
+}
+
+.sheet__badge--brand {
+  color: var(--red-700);
+  background-color: var(--red-50);
+}
+
+/* ---------- Filtros por chip; objetivo táctil de 40px ---------- */
+.sheet__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sheet__chip {
+  min-height: 40px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.sheet__chip--on {
+  color: var(--on-accent);
+  background-color: var(--red-600);
+  border-color: var(--red-600);
+}
+
+.sheet__chip:focus-visible {
+  outline: 2px solid var(--red-600);
+  outline-offset: 2px;
+}
+
+/* Enlace con objetivo táctil de 44px */
+.sheet__link {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--red-700);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.sheet__link:focus-visible {
+  outline: 2px solid var(--red-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* TABLET (≥ 768px): cada fila en una línea, datos a la izquierda y cifras a la derecha */
+@media (min-width: 768px) {
+  .sheet__row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .sheet__row-side {
+    flex-shrink: 0;
+    justify-content: flex-end;
+  }
+
+  .sheet__row-side--stack {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+}

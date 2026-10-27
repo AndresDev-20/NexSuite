@@ -8,12 +8,7 @@ import Modal from "../../../components/feadback/Modal/Modal";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { calculateNitDv } from "../../../utils/nit";
 import { EMAIL_PATTERN, PHONE_PATTERN, stripNonDigits } from "../../../utils/validators";
-import {
-  IDENTIFICATION_TYPES,
-  NIT_TYPE,
-  NO_VERIFICATION_DIGIT,
-  ORGANIZATION_TYPES,
-} from "./supplierOptions";
+import { IDENTIFICATION_TYPES, NIT_TYPE, ORGANIZATION_TYPES } from "./supplierOptions";
 import "./supplierFormModal.css";
 
 const MIN_ID_DIGITS = 5;
@@ -32,13 +27,16 @@ const toFormValues = (supplier) => ({
   contact: supplier?.contact ?? "",
 });
 
-/** Recorta los textos. contact es opcional: al crear se omite vacío; al editar se envía null para poder borrarlo. */
+/**
+ * Recorta los textos. contact es opcional: al crear se omite vacío; al editar se envía null para poder borrarlo.
+ * digitoverification es null cuando no aplica (todo lo que no es NIT).
+ */
 const buildPayload = (values, isEdit, dv) => {
   const payload = {
     typeorganization: values.typeorganization,
     typeidentification: values.typeidentification,
     nitcc: Number(values.nitcc),
-    digitverification: dv ?? NO_VERIFICATION_DIGIT,
+    digitoverification: dv,
     companyname: values.companyname.trim(),
     phone: values.phone.trim(),
     email: values.email.trim(),

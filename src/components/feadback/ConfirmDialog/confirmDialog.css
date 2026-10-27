@@ -15,8 +15,8 @@
   padding: 10px 12px;
   font-size: 0.85rem;
   font-weight: 500;
-  color: #8a5a00;
-  background: #fdf1d3;
+  color: var(--warning-strong);
+  background: var(--warning-soft);
   border-radius: 12px;
 }
 

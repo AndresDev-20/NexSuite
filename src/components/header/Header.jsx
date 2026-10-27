@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Icon from "../ui/Icon/Icon";
 import Menu from "../menu/Menu";
+import BranchSelector from "../../features/branches/BranchSelector";
 import { clearSession, getUser } from "../../utils/session";
 import { getFullName, getInitials, getShortName } from "../../utils/userDisplay";
 import "./header.css";
@@ -88,6 +89,8 @@ const Header = ({ notifications = 0 }) => {
           </Link>
 
           <div className="header__actions">
+            <BranchSelector className="header__branch" />
+
             <button
               type="button"
               className="icon-button"
@@ -184,6 +187,8 @@ const Header = ({ notifications = 0 }) => {
             {roleName && <p className="drawer__user-role">{roleName}</p>}
           </div>
         </div>
+
+        <BranchSelector className="drawer__branch" />
 
         <div className="drawer__nav">
           <Menu onNavigate={closeMenu} />

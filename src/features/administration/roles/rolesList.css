@@ -59,7 +59,7 @@
 }
 
 .roles-list__card:hover .roles-list__icon {
-  color: var(--white);
+  color: var(--on-accent);
   background: var(--red-600);
 }
 
@@ -141,7 +141,7 @@
 }
 
 .roles-list__permissions:hover {
-  color: var(--white);
+  color: var(--on-accent);
   background: var(--red-600);
   border-color: var(--red-600);
 }
@@ -193,7 +193,7 @@
 }
 
 .roles-list__action--danger:hover:not(:disabled) {
-  color: var(--white);
+  color: var(--on-accent);
   background: var(--danger);
   border-color: var(--danger);
 }

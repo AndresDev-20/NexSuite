@@ -1,0 +1,26 @@
+.counts-page__filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.counts-page__results {
+  transition: opacity 150ms ease;
+}
+
+.counts-page__results--loading {
+  opacity: 0.55;
+}
+
+@media (min-width: 768px) {
+  .counts-page__filters {
+    grid-template-columns: minmax(0, 280px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .counts-page__results {
+    transition: none;
+  }
+}

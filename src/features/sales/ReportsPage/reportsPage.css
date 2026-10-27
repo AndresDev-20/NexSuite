@@ -1,0 +1,209 @@
+/* Reportes de ventas: cifras, lo que entró, tablas por vendedor, sucursal, día y producto */
+.reports-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.reports-filters__dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* El vendedor ocupa toda la fila en móvil; desde tablet va junto a las fechas */
+.reports-filters__seller {
+  grid-column: 1 / -1;
+}
+
+.reports {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: opacity 150ms ease;
+}
+
+.reports--loading {
+  opacity: 0.55;
+}
+
+/* Cifras: dos por fila en móvil, cuatro desde tablet */
+.reports-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.reports-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px 16px;
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.reports-kpi__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.reports-kpi__value {
+  font-size: 1.3rem;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.reports-kpi__detail {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+}
+
+.reports-kpi--ok .reports-kpi__value {
+  color: var(--success);
+}
+
+.reports-kpi--warning .reports-kpi__value {
+  color: var(--warning-text);
+}
+
+.reports-note {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.reports-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.reports-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.reports-section__head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reports-section__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.reports-section__subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.reports-total .sheet__row-title,
+.reports-total .sheet__number {
+  font-weight: 800;
+}
+
+.reports-product {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reports-product__sku {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+}
+
+@media (min-width: 768px) {
+  .reports-filters {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .reports-filters__dates {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    min-width: 340px;
+  }
+
+  .reports-filters__dates:has(.reports-filters__seller) {
+    min-width: 540px;
+  }
+
+  .reports-filters__seller {
+    grid-column: auto;
+  }
+
+  .reports-kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .reports-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+/* ---------- Animaciones (mismas del inicio: dash-rise, bar-grow, chart-draw) ---------- */
+.reports-kpi,
+.reports-section,
+.reports-rise {
+  animation: dash-rise 600ms ease both;
+}
+
+.reports-kpi {
+  animation-delay: calc(var(--i, 0) * 80ms);
+  transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease;
+}
+
+.reports-kpi:hover {
+  border-color: var(--red-200);
+  box-shadow: 0 14px 28px -14px rgba(214, 24, 46, 0.35);
+  transform: translateY(-3px);
+}
+
+.reports-section {
+  animation-delay: calc(var(--i, 0) * 90ms + 250ms);
+}
+
+.reports-rise {
+  animation-delay: calc(var(--i, 0) * 70ms + 350ms);
+}
+
+/* La barra de cada medio de pago, debajo de su nombre */
+.reports-bar {
+  margin: 6px 0 0;
+}
+
+.reports-section .rank__item:last-child {
+  padding-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reports {
+    transition: none;
+  }
+
+  .reports *,
+  .reports *::before,
+  .reports *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+  }
+}

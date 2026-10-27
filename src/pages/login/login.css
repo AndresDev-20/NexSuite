@@ -23,7 +23,7 @@
    ========================================================================== */
 .logo {
   --logo-bg: var(--red-600);
-  --logo-fg: var(--white);
+  --logo-fg: var(--on-accent);
   display: block;
   width: 100%;
   height: auto;
@@ -333,7 +333,7 @@
 .button:hover .button__icon { transform: translateX(4px); }
 
 .button--primary {
-  color: var(--white);
+  color: var(--on-accent);
   background: linear-gradient(135deg, var(--red-500), var(--red-700));
   box-shadow: 0 10px 22px -8px rgba(214, 24, 46, 0.6);
 }
@@ -598,8 +598,8 @@
     width: clamp(220px, 36dvh, 320px);
     filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.28));
   }
-  .login__wordmark { position: relative; z-index: 1; font-size: clamp(2.4rem, 6dvh, 3.5rem); color: var(--white); }
-  .login__wordmark-nex { color: var(--white); }
+  .login__wordmark { position: relative; z-index: 1; font-size: clamp(2.4rem, 6dvh, 3.5rem); color: var(--on-accent); }
+  .login__wordmark-nex { color: var(--on-accent); }
 
   /* Panel del formulario (derecha) */
   .login__panel {
@@ -652,4 +652,30 @@
     animation-iteration-count: 1 !important;
   }
   .power__fill { animation-duration: var(--power-ms) !important; }
+}
+
+/* ==========================================================================
+   Modo noche (Configuración → Apariencia): tarjeta azul oscuro translúcida y
+   panel de marca de rojo a vino y azul noche
+   ========================================================================== */
+:root[data-theme="dark"] .login__card {
+  background: rgba(18, 28, 51, 0.9);
+  border-color: rgba(127, 168, 255, 0.14);
+  box-shadow:
+    0 24px 48px -16px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+@media (min-width: 1024px) {
+  :root[data-theme="dark"] .login__brand {
+    background:
+      radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(135deg, #e3283f 0%, #8e1022 55%, #1b1030 100%);
+  }
+
+  :root[data-theme="dark"] .login__card {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
 }

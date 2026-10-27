@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 
 <head>
   <meta charset="UTF-8" />
@@ -10,6 +10,23 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400;1,700&display=swap"
     rel="stylesheet" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#FAFAFA" />
+  <script>
+    // Tema y preferencias del equipo antes de pintar (sin destello claro en modo noche).
+    // Mismo formato que src/features/settings/preferences.js.
+    (function () {
+      try {
+        var p = JSON.parse(localStorage.getItem("nexsuite.preferences") || "{}");
+        var theme = p.theme === "system" ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : p.theme || "light";
+        var root = document.documentElement;
+        root.dataset.theme = theme;
+        root.dataset.motion = p.motion || "full";
+        root.dataset.text = p.text || "normal";
+      } catch (error) {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
   <title>NexSuite</title>
 </head>
 

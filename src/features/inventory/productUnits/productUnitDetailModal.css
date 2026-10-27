@@ -1,0 +1,120 @@
+.unit-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.unit-detail__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.unit-detail__serial {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+
+.unit-detail__secondary {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+
+.unit-detail__list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin: 0;
+  padding: 16px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.unit-detail__item {
+  min-width: 0;
+}
+
+.unit-detail__label {
+  margin-bottom: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.unit-detail__value {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.95rem;
+}
+
+.unit-detail__supplier {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background-color: var(--tint);
+  border: 1px solid var(--red-100);
+  border-radius: 16px;
+}
+
+.unit-detail__supplier-title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--red-700);
+}
+
+.unit-detail__supplier-name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.unit-detail__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 4px;
+}
+
+/* Objetivo táctil de 44px */
+.unit-detail__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  overflow-wrap: anywhere;
+  color: var(--gray-900);
+  text-decoration: none;
+}
+
+.unit-detail__link:hover {
+  color: var(--red-700);
+  text-decoration: underline;
+}
+
+.unit-detail__icon {
+  width: 16px;
+  height: 16px;
+  color: var(--red-600);
+}
+
+@media (min-width: 768px) {
+  .unit-detail__list {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+  }
+
+  .unit-detail__item--wide {
+    grid-column: 1 / -1;
+  }
+}

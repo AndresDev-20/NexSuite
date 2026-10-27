@@ -24,17 +24,19 @@ const toFormValues = (branch) => ({
   email: branch?.email ?? "",
   number: branch?.number ?? "",
   web: branch?.web ?? "",
+  invoiceprefix: branch?.invoicePrefix ?? "",
 });
 
 /**
  * Recorta los textos. Al crear, los campos vacíos se omiten;
- * al editar, se envían como null para poder borrar un dato.
+ * al editar, se envían como null para poder borrar un dato. El prefijo de comprobantes vacío no
+ * se envía (no se borra: si no se escribe, el servidor lo genera del nombre).
  */
 const buildPayload = (values, isEdit) =>
   Object.fromEntries(
     Object.entries(values)
-      .map(([key, value]) => [key, value.trim()])
-      .filter(([key, value]) => isEdit || key === "nameBranch" || value !== "")
+      .map(([key, value]) => [key, key === "invoiceprefix" ? value.replace(/\s+/g, "").toUpperCase() : value.trim()])
+      .filter(([key, value]) => (key === "invoiceprefix" ? value !== "" : isEdit || key === "nameBranch" || value !== ""))
       .map(([key, value]) => [key, value === "" ? null : value])
   );
 
@@ -56,6 +58,9 @@ const RULES = {
   },
   web: {
     validate: (value) => !value.trim() || isHttpUrl(value.trim()) || "Debe empezar por http:// o https://",
+  },
+  invoiceprefix: {
+    validate: (value) => !value.trim() || /^[A-Za-z0-9]{2,6}$/.test(value.trim()) || "De 2 a 6 letras o números (ej. CEN).",
   },
 };
 
@@ -141,6 +146,16 @@ const BranchForm = ({ branch, busy, onCancel, onSubmit }) => {
         hint="Opcional. Incluye https://"
         error={errors.web?.message}
         {...register("web", RULES.web)}
+      />
+
+      <Field
+        label="Prefijo de los comprobantes de venta"
+        autoComplete="off"
+        maxLength={6}
+        placeholder={isEdit ? "" : "Se genera del nombre (ej. CEN)"}
+        hint={`Así empiezan los números de sus ventas: ${(branch?.invoicePrefix || "CEN")}-000001. Opcional al crear.`}
+        error={errors.invoiceprefix?.message}
+        {...register("invoiceprefix", RULES.invoiceprefix)}
       />
 
       <div className="branch-form__actions">

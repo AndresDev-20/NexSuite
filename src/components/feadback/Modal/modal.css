@@ -115,6 +115,10 @@
     margin: auto;
   }
 
+  .modal--wide {
+    width: min(920px, calc(100% - 48px));
+  }
+
   .modal__panel {
     max-height: 90dvh;
     border-radius: 20px;

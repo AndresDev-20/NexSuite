@@ -6,8 +6,9 @@ import "./modal.css";
  * Ventana modal. En móvil se abre como hoja inferior; desde 768px, centrada.
  * Los hijos solo se montan mientras está abierta, así los formularios arrancan limpios.
  * Marca con data-autofocus el elemento que debe recibir el foco al abrir.
+ * size="wide": más ancha desde tablet (formularios con tablas, como los ítems de un pedido).
  */
-const Modal = ({ open, title, onClose, busy = false, children }) => {
+const Modal = ({ open, title, onClose, busy = false, size, children }) => {
   const dialogRef = useRef(null);
   const titleId = useId();
 
@@ -17,6 +18,9 @@ const Modal = ({ open, title, onClose, busy = false, children }) => {
 
     if (open && !dialog.open) {
       dialog.showModal();
+      // El diálogo no se desmonta al cerrar: sin esto abriría donde quedó el desplazamiento anterior
+      const body = dialog.querySelector(".modal__body");
+      if (body) body.scrollTop = 0;
       dialog.querySelector("[data-autofocus]")?.focus();
     }
     if (!open && dialog.open) {
@@ -48,7 +52,7 @@ const Modal = ({ open, title, onClose, busy = false, children }) => {
   return (
     <dialog
       ref={dialogRef}
-      className="modal"
+      className={`modal ${size === "wide" ? "modal--wide" : ""}`.trim()}
       aria-labelledby={titleId}
       onCancel={handleCancel}
       onClick={handleClick}

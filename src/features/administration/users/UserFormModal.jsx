@@ -32,7 +32,7 @@ const toFormValues = (user) => ({
 
 /**
  * Prepara el cuerpo de la petición.
- * - roleId no viaja cuando el select está bloqueado (tu propio usuario).
+ * - roleId no viaja cuando el select está bloqueado (tu propio usuario, o no eres Administrador ni Developer).
  * - Al editar, teléfono y edad vacíos se envían como null para poder borrarlos.
  * - La contraseña vacía no se envía: se conserva la actual. No se recorta nunca.
  */
@@ -107,7 +107,7 @@ const passwordRule = (isEdit) => ({
 });
 
 /* ---------- Formulario (solo existe mientras el modal está abierto) ---------- */
-const UserForm = ({ user, roles, isSelf, busy, onCancel, onSubmit }) => {
+const UserForm = ({ user, roles, rolesHint, roleLocked, isSelf, busy, onCancel, onSubmit }) => {
   const isEdit = Boolean(user);
   const [serverError, setServerError] = useState("");
 
@@ -137,6 +137,8 @@ const UserForm = ({ user, roles, isSelf, busy, onCancel, onSubmit }) => {
 
   let roleHint;
   if (isSelf) roleHint = "No puedes cambiar tu propio rol.";
+  else if (roleLocked) roleHint = "Solo un Administrador o un Developer puede cambiar el rol.";
+  else if (rolesHint) roleHint = rolesHint;
   else if (roles.length === 0) roleHint = "No hay roles disponibles. Crea uno primero en Roles y permisos.";
 
   return (
@@ -204,7 +206,7 @@ const UserForm = ({ user, roles, isSelf, busy, onCancel, onSubmit }) => {
         required
         placeholder="Selecciona un rol"
         options={roleOptions}
-        disabled={isSelf}
+        disabled={isSelf || roleLocked}
         hint={roleHint}
         error={errors.roleId?.message}
         {...register("roleId", RULES.roleId)}
@@ -234,7 +236,11 @@ const UserForm = ({ user, roles, isSelf, busy, onCancel, onSubmit }) => {
  * user = null → crear · user = {…} → editar.
  * onSubmit(payload) debe ser async y lanzar el error si algo falla.
  */
-const UserFormModal = ({ open, user = null, roles, isSelf = false, onClose, onSubmit }) => {
+/**
+ * rolesHint: aviso bajo el selector cuando no se pueden cargar los roles (falta el permiso).
+ * roleLocked: el rol no se puede cambiar (solo un Administrador o un Developer da roles).
+ */
+const UserFormModal = ({ open, user = null, roles, rolesHint, roleLocked = false, isSelf = false, onClose, onSubmit }) => {
   const [busy, setBusy] = useState(false);
 
   const handleSubmit = async (payload) => {
@@ -248,7 +254,7 @@ const UserFormModal = ({ open, user = null, roles, isSelf = false, onClose, onSu
 
   return (
     <Modal open={open} title={user ? "Editar usuario" : "Nuevo usuario"} onClose={onClose} busy={busy}>
-      <UserForm user={user} roles={roles} isSelf={isSelf} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />
+      <UserForm user={user} roles={roles} rolesHint={rolesHint} roleLocked={roleLocked} isSelf={isSelf} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />
     </Modal>
   );
 };

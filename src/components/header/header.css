@@ -59,6 +59,12 @@
   transition: transform 300ms ease;
 }
 
+/* Modo noche: el logo trae fondo blanco; redondeado se ve como el ícono de la aplicación */
+:root[data-theme="dark"] .header__logo-image {
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 6px 16px -6px rgba(227, 40, 63, 0.55);
+}
+
 .header__logo:hover .header__logo-image {
   transform: rotate(-6deg) scale(1.06);
 }
@@ -126,7 +132,7 @@
   font-size: 0.65rem;
   font-weight: 700;
   line-height: 1;
-  color: var(--white);
+  color: var(--on-accent);
   background: var(--red-600);
   border: 2px solid var(--white);
   border-radius: 999px;
@@ -187,7 +193,7 @@
 /* Menú abierto: la hamburguesa se convierte en X */
 .burger--open { background: var(--red-600); }
 .burger--open:hover { background: var(--red-700); }
-.burger--open .burger__line { width: 100%; background: var(--white); }
+.burger--open .burger__line { width: 100%; background: var(--on-accent); }
 .burger--open .burger__line:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .burger--open .burger__line:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .burger--open .burger__line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
@@ -233,7 +239,7 @@
   font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.03em;
-  color: var(--white);
+  color: var(--on-accent);
   background: linear-gradient(135deg, var(--red-500), var(--red-800));
   border-radius: 50%;
 }
@@ -370,7 +376,7 @@
 .user-menu__item--danger { color: var(--danger); }
 
 .user-menu__item--danger:hover {
-  color: var(--white);
+  color: var(--on-accent);
   background: var(--red-600);
 }
 
@@ -477,7 +483,7 @@
 }
 
 .drawer__logout:hover {
-  color: var(--white);
+  color: var(--on-accent);
   background: var(--red-600);
   border-color: var(--red-600);
 }
@@ -513,8 +519,21 @@
 /* ==========================================================================
    TABLET (≥ 768px)
    ========================================================================== */
+/* ---------- Sucursal activa: en el drawer en móvil, en el encabezado desde tablet ---------- */
+.header__branch { display: none; }
+
+.drawer__branch {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.drawer__branch .branch-selector__select { flex: 1; max-width: none; }
+
 @media (min-width: 768px) {
   .header { --header-pad: 32px; }
+
+  .header__branch { display: inline-flex; }
+  .drawer__branch { display: none; }
 
   .header__logo { gap: 10px; }
   .header__logo-image { width: 44px; height: 44px; }

@@ -1,0 +1,380 @@
+.product-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.product-detail__head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.product-detail__name {
+  margin: 0;
+  overflow-wrap: break-word;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.product-detail__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.product-detail__sku {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.88rem;
+  color: var(--gray-700);
+}
+
+.product-detail__tag {
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--red-700);
+  background-color: var(--red-50);
+  border-radius: 999px;
+}
+
+.product-detail__tag--active {
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
+}
+
+.product-detail__tag--inactive {
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+}
+
+.product-detail__list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin: 0;
+  padding: 16px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.product-detail__item {
+  min-width: 0;
+}
+
+.product-detail__label {
+  margin-bottom: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.product-detail__value {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.95rem;
+}
+
+.product-detail__note {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--gray-700);
+  background-color: var(--tint);
+  border: 1px solid var(--red-100);
+  border-radius: 12px;
+}
+
+.product-detail__note--pending {
+  color: var(--gray-900);
+  background-color: color-mix(in srgb, var(--warning) 16%, var(--white));
+  border-color: color-mix(in srgb, var(--warning) 50%, var(--white));
+}
+
+/* Enlace con objetivo táctil de 44px */
+.product-detail__link {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--red-700);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.product-detail__link:focus-visible {
+  outline: 2px solid var(--red-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.product-detail__delete:not(:disabled) {
+  color: var(--danger);
+}
+
+.product-detail__tag--pending {
+  color: var(--gray-900);
+  background-color: color-mix(in srgb, var(--warning) 22%, var(--white));
+}
+
+/* ---------- Cifras clave ---------- */
+.product-detail__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.product-detail__kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.product-detail__kpi-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--gray-900);
+}
+
+.product-detail__kpi-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.product-detail__kpi--empty .product-detail__kpi-value {
+  color: var(--danger);
+}
+
+.product-detail__kpi--low .product-detail__kpi-value {
+  color: color-mix(in srgb, var(--warning) 70%, var(--gray-900));
+}
+
+/* ---------- Secciones ---------- */
+.product-detail__section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.product-detail__section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.product-detail__section-count {
+  padding: 1px 9px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  border-radius: 999px;
+}
+
+.product-detail__empty,
+.product-detail__loading,
+.product-detail__more {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.product-detail__loading {
+  padding: 14px;
+  text-align: center;
+  background-color: var(--gray-50);
+  border-radius: 12px;
+}
+
+.product-detail__error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  color: var(--danger);
+  background-color: var(--red-50);
+  border-radius: 12px;
+}
+
+.product-detail__rows {
+  display: flex;
+  flex-direction: column;
+  max-height: 340px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.product-detail__row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px;
+}
+
+.product-detail__row + .product-detail__row {
+  border-top: 1px solid var(--color-border);
+}
+
+.product-detail__row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.product-detail__row-title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.product-detail__row-meta {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.product-detail__row-side {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.product-detail__row-number {
+  font-variant-numeric: tabular-nums;
+}
+
+.product-detail__badge {
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  border-radius: 999px;
+}
+
+.product-detail__badge--ok {
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success) 12%, transparent);
+}
+
+.product-detail__badge--low {
+  color: var(--gray-900);
+  background-color: color-mix(in srgb, var(--warning) 25%, var(--white));
+}
+
+.product-detail__badge--empty {
+  color: var(--danger);
+  background-color: var(--red-50);
+}
+
+.product-detail__delta {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.product-detail__delta--in {
+  color: var(--success);
+}
+
+.product-detail__delta--out {
+  color: var(--danger);
+}
+
+/* Filtro por estado de las unidades; objetivo táctil de 40px */
+.product-detail__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.product-detail__chip {
+  min-height: 40px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.product-detail__chip--on {
+  color: var(--on-accent);
+  background-color: var(--red-600);
+  border-color: var(--red-600);
+}
+
+.product-detail__chip:focus-visible {
+  outline: 2px solid var(--red-600);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .product-detail__list {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+  }
+
+  .product-detail__item--wide {
+    grid-column: 1 / -1;
+  }
+
+  /* Desde tablet cada fila va en una línea: datos a la izquierda, cifras a la derecha */
+  .product-detail__row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .product-detail__row-side {
+    flex-shrink: 0;
+    justify-content: flex-end;
+  }
+
+  .product-detail__row--unit .product-detail__row-side {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  /* Eliminar queda a la izquierda, lejos de Editar */
+  .product-detail__delete {
+    margin-right: auto;
+  }
+}
+
+/* Botón Ajustar de cada sucursal: compacto, al lado de su estado */
+.product-detail__adjust {
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 0.82rem;
+}

@@ -1,0 +1,57 @@
+/* Aviso del modo demostración: abajo al centro, siempre visible y sin tapar los botones */
+.demo-badge {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 32px);
+  padding: 8px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--on-accent);
+  background: linear-gradient(135deg, var(--red-600), #7c3aed);
+  border-radius: 999px;
+  box-shadow: 0 10px 24px -10px rgba(124, 58, 237, 0.6);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.demo-badge__dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  animation: demo-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes demo-pulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.7);
+  }
+}
+
+/* En celular, solo lo esencial para no tapar la pantalla */
+.demo-badge {
+  white-space: nowrap;
+}
+
+.demo-badge__more {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .demo-badge__more {
+    display: inline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-badge__dot {
+    animation: none;
+  }
+}

@@ -1,7 +1,8 @@
 import Switch from "../../../components/forms/Switch/Switch";
 import "./permissionGroups.css";
 
-const PermissionGroups = ({ groups, assigned, pending, onToggle }) => (
+/** canAssign / canRemove: activar o quitar (los roles del sistema y los permisos del usuario lo limitan). */
+const PermissionGroups = ({ groups, assigned, pending, canAssign = true, canRemove = true, onToggle }) => (
   <div className="permission-groups">
     {groups.map((group) => {
       const active = group.items.filter((item) => assigned.has(item.id)).length;
@@ -22,7 +23,7 @@ const PermissionGroups = ({ groups, assigned, pending, onToggle }) => (
                   label={item.label}
                   description={item.description}
                   checked={assigned.has(item.id)}
-                  disabled={pending.has(item.id)}
+                  disabled={pending.has(item.id) || (assigned.has(item.id) ? !canRemove : !canAssign)}
                   onChange={(checked) => onToggle(item.id, checked)}
                 />
               </li>

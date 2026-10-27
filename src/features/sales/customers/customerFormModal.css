@@ -1,0 +1,26 @@
+.customer-form__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .customer-form__row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Tipo + número (+ DV cuando es NIT) */
+  .customer-form__row--identification {
+    grid-template-columns: 1fr 1.2fr;
+  }
+
+  .customer-form__row--identification:has(.field:nth-child(3)) {
+    grid-template-columns: 1fr 1.2fr 90px;
+  }
+}
+/* Cupo de solo lectura para quien no puede asignarlo */
+.customer-form__note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}

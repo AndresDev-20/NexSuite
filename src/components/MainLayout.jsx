@@ -3,11 +3,14 @@ import Header from "../components/header/Header";
 import Menu from "../components/menu/Menu";
 import ToastProvider from "../components/feadback/Toast/ToastProvider";
 import PermissionsProvider from "../features/auth/PermissionsProvider";
+import BranchProvider from "../features/branches/BranchProvider";
+import DemoBadge from "../demo/DemoBadge";
 import "./mainLayout.css";
 
 const MainLayout = () => (
   <ToastProvider>
-    <PermissionsProvider> 
+    <PermissionsProvider>
+      <BranchProvider>
       <div className="main-layout">
         <Header />
 
@@ -20,7 +23,9 @@ const MainLayout = () => (
             <Outlet />
           </main>
         </div>  
+        <DemoBadge />
       </div>
+      </BranchProvider>
     </PermissionsProvider>
   </ToastProvider>
 );

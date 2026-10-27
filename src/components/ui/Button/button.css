@@ -35,7 +35,7 @@
 }
 
 .btn--primary {
-  color: var(--white);
+  color: var(--on-accent);
   background: linear-gradient(135deg, var(--red-500), var(--red-700));
   box-shadow: 0 8px 18px -8px rgba(214, 24, 46, 0.6);
 }
@@ -57,7 +57,7 @@
 }
 
 .btn--danger {
-  color: var(--white);
+  color: var(--on-accent);
   background: var(--danger);
   box-shadow: 0 8px 18px -8px rgba(180, 35, 24, 0.6);
 }

@@ -47,6 +47,15 @@
   border-color: var(--gray-300);
 }
 
+/* Texto largo: crece hacia abajo y el usuario puede agrandarlo */
+.field__input--multiline {
+  height: auto;
+  min-height: 96px;
+  padding: 12px 14px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
 .field__input:focus {
   outline: none;
   background-color: var(--white);

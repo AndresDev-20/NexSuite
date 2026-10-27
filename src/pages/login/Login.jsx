@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 import useAuthentication from "../../hooks/useAuthentication";
+import getErrorMessage from "../../utils/getErrorMessage";
+import { DEMO_MODE } from "../../demo/demoMode";
 
 // Tiempos de las animaciones (deben coincidir con --power-ms en login.css)
 const LOADING_MS = 2400;
@@ -97,9 +99,10 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [shake, setShake] = useState(false);
   const [status, setStatus] = useState("idle"); // idle | loading | success
+  const [loginError, setLoginError] = useState(""); // mensaje del servidor (credenciales, usuario inactivo…)
   const timers = useRef([]);
 
-  const { logginUser } = useAuthentication(); // Hook para manejar la autenticación (login, logout, etc.)
+  const { login } = useAuthentication();
 
   const {
     register,
@@ -115,11 +118,20 @@ function Login() {
     return () => pending.forEach(clearTimeout);
   }, []);
 
-  // Datos correctos: se muestran en consola y arranca la animación de carga
-  const onValid = (data) => {
-    console.log("Datos del login:", data);
-    logginUser(data);
+  // Datos válidos: se envían al servidor; solo si responde bien sigue la animación y se entra
+  const onValid = async (data) => {
+    setLoginError("");
     setStatus("loading");
+
+    try {
+      await login(data);
+    } catch (error) {
+      setStatus("idle");
+      setLoginError(getErrorMessage(error, "No se pudo iniciar sesión. Inténtalo de nuevo."));
+      setShake(true);
+      return;
+    }
+
     timers.current.push(
       setTimeout(() => setStatus("success"), LOADING_MS),
       setTimeout(() => navigate("/welcome"), LOADING_MS + SUCCESS_MS), // cambia la ruta si es otra
@@ -127,10 +139,7 @@ function Login() {
   };
 
   // Datos incorrectos o incompletos: la tarjeta vibra
-  const onInvalid = (formErrors) => {
-    console.log("Datos inválidos:", formErrors);
-    setShake(true);
-  };
+  const onInvalid = () => setShake(true);
 
   return (
     <main className="login">
@@ -153,7 +162,9 @@ function Login() {
           onAnimationEnd={() => setShake(false)}
         >
           <h1 className="login__title">Bienvenido</h1>
-          <p className="login__subtitle">Ingresa con tu cédula y contraseña</p>
+          <p className="login__subtitle">
+            {DEMO_MODE ? "Demostración: entra con cualquier cédula y contraseña" : "Ingresa con tu cédula y contraseña"}
+          </p>
 
           <form
             className="form"
@@ -236,7 +247,13 @@ function Login() {
               ¿Olvidaste tu contraseña?
             </a>
 
-            <button className="button button--primary" type="submit">
+            {loginError && (
+              <p className="form__error" role="alert">
+                {loginError}
+              </p>
+            )}
+
+            <button className="button button--primary" type="submit" disabled={status !== "idle"}>
               <span>Ingresar</span>
               <svg
                 className="button__icon"

@@ -1,0 +1,38 @@
+/* Filtros: una columna en móvil, cuadrícula desde tablet */
+.orders-page__filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.orders-page__clear {
+  align-self: end;
+}
+
+/* Mientras llega la página siguiente, la actual se atenúa en lugar de desaparecer */
+.orders-page__results {
+  transition: opacity 150ms ease;
+}
+
+.orders-page__results--loading {
+  opacity: 0.55;
+}
+
+@media (min-width: 768px) {
+  .orders-page__filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .orders-page__filters {
+    grid-template-columns: minmax(0, 1.3fr) repeat(4, minmax(0, 1fr)) auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orders-page__results {
+    transition: none;
+  }
+}

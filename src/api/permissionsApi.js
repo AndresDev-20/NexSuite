@@ -1,8 +1,8 @@
 import api from "./client";
 
-// Contrato asumido: ajústalo aquí si tus rutas son otras
 export const PERMISSIONS_PATH = "/permissions";
 export const ROLE_PERMISSIONS_PATH = "/role-permissions";
+const ME_PATH = "/users/me";
 
 /** Respuesta del backend: { success, data } o directamente el dato. */
 export const unwrap = (response) => response?.data?.data ?? response?.data;
@@ -14,11 +14,12 @@ export const extractList = (value) => {
   return [];
 };
 
-export const getPermissionName = (permission) =>
-  permission.namePermission ?? permission.namePermissio ?? permission.name ?? `Permiso ${permission.id}`;
+const getPermissionName = (permission) => permission.namePermission ?? `Permiso ${permission.id}`;
 
+/** code (modulo.accion) es lo que exige el backend; name es solo el texto de la base de datos. */
 export const normalizePermission = (permission) => ({
   id: Number(permission.id),
+  code: permission.code ?? "",
   name: getPermissionName(permission),
 });
 
@@ -42,15 +43,11 @@ export const fetchRolePermissionRows = async (roleId) => {
   return extractList(unwrap(response));
 };
 
-/** Nombres de los permisos de un rol. Si las filas no traen el permiso, se buscan en el catálogo. */
-export const resolvePermissionNames = (rows, catalog) => {
-  const nameById = new Map(catalog.map((permission) => [permission.id, permission.name]));
-
-  return rows
-    .map((row) => {
-      if (row?.permission) return getPermissionName(row.permission);
-      const id = toPermissionId(row);
-      return id === null ? undefined : nameById.get(id);
-    })
-    .filter(Boolean);
+/**
+ * Permisos del usuario autenticado y la marca de su rol si es del sistema ("developer",
+ * "administrador" o null). Solo exige sesión, no un permiso.
+ */
+export const fetchMyAccess = async () => {
+  const me = unwrap(await api.get(ME_PATH));
+  return { permissions: me?.permissions ?? [], systemKey: me?.role?.systemkey ?? null };
 };

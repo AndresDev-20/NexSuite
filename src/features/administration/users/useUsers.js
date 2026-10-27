@@ -27,6 +27,10 @@ const normalizeUser = (user) => ({
   age: user.age != null ? String(user.age) : "",
   roleId: user.roleId ?? user.role?.id ?? null,
   roleName: user.role?.nameRole ?? "",
+  // "developer": solo otro Developer puede cambiar a este usuario
+  roleSystemKey: user.role?.systemkey ?? null,
+  isActive: user.isActive !== false, // los usuarios creados antes del campo cuentan como activos
+  hasHistory: Boolean(user.hasHistory), // con historial no se elimina: se desactiva
   // null cuando el backend no incluye las sucursales en el listado
   branches: Array.isArray(user.branches)
     ? user.branches.map(({ id, nameBranch }) => ({ id, nameBranch }))

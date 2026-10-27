@@ -119,12 +119,27 @@
 /* ==========================================================================
    TABLET (≥ 768px)
    ========================================================================== */
+/* El filtro lleva etiqueta solo para lectores de pantalla */
+.admin-page__filter .field__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.admin-page__filter .field__input {
+  height: 46px;
+}
+
 @media (min-width: 768px) {
+  .admin-page__filter {
+    width: 180px;
+  }
+
   .admin-page__header {
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 24px;
+    gap: 20px;
     margin-bottom: 24px;
   }
 
@@ -139,13 +154,16 @@
   }
 
   .admin-page__toolbar {
+    flex: 1;
     flex-direction: row;
     align-items: center;
     gap: 16px;
+    min-width: 0;
   }
 
   .admin-page__search {
-    width: 300px;
+    flex: 1;
+    min-width: 0;
   }
 
   .admin-page__count {
@@ -163,6 +181,24 @@
 
   .admin-page__card--bare {
     padding: 0;
+  }
+}
+
+/* ==========================================================================
+   PANTALLA GRANDE (≥ 1440px): título y herramientas en una sola fila
+   (antes no caben junto al menú lateral)
+   ========================================================================== */
+@media (min-width: 1440px) {
+  .admin-page__header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .admin-page__search {
+    flex: none;
+    width: 300px;
   }
 }
 

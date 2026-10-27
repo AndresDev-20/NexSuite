@@ -1,0 +1,160 @@
+.stock-adjust__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px 16px;
+  margin: 0;
+  padding: 12px 14px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+}
+
+.stock-adjust__summary dt {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+.stock-adjust__summary dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.stock-adjust__direction {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stock-adjust__result {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
+  border-radius: 10px;
+}
+
+.stock-adjust__result--invalid {
+  color: var(--danger);
+  background-color: var(--red-50);
+}
+
+.stock-adjust__hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.stock-adjust__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.stock-adjust__count {
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--red-700);
+  background-color: var(--red-50);
+  border-radius: 999px;
+}
+
+/* IMEI que entran: monoespaciado, 16px para que iOS no haga zoom */
+.stock-adjust__codes .field__input {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.stock-adjust__errors {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 8px 12px 8px 28px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--danger);
+  background-color: var(--red-50);
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- IMEI que salen ---------- */
+.stock-adjust__picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.stock-adjust__picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.stock-adjust__units {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 280px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+/* Objetivo táctil de 44px */
+.stock-adjust__unit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 12px;
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.stock-adjust__unit input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--red-600);
+}
+
+.stock-adjust__unit--on {
+  border-color: var(--red-300);
+  background-color: color-mix(in srgb, var(--red-50) 60%, var(--white));
+}
+
+.stock-adjust__unit--all {
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: none;
+  border-style: dashed;
+}
+
+.stock-adjust__unit-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.stock-adjust__serial {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}

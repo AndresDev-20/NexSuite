@@ -39,9 +39,98 @@
   --color-text-muted:    var(--gray-500);
   --color-border:        var(--gray-200);
 
+  /* Semánticos: texto sobre el rojo de marca, estados y gráficas (cambian con el tema) */
+  --on-accent:      #FFFFFF;
+  --success-text:   #167A42;
+  --success-soft:   #DDF5E7;
+  --warning-text:   #B45309;
+  --warning-strong: #8A5A00;
+  --warning-soft:   #FDF1D3;
+  --info-text:      #1D4ED8;
+  --chart-ink:      #1A1A1A;
+  --chart-2:        #3F3F46;
+  --chart-3:        #F06675;
+  --chart-4:        #A1A1AA;
+  --chart-5:        #8B0F1F;
+  --chart-6:        #FB9AA4;
+
+  color-scheme: light;
+
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-brand: "Playfair Display", Georgia, "Times New Roman", serif;
   --header-h: 60px;
+}
+
+/*
+ * Modo noche (Configuración → Apariencia): azules oscuros con el rojo de marca. Se activa con
+ * data-theme="dark" en <html> (lo pone preferences.js antes de pintar, sin parpadeo). Los
+ * "blancos" y "grises" son superficies y textos: aquí se invierten para que todo siga el tema.
+ */
+:root[data-theme="dark"] {
+  --red-50:  #2A1830;
+  --red-100: #351B33;
+  --red-200: #50233D;
+  --red-300: #7C3150;
+  --red-400: #F06A7C;
+  --red-500: #EF4A60;
+  --red-600: #E3283F;
+  --red-700: #FF6F82;
+  --red-800: #D9223A;
+  --red-900: #FFA3AF;
+
+  --white:    #121C33;
+  --gray-50:  #0B1324;
+  --gray-100: #19243F;
+  --gray-200: #26355A;
+  --gray-300: #36486F;
+  --gray-500: #8F9DBD;
+  --gray-700: #C3CDE3;
+  --gray-900: #EAF0FB;
+  --tint:     #172446;
+
+  --success: #2BC48A;
+  --warning: #F5B83D;
+  --info:    #60A5FA;
+  --danger:  #F26B6B;
+
+  --success-text:   #4ADE9A;
+  --success-soft:   rgba(43, 196, 138, 0.16);
+  --warning-text:   #FBBF4A;
+  --warning-strong: #FCD47A;
+  --warning-soft:   rgba(245, 184, 61, 0.16);
+  --info-text:      #9CC3FF;
+  --chart-ink:      #7FA8FF;
+  --chart-2:        #5B8DEF;
+  --chart-3:        #F06A7C;
+  --chart-4:        #7DD3FC;
+  --chart-5:        #A78BFA;
+  --chart-6:        #FBA3AF;
+
+  color-scheme: dark;
+}
+
+/* Fondo de noche con un brillo azul muy suave */
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 15% -10%, rgba(91, 141, 239, 0.12), transparent 45%),
+    radial-gradient(circle at 110% 10%, rgba(227, 40, 63, 0.08), transparent 40%),
+    var(--color-bg-alt);
+  background-attachment: fixed;
+}
+
+/* Configuración → Animaciones reducidas: sin movimiento en todo el sistema */
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+  animation-duration: 1ms !important;
+  animation-delay: 0ms !important;
+  transition-duration: 1ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Configuración → Tamaño del texto */
+:root[data-text="large"] {
+  font-size: 112.5%;
 }
 
 * {

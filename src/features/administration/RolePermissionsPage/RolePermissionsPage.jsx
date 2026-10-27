@@ -20,7 +20,7 @@ const RolePermissionsPage = () => {
   const { roleId } = useParams();
   const toast = useToast();
   const currentRoleId = getUser()?.role?.id;
-  const { reload: reloadAccess } = usePermissions();
+  const { can, isSystem: isSystemUser, reload: reloadAccess } = usePermissions();
   const { role, permissions, assigned, pending, loading, error, load, togglePermission } =
     useRolePermissions(roleId);
 
@@ -34,6 +34,11 @@ const RolePermissionsPage = () => {
 
   const activeCount = permissions.filter((permission) => assigned.has(permission.id)).length;
   const isOwnRole = role && role.id === currentRoleId;
+  // Los roles del sistema tienen siempre todos los permisos; asignar y quitar solo lo hacen un
+  // Administrador o un Developer (con su permiso); el servidor también lo exige
+  const isSystem = Boolean(role?.systemKey);
+  const canAssign = !isSystem && isSystemUser && can("role-permissions.create");
+  const canRemove = !isSystem && isSystemUser && can("role-permissions.delete");
   const ready = !loading && !error && permissions.length > 0;
 
   const handleToggle = async (permissionId, enable) => {
@@ -89,7 +94,16 @@ const RolePermissionsPage = () => {
       );
     }
 
-    return <PermissionGroups groups={groups} assigned={assigned} pending={pending} onToggle={handleToggle} />;
+    return (
+      <PermissionGroups
+        groups={groups}
+        assigned={assigned}
+        pending={pending}
+        canAssign={canAssign}
+        canRemove={canRemove}
+        onToggle={handleToggle}
+      />
+    );
   };
 
   return (
@@ -124,7 +138,26 @@ const RolePermissionsPage = () => {
         )}
       </header>
 
-      {isOwnRole && !loading && !error && (
+      {isSystem && !loading && !error && (
+        <p className="role-permissions-page__notice" role="note">
+          {role.nameRole} es un rol del sistema: tiene siempre todos los permisos, también los que se agreguen en el
+          futuro, y no se pueden quitar.
+        </p>
+      )}
+
+      {!isSystem && !loading && !error && (!canAssign || !canRemove) && (
+        <p className="role-permissions-page__notice" role="note">
+          {!isSystemUser
+            ? "Solo un Administrador o un Developer puede asignar o quitar permisos a un rol: aquí puedes consultarlos."
+            : canAssign
+              ? "Puedes activar permisos, pero no quitarlos."
+              : canRemove
+                ? "Puedes quitar permisos, pero no activarlos."
+                : "Solo puedes consultar los permisos de este rol."}
+        </p>
+      )}
+
+      {isOwnRole && canRemove && !loading && !error && (
         <p className="role-permissions-page__notice" role="note">
           Este es tu rol actual. Si le quitas permisos podrías perder acceso a partes del sistema.
         </p>

@@ -4,36 +4,10 @@ import usePermissions from "../../features/auth/usePermissions";
 import Icon from "../ui/Icon/Icon";
 import "./menu.css";
 
-/* Opciones de navegación. Una opción sin "permission" es visible para todos. */
+/* Opciones de navegación. Una opción sin "permission" es visible para todos; con una lista, basta uno. */
 const NAV_ITEMS = [
   { label: "Inicio", to: "/welcome", icon: "home" },
-  {
-    label: "Inventarios",
-    icon: "box",
-    children: [
-      {
-        label: "Categorías",
-        to: "/inventario/categorias",
-        permission: "inventario.ver",
-      },
-      {
-        label: "Productos",
-        to: "/inventario/productos",
-        permission: "inventario.ver",
-      },
-    ],
-  },
-  {
-    label: "Compras",
-    icon: "bag",
-    children: [
-      {
-        label: "Proveedores",
-        to: "/compras/proveedores",
-        permission: "compras.ver",
-      },
-    ],
-  },
+  // Administrativo justo después de Inicio: usuarios, roles y sucursales se configuran primero
   {
     label: "Administrativo",
     icon: "shield",
@@ -41,16 +15,107 @@ const NAV_ITEMS = [
       {
         label: "Usuarios",
         to: "/administrativo/usuarios",
-        permission: "usuarios.ver",
+        permission: "users.read",
       },
-      { label: "Roles", to: "/administrativo/roles", permission: "roles.ver" },
+      { label: "Roles", to: "/administrativo/roles", permission: "roles.read" },
       {
         label: "Sucursales",
         to: "/administrativo/sucursales",
-        permission: "sucursales.ver",
+        permission: "branches.read",
+      },
+      {
+        label: "Auditoría",
+        to: "/administrativo/auditoria",
+        permission: "audit.read",
       },
     ],
   },
+  // Primero Compras: el proveedor y la compra van antes que los productos y su inventario
+  {
+    label: "Compras",
+    icon: "bag",
+    children: [
+      {
+        label: "Proveedores",
+        to: "/compras/proveedores",
+        permission: "suppliers.read",
+      },
+      {
+        label: "Compras",
+        to: "/compras/registro",
+        permission: "orders.read",
+      },
+      {
+        label: "Cuentas por pagar",
+        to: "/compras/cuentas-por-pagar",
+        permission: "payables.read",
+      },
+    ],
+  },
+  {
+    label: "Inventarios",
+    icon: "box",
+    children: [
+      {
+        label: "Categorías",
+        to: "/inventario/categorias",
+        permission: "categories.read",
+      },
+      {
+        label: "Productos",
+        to: "/inventario/productos",
+        permission: "products.read",
+      },
+      // Debajo de Productos: lo que se consulta, ajusta y corrige de lo que ya entró
+      {
+        label: "Existencias",
+        to: "/inventario/existencias",
+        permission: "branch-stock.read",
+      },
+      {
+        label: "Unidades con serial",
+        to: "/inventario/seriales",
+        permission: "product-units.read",
+      },
+      {
+        label: "Movimientos",
+        to: "/inventario/movimientos",
+        permission: "branch-stock.read",
+      },
+      {
+        label: "Traslados",
+        to: "/inventario/traslados",
+        permission: "transfers.read",
+      },
+      {
+        label: "Toma física",
+        to: "/inventario/toma-fisica",
+        permission: "stock-counts.read",
+      },
+    ],
+  },
+  {
+    label: "Ventas",
+    icon: "cart",
+    children: [
+      { label: "Vender", to: "/ventas/vender", permission: "sales.create" },
+      { label: "Ventas", to: "/ventas/historial", permission: "sales.read" },
+      { label: "Clientes", to: "/ventas/clientes", permission: "customers.read" },
+      { label: "Cartera", to: "/ventas/cartera", permission: ["receivables.read", "receivables.pay"] },
+      { label: "Reportes", to: "/ventas/reportes", permission: ["sales.read", "sales.read-all"] },
+    ],
+  },
+  {
+    label: "Caja",
+    icon: "wallet",
+    children: [
+      { label: "Mi caja", to: "/caja/mi-caja", permission: "cash-sessions.operate" },
+      { label: "Turnos", to: "/caja/turnos", permission: "cash-sessions.read" },
+      { label: "Cajas", to: "/caja/cajas", permission: "cash-registers.read" },
+    ],
+  },
+  // Al final y para todos: tema (claro / noche), animaciones y tamaño del texto de este equipo
+  { label: "Configuración", to: "/configuracion", icon: "settings" },
 ];
 
 const getLinkClass =
@@ -112,7 +177,9 @@ const Menu = ({ onNavigate }) => {
   const { pathname } = useLocation();
   const { can } = usePermissions();
   const baseId = useId(); // el Menu se monta en el sidebar y en el drawer: los ids no pueden repetirse
-  const [toggled, setToggled] = useState({});
+  // Un solo grupo abierto (acordeón). Lo que abre o cierra el usuario vale mientras siga en la misma
+  // página; al navegar queda abierto solo el grupo de la página actual y los demás se cierran
+  const [manual, setManual] = useState({ pathname: null, label: null }); // label null = todos cerrados
 
   // Deja solo lo que el usuario puede ver; un grupo sin opciones desaparece
   const items = useMemo(
@@ -132,9 +199,12 @@ const Menu = ({ onNavigate }) => {
 
   const isGroupActive = (item) =>
     item.children.some((child) => pathname.startsWith(child.to));
-  const isGroupOpen = (item) => toggled[item.label] ?? isGroupActive(item);
+  const activeGroup = items.find((item) => item.children && isGroupActive(item))?.label ?? null;
+  const openLabel = manual.pathname === pathname ? manual.label : activeGroup;
+  const isGroupOpen = (item) => openLabel === item.label;
+  // Abrir un grupo cierra el que estaba abierto; tocar el abierto lo cierra
   const toggleGroup = (item) =>
-    setToggled((prev) => ({ ...prev, [item.label]: !isGroupOpen(item) }));
+    setManual({ pathname, label: openLabel === item.label ? null : item.label });
 
   return (
     <nav className="menu" aria-label="Navegación principal">

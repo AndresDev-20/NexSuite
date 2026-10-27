@@ -1,9 +1,21 @@
 .product-cell {
   display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.product-cell__meta {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 8px;
-  min-width: 0;
+}
+
+.product-cell__sku {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
 }
 
 .product-cell__name {
@@ -17,9 +29,22 @@
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--red-700);
-  background: var(--red-50);
+  background-color: var(--red-50);
   border: 1px solid var(--red-200);
   border-radius: 999px;
+}
+
+.product-cell__tag--inactive {
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  border-color: var(--gray-200);
+}
+
+/* Falta su carga inicial: el ámbar de "atención" sin pasar por alerta */
+.product-cell__tag--pending {
+  color: var(--gray-900);
+  background-color: color-mix(in srgb, var(--warning) 22%, var(--white));
+  border-color: color-mix(in srgb, var(--warning) 55%, var(--white));
 }
 
 .product-cell__price {
@@ -38,12 +63,31 @@
   font-size: 0.8rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   color: var(--success);
-  background: rgba(31, 157, 85, 0.1);
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
   border-radius: 999px;
 }
 
 .stock-badge--empty {
   color: var(--danger);
-  background: var(--red-50);
+  background-color: var(--red-50);
+}
+/* Existencias con nota (mínimo de la sucursal o total de todas) */
+.stock-badge-group {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.stock-badge--low {
+  color: var(--gray-900);
+  background-color: color-mix(in srgb, var(--warning) 25%, var(--white));
+}
+
+.stock-badge-group__note {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
 }

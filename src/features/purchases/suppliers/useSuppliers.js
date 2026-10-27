@@ -3,12 +3,12 @@ import useCrudResource from "../../../hooks/useCrudResource";
 // Contrato asumido: ajústalo aquí si tu ruta es otra
 const SUPPLIERS_PATH = "/suppliers";
 
-const normalizeSupplier = (supplier) => ({
+export const normalizeSupplier = (supplier) => ({
   id: supplier.id,
   typeorganization: supplier.typeorganization ?? "",
   typeidentification: supplier.typeidentification ?? "",
   nitcc: supplier.nitcc != null ? String(supplier.nitcc) : "", // BIGINT puede llegar como texto
-  digitverification: supplier.digitverification ?? null,
+  digitoverification: supplier.digitoverification ?? null,
   companyname: supplier.companyname ?? "",
   phone: supplier.phone ?? "",
   address: supplier.address ?? "",
@@ -16,6 +16,9 @@ const normalizeSupplier = (supplier) => ({
   city: supplier.city ?? "",
   email: supplier.email ?? "",
   contact: supplier.contact ?? "",
+  isActive: supplier.isactive !== false,
+  // Ya tiene unidades o pedidos: no se elimina, se desactiva
+  hasHistory: Boolean(supplier.hasHistory),
 });
 
 const byCompanyName = (a, b) => a.companyname.localeCompare(b.companyname, "es");

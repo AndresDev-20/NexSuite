@@ -2,14 +2,14 @@ import Icon from "../../../components/ui/Icon/Icon";
 import DataTable from "../../../components/tables/DataTable/DataTable";
 import { RowAction, RowActions } from "../../../components/tables/RowActions/RowActions";
 import { formatIdentification } from "../../../utils/nit";
-import { NIT_TYPE } from "./supplierOptions";
+import { NIT_TYPE, getOrganizationLabel } from "./supplierOptions";
 import "./suppliersTable.css";
 
 const EMPTY = "—";
 
 /** El dígito de verificación solo se muestra cuando es un NIT. */
 const formatSupplierId = (supplier) =>
-  formatIdentification(supplier.nitcc, supplier.typeidentification === NIT_TYPE ? supplier.digitverification : null);
+  formatIdentification(supplier.nitcc, supplier.typeidentification === NIT_TYPE ? supplier.digitoverification : null);
 
 const columns = [
   {
@@ -18,8 +18,13 @@ const columns = [
     primary: true,
     render: (supplier) => (
       <div className="supplier-cell">
-        <span className="supplier-cell__name">{supplier.companyname}</span>
-        {supplier.typeorganization && <span className="supplier-cell__type">{supplier.typeorganization}</span>}
+        <span className="supplier-cell__name">
+          {supplier.companyname}
+          {!supplier.isActive && <span className="supplier-cell__tag">Inactivo</span>}
+        </span>
+        {supplier.typeorganization && (
+          <span className="supplier-cell__type">{getOrganizationLabel(supplier.typeorganization)}</span>
+        )}
       </div>
     ),
   },
@@ -72,24 +77,47 @@ const columns = [
   },
 ];
 
-/** canManage: muestra la columna de acciones (editar y eliminar). */
-const SuppliersTable = ({ suppliers, canManage, onEdit, onDelete }) => (
+/**
+ * onView: abre la ficha completa del proveedor.
+ * canEdit: editar y activar/desactivar · canDelete: eliminar, solo si no tiene unidades ni pedidos
+ * (con historia se desactiva).
+ */
+const SuppliersTable = ({ suppliers, canEdit, canDelete, onView, onEdit, onToggleActive, onDelete }) => (
   <DataTable
     caption="Listado de proveedores"
     columns={columns}
     rows={suppliers}
     getRowKey={(supplier) => supplier.id}
     renderActions={
-      canManage
+      onView || canEdit || canDelete
         ? (supplier) => (
             <RowActions>
-              <RowAction icon="edit" label={`Editar ${supplier.companyname}`} onClick={() => onEdit(supplier)} />
-              <RowAction
-                icon="trash"
-                tone="danger"
-                label={`Eliminar ${supplier.companyname}`}
-                onClick={() => onDelete(supplier)}
-              />
+              {onView && (
+                <RowAction icon="eye" label={`Ver la ficha de ${supplier.companyname}`} onClick={() => onView(supplier)} />
+              )}
+              {canEdit && (
+                <RowAction icon="edit" label={`Editar ${supplier.companyname}`} onClick={() => onEdit(supplier)} />
+              )}
+              {canEdit && (
+                <RowAction
+                  icon={supplier.isActive ? "lock" : "check"}
+                  label={supplier.isActive ? `Desactivar ${supplier.companyname}` : `Activar ${supplier.companyname}`}
+                  onClick={() => onToggleActive(supplier)}
+                />
+              )}
+              {canDelete && (
+                <RowAction
+                  icon="trash"
+                  tone="danger"
+                  label={
+                    supplier.hasHistory
+                      ? "Tiene unidades o pedidos: desactívalo en lugar de eliminarlo"
+                      : `Eliminar ${supplier.companyname}`
+                  }
+                  disabled={supplier.hasHistory}
+                  onClick={() => onDelete(supplier)}
+                />
+              )}
             </RowActions>
           )
         : undefined

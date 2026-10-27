@@ -1,0 +1,38 @@
+.pagination {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.pagination__info {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.pagination__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 768px) {
+  .pagination {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .pagination__info {
+    text-align: left;
+  }
+
+  .pagination__actions {
+    display: flex;
+  }
+}

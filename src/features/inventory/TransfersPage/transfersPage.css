@@ -1,0 +1,31 @@
+/* Filtros: una columna en móvil, cuadrícula desde tablet */
+.transfers-page__filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.transfers-page__clear {
+  align-self: end;
+}
+
+.transfers-page__results {
+  transition: opacity 150ms ease;
+}
+
+.transfers-page__results--loading {
+  opacity: 0.55;
+}
+
+@media (min-width: 768px) {
+  .transfers-page__filters {
+    grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr)) auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transfers-page__results {
+    transition: none;
+  }
+}

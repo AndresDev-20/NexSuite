@@ -1,0 +1,16 @@
+.category-cell {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.category-cell__tag {
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+}

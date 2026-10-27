@@ -1,0 +1,190 @@
+/* ---------- Celdas y etiquetas ---------- */
+.cash-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+}
+
+.cash-cell__name {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.cash-cell__secondary {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+}
+
+.cash-cell__money {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.cash-tag {
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  border-radius: 999px;
+}
+
+.cash-tag--open {
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
+}
+
+/* ---------- Mi caja ---------- */
+.my-cash {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.my-cash__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 16px;
+}
+
+.my-cash__register {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.my-cash__since {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--gray-700);
+}
+
+.my-cash__cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.my-cash__card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  /* Las cifras grandes (millones) nunca se salen de la tarjeta */
+  min-width: 0;
+  padding: 14px 16px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.my-cash__card--main {
+  grid-column: 1 / -1;
+  background-color: color-mix(in srgb, var(--success) 8%, var(--white));
+  border-color: color-mix(in srgb, var(--success) 30%, transparent);
+}
+
+.my-cash__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.my-cash__value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.my-cash__card--main .my-cash__value {
+  font-size: clamp(1.4rem, 5vw, 1.8rem);
+  color: var(--success);
+}
+
+.my-cash__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.my-cash__open {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 560px;
+}
+
+/* ---------- Movimientos ---------- */
+.cash-movements {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cash-movements__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.cash-movements__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.cash-movements__amount {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.cash-movements__amount--in {
+  color: var(--success);
+}
+
+.cash-movements__amount--out {
+  color: var(--danger);
+}
+
+.cash-section-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  /* Cuatro cifras en una fila y el efectivo esperado debajo, a todo el ancho */
+  .my-cash__cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .my-cash__card--main {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .my-cash__actions {
+    display: flex;
+    justify-content: flex-start;
+  }
+}

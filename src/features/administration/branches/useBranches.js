@@ -13,6 +13,8 @@ const normalizeBranch = (branch) => ({
   email: branch.email ?? "",
   number: branch.number ?? "",
   web: branch.web ?? "",
+  // Prefijo de sus comprobantes de venta (CEN → CEN-000001)
+  invoicePrefix: branch.invoiceprefix ?? "",
   users: (branch.users ?? []).map(({ id, firstNames, lastNames }) => ({
     id,
     firstNames,

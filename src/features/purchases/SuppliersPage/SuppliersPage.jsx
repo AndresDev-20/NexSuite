@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "../../../components/ui/Button/Button";
 import SearchInput from "../../../components/forms/SearchInput/SearchInput";
+import Select from "../../../components/forms/Select/Select";
 import ConfirmDialog from "../../../components/feadback/ConfirmDialog/ConfirmDialog";
 import StateMessage from "../../../components/feadback/StateMessage/StateMessage";
 import useToast from "../../../components/feadback/Toast/useToast";
+import useStatusToggle from "../../../hooks/useStatusToggle";
 import usePermissions from "../../../features/auth/usePermissions";
+import SupplierDetailModal from "../../../features/purchases/suppliers/SupplierDetailModal";
 import SupplierFormModal from "../../../features/purchases/suppliers/SupplierFormModal";
 import SuppliersTable from "../../../features/purchases/suppliers/SuppliersTable";
 import useSuppliers from "../../../features/purchases/suppliers/useSuppliers";
@@ -13,18 +17,36 @@ import "../../../styles/listPage.css";
 
 const SKELETON_ITEMS = 5;
 
+const STATUS_OPTIONS = [
+  { value: "active", label: "Activos" },
+  { value: "inactive", label: "Inactivos" },
+];
+
 const SuppliersPage = () => {
   const { suppliers, loading, error, getAllSuppliers, createSupplier, updateSupplier, deleteSupplier } =
     useSuppliers();
   const toast = useToast();
+  const navigate = useNavigate();
   const { can } = usePermissions();
 
   // El backend también debe exigirlo: ocultar botones es solo comodidad
-  const canManage = can("compras.proveedores");
+  const canCreate = can("suppliers.create");
+  const canEdit = can("suppliers.update");
+  const canDelete = can("suppliers.delete");
 
   const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState(""); // "" = todos
   const [form, setForm] = useState({ open: false, supplier: null }); // supplier null = crear
   const [deleting, setDeleting] = useState(null); // proveedor pendiente de confirmar
+  const [viewing, setViewing] = useState(null);
+
+  const status = useStatusToggle({
+    setActive: async (supplier, isactive) => {
+      await updateSupplier(supplier.id, { isactive });
+      toast.success(isactive ? `${supplier.companyname} vuelve a estar disponible.` : `${supplier.companyname} quedó inactivo.`);
+    },
+    activateError: "No se pudo activar el proveedor.",
+  });
 
   useEffect(() => {
     getAllSuppliers();
@@ -32,14 +54,17 @@ const SuppliersPage = () => {
 
   const filtered = useMemo(() => {
     const term = normalizeText(query.trim());
-    if (!term) return suppliers;
+    return suppliers.filter((supplier) => {
+      if (statusFilter && supplier.isActive !== (statusFilter === "active")) return false;
+      const text = [supplier.companyname, supplier.nitcc, supplier.city, supplier.department, supplier.email, supplier.contact];
+      return !term || normalizeText(text.join(" ")).includes(term);
+    });
+  }, [suppliers, query, statusFilter]);
 
-    return suppliers.filter((supplier) =>
-      normalizeText(
-        [supplier.companyname, supplier.nitcc, supplier.city, supplier.department, supplier.email, supplier.contact].join(" ")
-      ).includes(term)
-    );
-  }, [suppliers, query]);
+  const clearFilters = () => {
+    setQuery("");
+    setStatusFilter("");
+  };
 
   const openCreate = () => setForm({ open: true, supplier: null });
   const openEdit = (supplier) => setForm({ open: true, supplier });
@@ -62,7 +87,7 @@ const SuppliersPage = () => {
     setDeleting(null);
   };
 
-  const showToolbar = !loading && !error && suppliers.length > 0;
+  const showBar = !loading && !error && suppliers.length > 0;
   const countLabel =
     filtered.length === suppliers.length
       ? `${suppliers.length} ${suppliers.length === 1 ? "proveedor" : "proveedores"}`
@@ -99,7 +124,7 @@ const SuppliersPage = () => {
           title="Aún no hay proveedores"
           text="Registra el primero para poder asociarlo a tus productos y pedidos."
         >
-          {canManage && (
+          {canCreate && (
             <Button icon="plus" onClick={openCreate}>
               Crear proveedor
             </Button>
@@ -110,15 +135,25 @@ const SuppliersPage = () => {
 
     if (filtered.length === 0) {
       return (
-        <StateMessage icon="search" title="Sin resultados" text={`No encontramos proveedores para «${query.trim()}».`}>
-          <Button variant="outline" onClick={() => setQuery("")}>
-            Limpiar búsqueda
+        <StateMessage icon="search" title="Sin resultados" text="No encontramos proveedores con esa búsqueda o estado.">
+          <Button variant="outline" onClick={clearFilters}>
+            Limpiar filtros
           </Button>
         </StateMessage>
       );
     }
 
-    return <SuppliersTable suppliers={filtered} canManage={canManage} onEdit={openEdit} onDelete={setDeleting} />;
+    return (
+      <SuppliersTable
+        suppliers={filtered}
+        canEdit={canEdit}
+        canDelete={canDelete}
+        onView={setViewing}
+        onEdit={openEdit}
+        onToggleActive={status.toggle}
+        onDelete={setDeleting}
+      />
+    );
   };
 
   return (
@@ -129,32 +164,76 @@ const SuppliersPage = () => {
           <p className="list-page__subtitle">Empresas y personas a las que le compras mercancía.</p>
         </div>
 
-        <div className="list-page__actions">
-          {showToolbar && (
-            <div className="list-page__toolbar">
-              <div className="list-page__search">
-                <SearchInput
-                  label="Buscar proveedores"
-                  placeholder="Buscar por nombre, NIT o ciudad"
-                  value={query}
-                  onChange={setQuery}
-                />
-              </div>
-              <span className="list-page__count">{countLabel}</span>
-            </div>
-          )}
-
-          {canManage && (
-            <Button className="list-page__add" icon="plus" onClick={openCreate}>
-              Nuevo proveedor
-            </Button>
-          )}
-        </div>
+        {canCreate && (
+          <Button className="list-page__add" icon="plus" onClick={openCreate}>
+            Nuevo proveedor
+          </Button>
+        )}
       </header>
 
-      <div className="list-page__card">{renderContent()}</div>
+      <div className="list-page__card">
+        {showBar && (
+          <div className="list-page__bar">
+            <div className="list-page__search">
+              <SearchInput
+                label="Buscar proveedores"
+                placeholder="Buscar por nombre, NIT o ciudad"
+                value={query}
+                onChange={setQuery}
+              />
+            </div>
+            <Select
+              className="list-page__filter"
+              label="Filtrar por estado"
+              placeholder="Activos e inactivos"
+              options={STATUS_OPTIONS}
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+            />
+            <span className="list-page__count">{countLabel}</span>
+          </div>
+        )}
+
+        {renderContent()}
+      </div>
+
+      <SupplierDetailModal
+        supplier={viewing}
+        onClose={() => setViewing(null)}
+        onEdit={
+          canEdit
+            ? (supplier) => {
+                setViewing(null);
+                openEdit(supplier);
+              }
+            : undefined
+        }
+        onViewOrders={can("orders.read") ? (supplier) => navigate(`/compras/registro?idsupplier=${supplier.id}`) : undefined}
+        onViewPayables={
+          can("payables.read") ? (supplier) => navigate(`/compras/cuentas-por-pagar?idsupplier=${supplier.id}`) : undefined
+        }
+      />
 
       <SupplierFormModal open={form.open} supplier={form.supplier} onClose={closeForm} onSubmit={handleSave} />
+
+      <ConfirmDialog
+        open={Boolean(status.deactivating)}
+        title="Desactivar proveedor"
+        message={
+          status.deactivating && (
+            <>
+              ¿Desactivar a <strong>{status.deactivating.companyname}</strong>? No se podrá usar en unidades ni pedidos
+              nuevos.
+            </>
+          )
+        }
+        detail="Su historia se conserva. Puedes activarlo de nuevo cuando quieras."
+        confirmLabel="Desactivar"
+        confirmIcon="lock"
+        errorFallback="No se pudo desactivar el proveedor."
+        onConfirm={status.confirmDeactivate}
+        onClose={status.cancelDeactivate}
+      />
 
       <ConfirmDialog
         open={Boolean(deleting)}
@@ -167,7 +246,6 @@ const SuppliersPage = () => {
             </>
           )
         }
-        detail="Si tiene pedidos registrados, podría no ser posible eliminarlo."
         confirmLabel="Eliminar proveedor"
         errorFallback="No se pudo eliminar el proveedor. Puede tener pedidos asociados."
         onConfirm={handleDelete}

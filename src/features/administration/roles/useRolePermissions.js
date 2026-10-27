@@ -45,6 +45,7 @@ const useRolePermissions = (roleId) => {
         id: Number(roleData.id),
         nameRole: roleData.nameRole,
         description: roleData.description ?? "",
+        systemKey: roleData.systemkey ?? null,
       });
       setPermissions([...catalog].sort((a, b) => a.name.localeCompare(b.name, "es")));
       setAssigned(new Set(rows.map(toPermissionId).filter((id) => id !== null)));

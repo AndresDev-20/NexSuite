@@ -1,0 +1,238 @@
+/* ---------- Tabla ---------- */
+.transfer-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.transfer-cell__number {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.92rem;
+}
+
+.transfer-cell__secondary {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+}
+
+.transfer-route {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-weight: 600;
+}
+
+.transfer-route__arrow {
+  color: var(--red-600, var(--danger));
+}
+
+/* ---------- Formulario ---------- */
+.transfer-products {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.transfer-products__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.transfer-products__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.transfer-products__error {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.transfer-line {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.transfer-line__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.transfer-line__name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.transfer-line__sku {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+}
+
+.transfer-line__remove {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--gray-500);
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.transfer-line__remove:hover {
+  color: var(--danger);
+  background-color: var(--red-50);
+}
+
+.transfer-line__remove:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 2px;
+}
+
+.transfer-line__remove-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.transfer-line__quantity {
+  max-width: 220px;
+}
+
+.transfer-line__serials {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.transfer-line__hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--gray-500);
+}
+
+.transfer-line__units {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 6px 12px;
+  max-height: 240px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.transfer-line__unit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.transfer-line__unit:hover {
+  background-color: var(--gray-50);
+}
+
+.transfer-line__unit input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--red-600, var(--danger));
+}
+
+/* ---------- Detalle ---------- */
+.transfer-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.transfer-detail__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+}
+
+.transfer-detail__number {
+  margin: 0;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.transfer-detail__meta {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--gray-700);
+}
+
+.transfer-detail__items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.transfer-detail__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.transfer-detail__item-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.transfer-detail__serials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.transfer-detail__serials li {
+  padding: 2px 8px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  background-color: var(--gray-100);
+  border-radius: 8px;
+}

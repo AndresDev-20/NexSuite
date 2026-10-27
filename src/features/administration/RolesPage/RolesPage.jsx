@@ -7,6 +7,7 @@ import useToast from "../../../components/feadback/Toast/useToast";
 import RoleFormModal from "../../../features/administration/roles/RoleFormModal";
 import RolesList from "../../../features/administration/roles/RolesList";
 import useRoles from "../../../features/administration/roles/useRoles";
+import usePermissions from "../../../features/auth/usePermissions";
 import { getUser } from "../../../utils/session";
 import normalizeText from "../../../utils/normalizeText";
 import "../adminPage.css";
@@ -27,6 +28,19 @@ const RolesPage = () => {
   const toast = useToast();
   const navigate = useNavigate();
   const currentRoleId = getUser()?.role?.id;
+  const { can, isDeveloper, isSystem } = usePermissions();
+
+  // El backend también los exige: ocultar botones es solo comodidad
+  const canCreate = can("roles.create");
+  const canDelete = can("roles.delete");
+  const canPermissions = can("role-permissions.read");
+  // Asignar o quitar permisos: solo un Administrador o un Developer
+  const canChangePermissions = isSystem && (can("role-permissions.create") || can("role-permissions.delete"));
+  // El rol Developer solo lo edita un Developer; el Administrador, un Administrador o un Developer
+  const canEdit = (role) =>
+    can("roles.update") &&
+    (role.systemKey !== "developer" || isDeveloper) &&
+    (role.systemKey !== "administrador" || isSystem);
 
   const [query, setQuery] = useState("");
   const [form, setForm] = useState({ open: false, role: null }); // role null = crear
@@ -112,9 +126,11 @@ const RolesPage = () => {
           title="Aún no hay roles"
           text="Crea el primero para definir qué puede hacer cada tipo de usuario."
         >
-          <Button icon="plus" onClick={openCreate}>
-            Crear rol
-          </Button>
+          {canCreate && (
+            <Button icon="plus" onClick={openCreate}>
+              Crear rol
+            </Button>
+          )}
         </StateMessage>
       );
     }
@@ -137,10 +153,13 @@ const RolesPage = () => {
       <RolesList
         roles={filtered}
         currentRoleId={currentRoleId}
+        canEdit={canEdit}
+        canDelete={canDelete}
+        canChangePermissions={canChangePermissions}
         onEdit={openEdit}
         onDelete={setDeleting}
-        onPermissions={(role) =>
-          navigate(`/administrativo/roles/${role.id}/permisos`)
+        onPermissions={
+          canPermissions ? (role) => navigate(`/administrativo/roles/${role.id}/permisos`) : undefined
         }
       />
     );
@@ -171,9 +190,11 @@ const RolesPage = () => {
             </div>
           )}
 
-          <Button className="admin-page__add" icon="plus" onClick={openCreate}>
-            Nuevo rol
-          </Button>
+          {canCreate && (
+            <Button className="admin-page__add" icon="plus" onClick={openCreate}>
+              Nuevo rol
+            </Button>
+          )}
         </div>
       </header>
 

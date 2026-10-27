@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "../../../components/ui/Button/Button";
 import Icon from "../../../components/ui/Icon/Icon";
 import ConfirmDialog from "../../../components/feadback/ConfirmDialog/ConfirmDialog";
 import StateMessage from "../../../components/feadback/StateMessage/StateMessage";
 import useToast from "../../../components/feadback/Toast/useToast";
+import BranchDetailModal from "../../../features/administration/branches/BranchDetailModal";
 import BranchFormModal from "../../../features/administration/branches/BranchFormModal";
 import BranchesTable from "../../../features/administration/branches/BranchesTable";
 import useBranches from "../../../features/administration/branches/useBranches";
+import usePermissions from "../../../features/auth/usePermissions";
+import useActiveBranch from "../../../features/branches/useActiveBranch";
 import "./branchesPage.css";
 
 const SKELETON_ROWS = 4;
@@ -20,11 +24,24 @@ const normalize = (text) =>
 
 const BranchesPage = () => {
   const { branches, loading, error, getAllBranches, createBranch, updateBranch, deleteBranch } = useBranches();
+  // Las sucursales del usuario (selector del encabezado, Asignar a sucursales…) se cargan al entrar: se refrescan aquí
+  const { branches: myBranches, reload: reloadMyBranches } = useActiveBranch();
   const toast = useToast();
+  const navigate = useNavigate();
+  const { can } = usePermissions();
+
+  // El backend también los exige: ocultar botones es solo comodidad
+  const canCreate = can("branches.create");
+  const canEdit = can("branches.update");
+  const canDelete = can("branches.delete");
+  // La ficha solo existe para las sucursales del usuario (el servidor responde 403 con las demás)
+  const myBranchIds = useMemo(() => new Set(myBranches.map((branch) => branch.id)), [myBranches]);
+  const canView = (branch) => myBranchIds.has(branch.id);
 
   const [query, setQuery] = useState("");
   const [form, setForm] = useState({ open: false, branch: null }); // branch null = crear
   const [deleting, setDeleting] = useState(null); // sucursal pendiente de confirmar
+  const [viewing, setViewing] = useState(null);
 
   useEffect(() => {
     getAllBranches();
@@ -52,12 +69,14 @@ const BranchesPage = () => {
       toast.success("Sucursal creada correctamente.");
     }
     closeForm();
+    reloadMyBranches();
   };
 
   const handleDelete = async () => {
     await deleteBranch(deleting.id);
     toast.success("Sucursal eliminada.");
     setDeleting(null);
+    reloadMyBranches();
   };
 
   const showToolbar = !loading && !error && branches.length > 0;
@@ -103,9 +122,11 @@ const BranchesPage = () => {
           title="Aún no hay sucursales"
           text="Crea la primera para empezar a asignarle usuarios e inventario."
         >
-          <Button icon="plus" onClick={openCreate}>
-            Crear sucursal
-          </Button>
+          {canCreate && (
+            <Button icon="plus" onClick={openCreate}>
+              Crear sucursal
+            </Button>
+          )}
         </StateMessage>
       );
     }
@@ -120,7 +141,15 @@ const BranchesPage = () => {
       );
     }
 
-    return <BranchesTable branches={filtered} onEdit={openEdit} onDelete={setDeleting} />;
+    return (
+      <BranchesTable
+        branches={filtered}
+        onView={setViewing}
+        canView={canView}
+        onEdit={canEdit ? openEdit : undefined}
+        onDelete={canDelete ? setDeleting : undefined}
+      />
+    );
   };
 
   return (
@@ -164,13 +193,31 @@ const BranchesPage = () => {
             </div>
           )}
 
-          <Button className="branches-page__add" icon="plus" onClick={openCreate}>
-            Nueva sucursal
-          </Button>
+          {canCreate && (
+            <Button className="branches-page__add" icon="plus" onClick={openCreate}>
+              Nueva sucursal
+            </Button>
+          )}
         </div>
       </header>
 
       <div className="branches-page__card">{renderContent()}</div>
+
+      <BranchDetailModal
+        branch={viewing}
+        onClose={() => setViewing(null)}
+        onEdit={
+          canEdit
+            ? (branch) => {
+                setViewing(null);
+                openEdit(branch);
+              }
+            : undefined
+        }
+        onViewMovements={
+          can("branch-stock.read") ? (branch) => navigate(`/inventario/movimientos?idbranch=${branch.id}`) : undefined
+        }
+      />
 
       <BranchFormModal open={form.open} branch={form.branch} onClose={closeForm} onSubmit={handleSave} />
 

@@ -1,0 +1,67 @@
+.unit-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* El IMEI se lee dígito por dígito: tipografía monoespaciada */
+.unit-cell__serial {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+
+.unit-cell__secondary,
+.unit-cell__muted {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.unit-cell__badge,
+.unit-cell__status {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  border-radius: 999px;
+}
+
+.unit-cell__badge--ok,
+.unit-cell__status--disponible {
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
+}
+
+.unit-cell__badge--off,
+.unit-cell__status--vendido,
+.unit-cell__status--baja {
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+}
+
+.unit-cell__status--garantia {
+  color: var(--warning);
+  background-color: color-mix(in srgb, var(--warning) 14%, transparent);
+}
+
+.unit-cell__status--devuelto_proveedor {
+  color: var(--info);
+  background-color: color-mix(in srgb, var(--info) 10%, transparent);
+}
+
+/* En la tarjeta móvil el contenido va a la derecha, como el resto de celdas */
+@container data-table (max-width: 879px) {
+  .unit-cell {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .data-table__cell--primary .unit-cell {
+    align-items: flex-start;
+    text-align: left;
+  }
+}

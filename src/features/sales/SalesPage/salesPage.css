@@ -1,0 +1,28 @@
+.sales-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sales-cell__number {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+.sales-cell__secondary {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+/* El enlace "Nueva venta" con el aspecto del botón principal de la página */
+.pos-new-sale {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  font-weight: 700;
+  color: var(--on-accent);
+  text-decoration: none;
+  background: var(--red-600);
+  border-radius: 12px;
+}

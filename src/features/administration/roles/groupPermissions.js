@@ -4,14 +4,14 @@ import { PERMISSION_CATALOG } from "./permissionCatalog";
 const OTHERS_TITLE = "Otros permisos";
 
 /**
- * Cruza los permisos de la base de datos con el catálogo del sistema.
+ * Cruza los permisos de la base de datos con el catálogo del sistema (por su code).
  *  · groups: lo que se muestra, en el orden del catálogo, filtrado por la búsqueda.
  *  · missing: permisos del catálogo que todavía no están en la base de datos (falta el seeder).
  * Los permisos de la base de datos que no están en el catálogo van a "Otros permisos".
  */
 export const buildPermissionGroups = (dbPermissions, query = "") => {
-  const idByName = new Map(dbPermissions.map((permission) => [permission.name, permission.id]));
-  const knownNames = new Set();
+  const idByCode = new Map(dbPermissions.map((permission) => [permission.code, permission.id]));
+  const knownCodes = new Set();
   const term = normalizeText(query.trim());
   const matches = (...texts) => !term || normalizeText(texts.join(" ")).includes(term);
 
@@ -22,16 +22,16 @@ export const buildPermissionGroups = (dbPermissions, query = "") => {
     const items = [];
 
     group.permissions.forEach((permission) => {
-      knownNames.add(permission.name);
-      const id = idByName.get(permission.name);
+      knownCodes.add(permission.code);
+      const id = idByCode.get(permission.code);
 
       if (id === undefined) {
-        missing.push(permission.name);
+        missing.push(permission.code);
         return;
       }
 
       if (matches(permission.label, permission.description, group.title)) {
-        items.push({ id, name: permission.name, label: permission.label, description: permission.description });
+        items.push({ id, code: permission.code, label: permission.label, description: permission.description });
       }
     });
 
@@ -39,8 +39,13 @@ export const buildPermissionGroups = (dbPermissions, query = "") => {
   });
 
   const extras = dbPermissions
-    .filter((permission) => !knownNames.has(permission.name) && matches(permission.name))
-    .map((permission) => ({ id: permission.id, name: permission.name, label: permission.name, description: "" }));
+    .filter((permission) => !knownCodes.has(permission.code) && matches(permission.name, permission.code))
+    .map((permission) => ({
+      id: permission.id,
+      code: permission.code,
+      label: permission.name,
+      description: permission.code,
+    }));
 
   if (extras.length > 0) groups.push({ title: OTHERS_TITLE, items: extras });
 

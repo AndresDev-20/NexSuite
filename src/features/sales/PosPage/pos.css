@@ -1,0 +1,534 @@
+/* ==========================================================================
+   pos — punto de venta: buscar/escanear a la izquierda, la venta y el pago a la derecha
+   ========================================================================== */
+.pos__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.pos__search,
+.pos__sale {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.pos__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.pos__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.pos__error {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--danger);
+  background-color: var(--red-50);
+  border-radius: 10px;
+}
+
+/* ---------- Buscador grande: el lector de código de barras escribe aquí ---------- */
+.pos__search-box {
+  position: relative;
+}
+
+.pos__search-icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 22px;
+  height: 22px;
+  color: var(--gray-500);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.pos__search-input {
+  width: 100%;
+  height: 54px;
+  padding: 0 14px 0 46px;
+  font: inherit;
+  font-size: 1.05rem;
+  color: var(--color-text);
+  background-color: var(--white);
+  border: 1.5px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.pos__search-input:focus {
+  outline: none;
+  border-color: var(--red-600);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--red-600) 14%, transparent);
+}
+
+.pos__results,
+.pos__lines,
+.pos__payments {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Objetivo táctil de 56px: se toca rápido en mostrador */
+.pos__result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 14px;
+  font: inherit;
+  text-align: left;
+  color: var(--color-text);
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.pos__result:hover:not(:disabled) {
+  border-color: var(--red-300);
+  background-color: color-mix(in srgb, var(--red-50) 55%, var(--white));
+}
+
+.pos__result:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pos__result:focus-visible {
+  outline: 2px solid var(--red-600);
+  outline-offset: 2px;
+}
+
+.pos__result-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pos__result-name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Venta ---------- */
+.pos__section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.pos__count {
+  padding: 1px 9px;
+  font-size: 0.75rem;
+  color: var(--red-700);
+  background-color: var(--red-50);
+  border-radius: 999px;
+}
+
+.pos__line {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.pos__line-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pos__line-body {
+  display: grid;
+  gap: 8px;
+}
+
+.pos__line-total {
+  margin: 0;
+  font-size: 0.88rem;
+  text-align: right;
+  color: var(--gray-700);
+}
+
+.pos__units {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.pos__unit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 4px 10px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background-color: var(--gray-100);
+  border-radius: 999px;
+}
+
+.pos__unit button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--gray-500);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.pos__unit .icon,
+.pos__remove .icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Objetivo táctil de 44px */
+.pos__remove {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  color: var(--gray-500);
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.pos__remove:hover {
+  color: var(--danger);
+  background-color: var(--red-50);
+}
+
+.pos__row {
+  display: grid;
+  gap: 8px;
+}
+
+.pos__totals {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 12px 14px;
+  background-color: var(--gray-50);
+  border-radius: 12px;
+}
+
+.pos__totals div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pos__totals dt {
+  color: var(--gray-700);
+}
+
+.pos__totals dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.pos__grand {
+  padding-top: 6px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  border-top: 1px solid var(--color-border);
+}
+
+.pos__grand dt {
+  color: var(--gray-900);
+}
+
+/* ---------- Pagos ---------- */
+.pos__payment {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 10px 12px;
+  background-color: var(--gray-50);
+  border-radius: 12px;
+}
+
+.pos__pay-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pos__change {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--success);
+}
+
+.pos__pending {
+  margin: 0;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--warning) 70%, var(--gray-900));
+}
+
+.pos__pending--over {
+  color: var(--danger);
+}
+
+.pos__charge {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.pos__charge-button {
+  min-height: 56px;
+  font-size: 1.1rem;
+}
+
+.pos__link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  font-weight: 700;
+  color: var(--on-accent);
+  text-decoration: none;
+  background: var(--red-600);
+  border-radius: 12px;
+}
+
+.pos__link-button--outline {
+  color: var(--red-700);
+  background: var(--white);
+  border: 1.5px solid var(--red-200);
+}
+
+.pos-mono {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Elegir IMEI ---------- */
+.pos-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pos-picker__intro {
+  margin: 0;
+}
+
+.pos-picker__hint {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.pos-picker__error {
+  margin: 0;
+  color: var(--danger);
+}
+
+.pos-picker__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 320px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.pos-picker__unit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.pos-picker__unit input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--red-600);
+}
+
+.pos-picker__unit--on {
+  border-color: var(--red-300);
+  background-color: color-mix(in srgb, var(--red-50) 60%, var(--white));
+}
+
+.pos-picker__unit-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* ---------- Venta registrada ---------- */
+.pos-done {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+
+.pos-done__number {
+  margin: 0;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gray-700);
+}
+
+.pos-done__total {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.pos-done__change {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--success);
+}
+
+.pos-done__payments {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--gray-700);
+}
+
+/* TABLET (≥ 768px) */
+@media (min-width: 768px) {
+  .pos__line-body,
+  .pos__row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pos__payment {
+    grid-template-columns: 1fr 1fr 1fr auto;
+    align-items: end;
+  }
+
+  .pos__charge {
+    grid-template-columns: auto 1fr;
+  }
+}
+
+/* ESCRITORIO (≥ 1100px): buscar a la izquierda, venta a la derecha */
+@media (min-width: 1100px) {
+  .pos__grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+
+  .pos__search {
+    position: sticky;
+    top: 88px;
+  }
+}
+
+/* Caja compartida: en qué caja se cobra y quién vendió */
+.pos__context {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pos__choose {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pos__choose-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.pos__choose-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 64px;
+  padding: 14px 16px;
+  font: inherit;
+  text-align: left;
+  color: var(--color-text);
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.pos__choose-item span {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.pos__choose-item:hover {
+  border-color: var(--red-300);
+  box-shadow: 0 8px 18px -12px rgba(214, 24, 46, 0.45);
+}
+
+.pos__choose-item:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .pos__context {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pos__choose-item {
+    transition: none;
+  }
+}

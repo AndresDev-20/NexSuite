@@ -1,19 +1,28 @@
-import Icon from "../../../components/ui/Icon/Icon";
 import DataTable from "../../../components/tables/DataTable/DataTable";
 import { RowAction, RowActions } from "../../../components/tables/RowActions/RowActions";
 import { getFullName, getInitials } from "../../../utils/userDisplay";
 import "./usersTable.css";
 
 const EMPTY = "—";
-const ccFormatter = new Intl.NumberFormat("es-CO");
 
-const formatCc = (cc) => (cc ? ccFormatter.format(Number(cc)) : EMPTY);
+/** Una sucursal se muestra completa; con más, la primera y cuántas faltan. El detalle las lista todas. */
+const BranchesSummary = ({ list }) => {
+  if (list.length === 0) return <span className="user-cell__muted">Sin sucursal</span>;
+
+  return (
+    <span className="user-cell__branches">
+      <span className="user-cell__branch">{list[0].nameBranch}</span>
+      {list.length > 1 && <span className="user-cell__branch user-cell__branch--more">+{list.length - 1}</span>}
+    </span>
+  );
+};
 
 /**
- * branchesByUser: Map(userId → [{ id, nameBranch }]) o null si todavía no se conocen
- * (en ese caso se oculta la columna y el botón de sucursales).
+ * La tabla muestra solo lo necesario para ubicar a una persona; cédula, teléfono y edad están en "Ver".
+ * branchesByUser: Map(userId → [{ id, nameBranch }]) o null si todavía no se conocen (se oculta la columna).
  */
-const UsersTable = ({ users, currentUserId, branchesByUser, onEdit, onDelete, onBranches }) => {
+/** canEdit(user): editar y activar/desactivar (permiso, y a un Developer solo lo cambia otro Developer). */
+const UsersTable = ({ users, currentUserId, branchesByUser, canEdit, onView, onEdit, onToggleActive }) => {
   const columns = [
     {
       key: "user",
@@ -29,33 +38,24 @@ const UsersTable = ({ users, currentUserId, branchesByUser, onEdit, onDelete, on
               {getFullName(user)}
               {user.id === currentUserId && <span className="user-cell__you">Tú</span>}
             </span>
-            {user.email && (
-              <a className="user-cell__link" href={`mailto:${user.email}`}>
-                {user.email}
-              </a>
-            )}
+            {user.email && <span className="user-cell__email">{user.email}</span>}
           </div>
         </div>
       ),
-    },
-    { key: "cc", header: "Cédula", render: (user) => formatCc(user.cc) },
-    {
-      key: "phone",
-      header: "Teléfono",
-      render: (user) =>
-        user.phone ? (
-          <a className="user-cell__link" href={`tel:${user.phone.replace(/[^\d+]/g, "")}`}>
-            <Icon name="phone" className="user-cell__link-icon" />
-            {user.phone}
-          </a>
-        ) : (
-          EMPTY
-        ),
     },
     {
       key: "role",
       header: "Rol",
       render: (user) => (user.roleName ? <span className="user-cell__role">{user.roleName}</span> : EMPTY),
+    },
+    {
+      key: "status",
+      header: "Estado",
+      render: (user) => (
+        <span className={`user-cell__status ${user.isActive ? "" : "user-cell__status--inactive"}`.trim()}>
+          {user.isActive ? "Activo" : "Inactivo"}
+        </span>
+      ),
     },
   ];
 
@@ -63,20 +63,7 @@ const UsersTable = ({ users, currentUserId, branchesByUser, onEdit, onDelete, on
     columns.push({
       key: "branches",
       header: "Sucursales",
-      render: (user) => {
-        const list = branchesByUser.get(user.id) ?? [];
-        if (list.length === 0) return "Sin sucursal";
-
-        return (
-          <ul className="user-cell__branches">
-            {list.map((branch) => (
-              <li className="user-cell__branch" key={branch.id}>
-                {branch.nameBranch}
-              </li>
-            ))}
-          </ul>
-        );
-      },
+      render: (user) => <BranchesSummary list={branchesByUser.get(user.id) ?? []} />,
     });
   }
 
@@ -92,17 +79,22 @@ const UsersTable = ({ users, currentUserId, branchesByUser, onEdit, onDelete, on
 
         return (
           <RowActions>
-            {branchesByUser && (
-              <RowAction icon="store" label={`Sucursales de ${name}`} onClick={() => onBranches(user)} />
+            <RowAction icon="eye" label={`Ver a ${name}`} onClick={() => onView(user)} />
+            {canEdit(user) && <RowAction icon="edit" label={`Editar a ${name}`} onClick={() => onEdit(user)} />}
+            {canEdit(user) && (
+              <RowAction
+                icon={user.isActive ? "lock" : "check"}
+                label={
+                  isSelf
+                    ? "No puedes desactivar tu propio usuario"
+                    : user.isActive
+                      ? `Desactivar a ${name}`
+                      : `Activar a ${name}`
+                }
+                disabled={isSelf}
+                onClick={() => onToggleActive(user)}
+              />
             )}
-            <RowAction icon="edit" label={`Editar a ${name}`} onClick={() => onEdit(user)} />
-            <RowAction
-              icon="trash"
-              tone="danger"
-              label={isSelf ? "No puedes eliminar tu propio usuario" : `Eliminar a ${name}`}
-              disabled={isSelf}
-              onClick={() => onDelete(user)}
-            />
           </RowActions>
         );
       }}

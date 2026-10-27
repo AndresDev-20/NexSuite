@@ -1,0 +1,232 @@
+/* ---------- Bloque de productos de la compra ---------- */
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.order-items__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-items__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.order-items__count {
+  min-width: 24px;
+  padding: 1px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--red-700);
+  background-color: var(--red-50);
+  border-radius: 999px;
+}
+
+.order-items__error {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.order-items__total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding-top: 10px;
+  font-size: 0.9rem;
+  border-top: 1px dashed var(--gray-200);
+}
+
+.order-items__total strong {
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Desplegable + botón "nuevo" en la misma línea desde tablet */
+.purchase-form__supplier {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.purchase-form__inline {
+  justify-self: start;
+}
+
+/* Filtro "Solo los creados hoy" y botón para agregarlos todos */
+.purchase-form__today {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+/* Objetivo táctil de 44px */
+.purchase-form__today-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  cursor: pointer;
+}
+
+.purchase-form__today-filter input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--red-600);
+}
+
+.purchase-form__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---------- Un producto ---------- */
+.purchase-line {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.purchase-line__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.purchase-line__name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.purchase-line__sku {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  color: var(--gray-500);
+}
+
+.purchase-line__remove {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--gray-500);
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.purchase-line__remove:hover {
+  color: var(--danger);
+  background-color: var(--red-50);
+}
+
+.purchase-line__remove:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 2px;
+}
+
+.purchase-line__remove-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.purchase-line__fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px 12px;
+}
+
+.purchase-line__split {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.purchase-line__legend {
+  margin-bottom: 8px;
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.purchase-line__branches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px 12px;
+}
+
+.purchase-line__serials textarea {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.88rem;
+}
+
+.purchase-line__foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  border-top: 1px solid var(--gray-100);
+}
+
+.purchase-line__errors {
+  margin: 0;
+  padding: 10px 12px 10px 28px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--danger);
+  background-color: var(--red-50);
+  border-radius: 10px;
+}
+
+@media (min-width: 768px) {
+  .purchase-form__supplier {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .purchase-form__inline {
+    margin-top: 26px;
+  }
+
+  .purchase-line__fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

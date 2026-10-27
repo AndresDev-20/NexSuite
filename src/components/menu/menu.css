@@ -66,7 +66,7 @@
 }
 
 .menu__link--active .menu__icon-box {
-  color: var(--white);
+  color: var(--on-accent);
   background: var(--red-600);
 }
 

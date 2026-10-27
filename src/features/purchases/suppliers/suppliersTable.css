@@ -49,16 +49,28 @@ a.supplier-cell__line:hover {
   color: var(--red-600);
 }
 
-@media (max-width: 767px) {
-  /* En las tarjetas móviles, el contenido va alineado a la derecha como el resto */
+@container data-table (max-width: 879px) {
+  /* En las tarjetas, el contenido va alineado a la derecha como el resto */
   .supplier-cell {
     align-items: flex-end;
     text-align: right;
   }
 }
 
-@media (min-width: 768px) {
+/* Mismo punto en que DataTable pasa a tabla */
+@container data-table (min-width: 880px) {
   .supplier-cell__contact {
     align-items: flex-start;
   }
+}
+
+.supplier-cell__tag {
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
 }
