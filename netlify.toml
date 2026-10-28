@@ -2,7 +2,18 @@
 # demo-db.json). Solo se define esta variable: el comando de compilación y la carpeta de publicación
 # siguen siendo los que ya tiene configurados el sitio en Netlify.
 #
-# Para conectar el sitio publicado a un backend real: cambia "true" por "false" (o borra esta
-# sección) y define VITE_REACT_APP_URL con la URL pública de la API.
+# Sitio REAL (Fase 17.2), otro sitio de Netlify con este mismo repositorio: en su panel (Site
+# configuration → Environment variables) define VITE_PRODUCTION_SITE=true y VITE_REACT_APP_URL con la
+# URL de la API (https://api.tudominio.com/api/v1). Con eso usa el backend aunque aquí diga demo; el
+# sitio de demostración sigue igual. Ver docs/DESPLIEGUE.md.
 [build.environment]
   VITE_DEMO_MODE = "true"
+
+# Cabeceras de seguridad para las pantallas (la API pone las suyas con helmet)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"

@@ -100,6 +100,7 @@ function Login() {
   const [shake, setShake] = useState(false);
   const [status, setStatus] = useState("idle"); // idle | loading | success
   const [loginError, setLoginError] = useState(""); // mensaje del servidor (credenciales, usuario inactivo…)
+  const [forgotOpen, setForgotOpen] = useState(false); // aviso de «¿Olvidaste tu contraseña?»
   const timers = useRef([]);
 
   const { login } = useAuthentication();
@@ -179,17 +180,18 @@ function Login() {
                 <UserIcon />
                 <input
                   id="cedula"
-                  className={`form__input form__input--icon ${errors.cedula ? "form__input--invalid" : ""}`}
+                  className={`form__input form__input--icon ${errors.cc ? "form__input--invalid" : ""}`}
                   type="text"
                   inputMode="numeric"
                   autoComplete="username"
                   placeholder="Ej: 1053123456"
-                  aria-invalid={errors.cedula ? "true" : "false"}
+                  aria-invalid={errors.cc ? "true" : "false"}
                   {...register("cc", {
                     required: "Ingresa tu número de cédula",
+                    // Hasta 10 números: no deja por fuera a quien ya tenga una cédula corta (A9)
                     pattern: {
-                      value: /^\d{6,10}$/,
-                      message: "La cédula debe tener entre 6 y 10 números",
+                      value: /^\d{1,10}$/,
+                      message: "La cédula tiene máximo 10 números",
                     },
                     onChange: (e) => {
                       e.target.value = e.target.value.replace(/\D/g, "");
@@ -197,9 +199,9 @@ function Login() {
                   })}
                 />
               </div>
-              {errors.cedula && (
+              {errors.cc && (
                 <p className="form__error" role="alert">
-                  {errors.cedula.message}
+                  {errors.cc.message}
                 </p>
               )}
             </div>
@@ -243,9 +245,15 @@ function Login() {
               )}
             </div>
 
-            <a className="form__link" href="#recuperar">
+            {/* Sin correo de recuperación: la contraseña nueva la asigna un administrador (A9) */}
+            <button type="button" className="form__link" aria-expanded={forgotOpen} onClick={() => setForgotOpen((open) => !open)}>
               ¿Olvidaste tu contraseña?
-            </a>
+            </button>
+            {forgotOpen && (
+              <p className="form__hint" role="status">
+                Pídele a un administrador que te asigne una contraseña nueva desde Administrativo → Usuarios.
+              </p>
+            )}
 
             {loginError && (
               <p className="form__error" role="alert">

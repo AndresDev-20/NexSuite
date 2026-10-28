@@ -8,6 +8,10 @@ import getErrorMessage from "../../../utils/getErrorMessage";
  */
 const normalizeBranch = (branch) => ({
   id: branch.id,
+  // Sin acceso a todas, de las sucursales ajenas el servidor solo envía id y nombre (A8): no son suyas
+  own: Array.isArray(branch.users),
+  // Inactiva (A9): no opera; su historial se conserva
+  isActive: branch.isactive !== false,
   nameBranch: branch.nameBranch,
   address: branch.address ?? "",
   email: branch.email ?? "",
@@ -67,6 +71,16 @@ const useBranches = () => {
     [getAllBranches]
   );
 
+  // Activar o desactivar (A9): PUT /branches/:id/status { isactive }; el servidor dice qué lo impide
+  const setBranchStatus = useCallback(
+    async (id, isactive) => {
+      const { data } = await api.put(`/branches/${id}/status`, { isactive });
+      await getAllBranches({ silent: true });
+      return data;
+    },
+    [getAllBranches]
+  );
+
   // Contrato asumido: DELETE /branches/:id
   const deleteBranch = useCallback(
     async (id) => {
@@ -76,7 +90,7 @@ const useBranches = () => {
     [getAllBranches]
   );
 
-  return { branches, loading, error, getAllBranches, createBranch, updateBranch, deleteBranch };
+  return { branches, loading, error, getAllBranches, createBranch, updateBranch, setBranchStatus, deleteBranch };
 };
 
 export default useBranches;

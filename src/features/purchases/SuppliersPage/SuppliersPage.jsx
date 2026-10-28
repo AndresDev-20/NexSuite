@@ -122,7 +122,7 @@ const SuppliersPage = () => {
         <StateMessage
           icon="inbox"
           title="Aún no hay proveedores"
-          text="Registra el primero para poder asociarlo a tus productos y pedidos."
+          text="Registra el primero para poder asociarlo a tus productos y compras."
         >
           {canCreate && (
             <Button icon="plus" onClick={openCreate}>
@@ -222,7 +222,7 @@ const SuppliersPage = () => {
         message={
           status.deactivating && (
             <>
-              ¿Desactivar a <strong>{status.deactivating.companyname}</strong>? No se podrá usar en unidades ni pedidos
+              ¿Desactivar a <strong>{status.deactivating.companyname}</strong>? No se podrá usar en unidades ni compras
               nuevos.
             </>
           )
@@ -247,7 +247,7 @@ const SuppliersPage = () => {
           )
         }
         confirmLabel="Eliminar proveedor"
-        errorFallback="No se pudo eliminar el proveedor. Puede tener pedidos asociados."
+        errorFallback="No se pudo eliminar el proveedor. Puede tener compras asociadas."
         onConfirm={handleDelete}
         onClose={() => setDeleting(null)}
       />

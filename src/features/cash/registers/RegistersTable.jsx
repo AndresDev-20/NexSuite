@@ -1,6 +1,7 @@
 import DataTable from "../../../components/tables/DataTable/DataTable";
 import { RowAction, RowActions } from "../../../components/tables/RowActions/RowActions";
 import { formatDateTime } from "../../administration/audit/auditOptions";
+import { formatCurrency } from "../../../utils/money";
 import "../cash.css";
 
 const columns = [
@@ -17,23 +18,41 @@ const columns = [
   },
   { key: "branch", header: "Sucursal", render: (register) => register.branchName },
   {
+    key: "schedule",
+    header: "Horario y base",
+    render: (register) => (
+      <div className="cash-cell">
+        <span>{register.autoOpen ? `Abre sola ${register.openTime} – ${register.closeTime}` : "Se abre a mano"}</span>
+        <span className="cash-cell__secondary">Base {formatCurrency(register.openingBase)}</span>
+      </div>
+    ),
+  },
+  {
     key: "session",
     header: "Turno",
-    render: (register) =>
-      register.openSession ? (
-        <div className="cash-cell">
-          <span className="cash-tag cash-tag--open">Abierta</span>
-          <span className="cash-cell__secondary">
-            {register.openSession.userName} · desde {formatDateTime(register.openSession.openedAt)}
+    render: (register) => (
+      <div className="cash-cell">
+        {register.openSession ? (
+          <>
+            <span className="cash-tag cash-tag--open">Vendiendo</span>
+            <span className="cash-cell__secondary">
+              {register.openSession.userName} · desde {formatDateTime(register.openSession.openedAt)}
+            </span>
+          </>
+        ) : (
+          <span className="cash-cell__secondary">Sin turno abierto</span>
+        )}
+        {register.pendingSessions.length > 0 && (
+          <span className="cash-tag cash-tag--pending">
+            {register.pendingSessions.length === 1 ? "1 turno por contar" : `${register.pendingSessions.length} turnos por contar`}
           </span>
-        </div>
-      ) : (
-        <span className="cash-cell__secondary">Sin turno abierto</span>
-      ),
+        )}
+      </div>
+    ),
   },
 ];
 
-/** Renombrar, activar/desactivar y eliminar (solo si nunca tuvo turnos). */
+/** Editar (nombre, horario y base), activar/desactivar y eliminar (solo si nunca tuvo turnos). */
 const RegistersTable = ({ registers, canManage, onEdit, onToggleActive, onDelete }) => (
   <DataTable
     caption="Cajas"
@@ -44,7 +63,7 @@ const RegistersTable = ({ registers, canManage, onEdit, onToggleActive, onDelete
       canManage
         ? (register) => (
             <RowActions>
-              <RowAction icon="edit" label={`Renombrar ${register.name}`} onClick={() => onEdit(register)} />
+              <RowAction icon="edit" label={`Editar ${register.name} (nombre, horario y base)`} onClick={() => onEdit(register)} />
               <RowAction
                 icon={register.isActive ? "lock" : "check"}
                 label={

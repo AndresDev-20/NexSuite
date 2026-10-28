@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "../components/header/Header";
 import Menu from "../components/menu/Menu";
@@ -20,7 +21,10 @@ const MainLayout = () => (
           </aside>
 
           <main className="main-layout__content">
-            <Outlet />
+            {/* Mientras llega el código de la pantalla (se carga al abrirla) */}
+            <Suspense fallback={<p className="main-layout__loading" role="status">Cargando…</p>}>
+              <Outlet />
+            </Suspense>
           </main>
         </div>  
         <DemoBadge />

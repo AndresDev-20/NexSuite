@@ -1,6 +1,8 @@
 import Button from "../../../components/ui/Button/Button";
 import Icon from "../../../components/ui/Icon/Icon";
 import useToast from "../../../components/feadback/Toast/useToast";
+import usePermissions from "../../auth/usePermissions";
+import BusinessSettings from "../BusinessSettings";
 import { DEFAULT_PREFERENCES, resetPreferences, savePreferences, usePreferences } from "../preferences";
 import "../../../styles/listPage.css";
 import "./settingsPage.css";
@@ -89,11 +91,13 @@ const Section = ({ icon, title, subtitle, index, children }) => (
 
 /**
  * Configuración del sistema en este equipo: apariencia (claro, noche o automático), animaciones y
- * tamaño del texto. Se aplica al instante y se recuerda en este navegador.
+ * tamaño del texto. Se aplica al instante y se recuerda en este navegador. Con «Configurar el
+ * negocio», también los datos del negocio para los documentos (Fase 15), que son para todos.
  */
 const SettingsPage = () => {
   const { preferences, activeTheme } = usePreferences();
   const toast = useToast();
+  const { can } = usePermissions();
   const isDefault = Object.entries(DEFAULT_PREFERENCES).every(([key, value]) => preferences[key] === value);
 
   return (
@@ -152,6 +156,12 @@ const SettingsPage = () => {
           Restablecer
         </Button>
       </footer>
+
+      {can("settings.manage") && (
+        <Section icon="store" title="Datos del negocio" subtitle="Para todos: salen en los comprobantes y documentos del sistema." index={3}>
+          <BusinessSettings />
+        </Section>
+      )}
     </section>
   );
 };

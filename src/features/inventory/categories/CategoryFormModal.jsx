@@ -6,7 +6,8 @@ import { FormActions, FormLayout } from "../../../components/forms/FormLayout/Fo
 import Modal from "../../../components/feadback/Modal/Modal";
 import getErrorMessage from "../../../utils/getErrorMessage";
 
-const MAX_LENGTH = 255;
+// Como el servidor (A9)
+const MAX_LENGTH = 100;
 
 /* El backend vuelve a validar: esto es solo para dar respuesta rápida. */
 const NAME_RULE = {

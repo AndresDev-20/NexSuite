@@ -25,9 +25,31 @@ const normalizeItem = (item) => ({
     branchId: branch.idbranch,
     branchName: branch.branch?.nameBranch ?? "",
     quantity: toNumber(branch.quantity),
+    // De la cantidad, cuántas ya estaban cargadas sin compra (se documentan, no suman)
+    existing: toNumber(branch.existing ?? 0),
+    // Con serial, las ya cargadas traen su idunit
     units: branch.units ?? [],
   })),
 });
+
+/**
+ * Lo cargado sin compra de un producto (al crearlo), para que la compra lo documente:
+ * { hasSerial, serialType, warrantyMonths, branches: [{ branchId, quantity, units: [{ idunit, serial, imei2 }] }] }.
+ * exceptOrder: la compra que se está editando (lo que ella ya tomó sigue disponible).
+ */
+export const fetchLoadedStock = async (productId, exceptOrder) => {
+  const data = unwrap(await api.get(`${ORDERS_PATH}/loaded`, { params: { idproduct: productId, ...(exceptOrder && { exceptorder: exceptOrder }) } }));
+  return {
+    hasSerial: data.hasserial,
+    serialType: data.serialtype ?? null,
+    warrantyMonths: data.warrantymonths ?? null,
+    branches: data.branches.map((branch) => ({
+      branchId: branch.idbranch,
+      quantity: branch.quantity,
+      units: branch.units.map((unit) => ({ idunit: unit.id, serial: unit.serial, imei2: unit.imei2 ?? null })),
+    })),
+  };
+};
 
 /** Abono a una compra a crédito. */
 export const normalizePayment = (payment) => ({
@@ -58,6 +80,8 @@ export const normalizeOrder = (order) => ({
   dueDate: order.duedate ?? null,
   // pendiente · abonada · vencida · pagada (null si no está confirmada)
   paymentStatus: order.paymentStatus ?? null,
+  // Puede editarla, confirmarla, anularla o abonarle: tiene acceso a todas sus sucursales (A8)
+  manageable: order.manageable !== false,
   notes: order.notes ?? "",
   supplierId: order.idsupplier,
   supplierName: order.supplier?.companyname ?? "",

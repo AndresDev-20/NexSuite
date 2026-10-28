@@ -126,7 +126,7 @@ const useSalesDashboard = () => {
           total: trendOf(report.totals.total, before.totals.total),
           count: trendOf(report.totals.count, before.totals.count),
           ticket: trendOf(ticket(report.totals), ticket(before.totals)),
-          profit: report.costs ? trendOf(report.totals.profit, before.totals.profit) : null,
+          profit: report.costs ? trendOf(report.totals.finalProfit, before.totals.finalProfit) : null,
         },
         ticket: ticket(report.totals),
         latest: latest ? latest.items.map(normalizeSale) : [],

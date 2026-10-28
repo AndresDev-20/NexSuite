@@ -73,7 +73,8 @@ const RULES = {
     onChange: stripNonDigits,
     validate: (value) => {
       if (!value) return "Escribe la cédula.";
-      return /^\d{5,12}$/.test(value) || "La cédula debe tener entre 5 y 12 números.";
+      // Como el servidor (A9): de 5 a 10 números y no más de lo que cabe en la base de datos
+      return (/^\d{5,10}$/.test(value) && Number(value) <= 2147483647) || "La cédula debe tener entre 5 y 10 números.";
     },
   },
   email: {
@@ -167,6 +168,7 @@ const UserForm = ({ user, roles, rolesHint, roleLocked, isSelf, busy, onCancel, 
           required
           inputMode="numeric"
           autoComplete="off"
+          maxLength={10}
           error={errors.cc?.message}
           {...register("cc", RULES.cc)}
         />

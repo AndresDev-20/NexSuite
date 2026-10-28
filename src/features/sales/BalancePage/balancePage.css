@@ -1,0 +1,204 @@
+/* Balance mensual en pantalla: resumen, resultado del mes y datos en tablas por pestaña */
+
+.balance-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.balance-toolbar > .field {
+  min-width: 200px;
+}
+
+.balance-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.balance-status {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.balance-section-title {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Resultado del mes y otras cifras */
+.balance-results {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 1024px) {
+  .balance-results {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}
+
+.balance-results__card {
+  animation: balance-rise 360ms ease both;
+}
+
+.balance-statement {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.balance-statement__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.balance-statement__row:last-child {
+  border-bottom: 0;
+}
+
+.balance-statement__row dt {
+  color: var(--color-text-muted);
+}
+
+.balance-statement__row dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.balance-statement__row--strong dt,
+.balance-statement__row--strong dd {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.balance-statement__row--main {
+  margin-top: 4px;
+  padding: 10px 12px;
+  background-color: var(--success-soft);
+  border: 0;
+  border-radius: 10px;
+}
+
+.balance-statement__row--main dd {
+  font-size: 1.1rem;
+  color: var(--success-text);
+}
+
+/* Datos del mes */
+.balance-data {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.balance-tabs {
+  flex-wrap: wrap;
+}
+
+.balance-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: balance-rise 280ms ease both;
+}
+
+.balance-table__tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  align-items: end;
+}
+
+@media (min-width: 768px) {
+  .balance-table__tools {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+
+.balance-table__totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0;
+  padding: 10px 14px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.balance-table__totals div {
+  display: flex;
+  flex-direction: column;
+}
+
+.balance-table__totals dt {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.balance-table__totals dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.balance-cell {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.balance-cell span {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.balance-amount {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.balance-amount--ok {
+  color: var(--success-text);
+}
+
+.balance-amount--warn {
+  color: var(--warning-text);
+}
+
+.balance-amount--bad {
+  color: var(--danger);
+}
+
+@keyframes balance-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .balance-results__card,
+  .balance-table {
+    animation: none;
+  }
+}

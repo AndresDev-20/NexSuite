@@ -25,7 +25,7 @@ const SerialList = ({ branch }) => {
   return (
     <ul className="order-detail__serials">
       {branch.units.map((unit) => (
-        <li key={unit.serial}>
+        <li key={unit.serial} className={unit.idunit ? "order-detail__serial--loaded" : undefined} title={unit.idunit ? "Ya cargado al crear el producto" : undefined}>
           {unit.serial}
           {unit.imei2 && ` · ${unit.imei2}`}
         </li>
@@ -58,6 +58,11 @@ const ProductCard = ({ item }) => (
         <li key={branch.branchId} className="order-detail__split-row">
           <span className="order-detail__split-branch">
             {branch.branchName} <strong>{branch.quantity}</strong>
+            {branch.existing > 0 && (
+              <span className="order-detail__loaded">
+                {branch.existing === branch.quantity ? "ya cargadas al crear el producto" : `${branch.existing} ya ${branch.existing === 1 ? "cargada" : "cargadas"} · ${branch.quantity - branch.existing} ${branch.quantity - branch.existing === 1 ? "nueva" : "nuevas"}`}
+              </span>
+            )}
           </span>
           {item.hasSerial && <SerialList branch={branch} />}
         </li>
@@ -179,6 +184,8 @@ const OrderDetailModal = ({
 }) => {
   const { order, loading, error } = state;
   const isDraft = order?.status === "borrador";
+  // Compartida con sucursales ajenas: solo consulta (el servidor también lo impide, A8)
+  const manage = order?.manageable !== false;
 
   const renderBody = () => {
     if (loading) {
@@ -247,8 +254,8 @@ const OrderDetailModal = ({
 
         <Payments
           order={order}
-          canPay={canPay}
-          canCancelPayment={canCancelPayment}
+          canPay={canPay && manage}
+          canCancelPayment={canCancelPayment && manage}
           onPay={onPay}
           onCancelPayment={onCancelPayment}
         />
@@ -259,18 +266,24 @@ const OrderDetailModal = ({
           </button>
         )}
 
+        {!manage && (
+          <p className="order-detail__shared" role="note">
+            Esta compra también es de sucursales que no manejas: solo puedes consultarla.
+          </p>
+        )}
+
         <FormActions>
-          {canCancel && isDraft && (
+          {canCancel && manage && isDraft && (
             <Button variant="outline" icon="x" className="order-detail__cancel" onClick={() => onCancel(order)}>
               Anular
             </Button>
           )}
-          {canEdit && isDraft && (
+          {canEdit && manage && isDraft && (
             <Button variant="outline" icon="edit" onClick={() => onEdit(order)}>
               Editar
             </Button>
           )}
-          {canConfirm && isDraft ? (
+          {canConfirm && manage && isDraft ? (
             <Button icon="check" data-autofocus onClick={() => onConfirm(order)}>
               Confirmar compra
             </Button>

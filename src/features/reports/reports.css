@@ -1,0 +1,173 @@
+/* Informes (Fase 14): filtros, tarjetas y gráfica comunes a inventario, compras, caja y gastos */
+
+.report-filters.reports-filters {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.report-filters__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+  align-items: end;
+}
+
+.report-filters__idle {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@media (min-width: 900px) {
+  .report-filters__grid {
+    grid-template-columns: 1fr 1fr 2fr;
+  }
+
+  .report-filters__idle {
+    grid-column: auto;
+  }
+}
+
+@media (min-width: 1100px) {
+  .report-kpis {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.report-chart__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .report-chart__body {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+}
+
+/* Etiquetas de estado reutilizadas (mismas de gastos fijos) */
+.due-badge {
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.due-badge--ok {
+  color: var(--success-text);
+  background-color: var(--success-soft);
+}
+
+.due-badge--warn {
+  color: var(--warning-text, #b45309);
+  background-color: color-mix(in srgb, var(--warning, #e8a317) 16%, transparent);
+}
+
+.due-badge--bad {
+  color: var(--danger);
+  background-color: var(--red-50);
+}
+
+/* Cuentas por pagar por antigüedad (informe de compras) */
+.report-buckets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (min-width: 900px) {
+  .report-buckets {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.report-bucket {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-top: 4px solid var(--gray-300);
+  border-radius: 12px;
+  animation: report-rise 320ms ease both;
+}
+
+.report-bucket span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.report-bucket strong {
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.report-bucket small {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.report-bucket--ok {
+  border-top-color: var(--success);
+}
+
+.report-bucket--warn {
+  border-top-color: var(--warning, #e8a317);
+}
+
+.report-bucket--bad {
+  border-top-color: var(--danger);
+}
+
+@keyframes report-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .report-bucket {
+    animation: none;
+  }
+}
+
+/* Comparativo mensual: cambio frente al año anterior (verde si mejora, rojo si empeora) */
+.comparison-change {
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Doble clase: gana a «.balance-cell span» (texto gris de las celdas) */
+.comparison-change.comparison-change--ok {
+  color: var(--success-text);
+}
+
+.comparison-change.comparison-change--bad {
+  color: var(--danger);
+}
+
+.comparison-negative {
+  color: var(--danger);
+}
+
+.comparison-chart__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}

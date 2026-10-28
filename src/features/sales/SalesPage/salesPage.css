@@ -26,3 +26,23 @@
   background: var(--red-600);
   border-radius: 12px;
 }
+
+/* Venta anulada (Fase 11.1): etiqueta junto al número y total tachado */
+.sales-cell__voided {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--danger);
+  background-color: var(--red-50);
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.sales-cell__struck {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}

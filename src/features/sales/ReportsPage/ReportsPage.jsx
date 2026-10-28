@@ -7,7 +7,6 @@ import StateMessage from "../../../components/feadback/StateMessage/StateMessage
 import DataTable from "../../../components/tables/DataTable/DataTable";
 import usePermissions from "../../auth/usePermissions";
 import useActiveBranch from "../../branches/useActiveBranch";
-import BalanceModal from "../reports/BalanceModal";
 import { AnimatedNumber, AreaChart } from "../../dashboard/charts";
 import { formatDay } from "../../purchases/orders/orderOptions";
 import { getMethodLabel } from "../sales/useSales";
@@ -59,6 +58,74 @@ const Section = ({ title, subtitle, index = 0, children }) => (
     {children}
   </section>
 );
+
+/** Devoluciones y cambios por garantía entregados en el periodo (se restan de lo vendido y la ganancia). */
+const WarrantiesSection = ({ warranties, costs, index }) => {
+  const { refunds, exchanges } = warranties;
+  const parts = [refunds.credit > 0 && `${formatCurrency(refunds.credit)} rebajado de deudas`, refunds.cash > 0 && `${formatCurrency(refunds.cash)} en efectivo`].filter(Boolean);
+  return (
+    <Section title="Garantías" subtitle="Devoluciones y cambios entregados en el periodo." index={index}>
+      <ul className="sheet__rows">
+        <li className="sheet__row reports-rise" style={{ "--i": 0 }}>
+          <div className="sheet__row-main">
+            <span className="sheet__row-title">Dinero devuelto</span>
+            <span className="sheet__row-meta">
+              {refunds.count} {refunds.count === 1 ? "devolución" : "devoluciones"}
+              {parts.length > 0 && ` · ${parts.join(" y ")}`}
+            </span>
+          </div>
+          <div className="sheet__row-side">
+            <span className="sheet__number">−{formatCurrency(refunds.amount)}</span>
+          </div>
+        </li>
+        <li className="sheet__row reports-rise" style={{ "--i": 1 }}>
+          <div className="sheet__row-main">
+            <span className="sheet__row-title">Cambios por otro equipo</span>
+            <span className="sheet__row-meta">
+              {exchanges.count} {exchanges.count === 1 ? "cambio" : "cambios"}
+              {costs ? " · lo que costaron los equipos entregados" : ""}
+            </span>
+          </div>
+          {costs && (
+            <div className="sheet__row-side">
+              <span className="sheet__number">−{formatCurrency(exchanges.cost)}</span>
+            </div>
+          )}
+        </li>
+      </ul>
+    </Section>
+  );
+};
+
+/** Gastos del periodo por categoría (13.3): se restan de la ganancia. */
+const ExpensesSection = ({ expenses, index }) => {
+  const max = Math.max(...expenses.byCategory.map((row) => row.amount), 1);
+  return (
+    <Section title="Gastos" subtitle={`${expenses.count} ${expenses.count === 1 ? "gasto" : "gastos"} en el periodo: se restan de la ganancia.`} index={index}>
+      <ul className="sheet__rows">
+        {expenses.byCategory.map((row, position) => (
+          <li className="sheet__row reports-rise" key={row.name} style={{ "--i": position }}>
+            <div className="sheet__row-main">
+              <span className="sheet__row-title">{row.name}</span>
+              <span className="sheet__row-meta">
+                {row.count} {row.count === 1 ? "gasto" : "gastos"}
+              </span>
+              <div className="rank__bar reports-bar">
+                <span className="rank__fill rank__fill--dark" style={{ "--w": `${(row.amount / max) * 100}%`, "--i": position }} />
+              </div>
+            </div>
+            <div className="sheet__row-side">
+              <span className="sheet__number">−{formatCurrency(row.amount)}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p className="reports-note">
+        Total gastado: <strong>{formatCurrency(expenses.total)}</strong>
+      </p>
+    </Section>
+  );
+};
 
 /** Lo que entró por medio de pago (ventas y abonos de cartera). El crédito no es dinero: va aparte. */
 const MoneyIn = ({ report, branchFiltered }) => {
@@ -133,7 +200,6 @@ const ReportsPage = () => {
   const { activeBranchId, activeBranch } = useActiveBranch();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showAllProducts, setShowAllProducts] = useState(false);
-  const [balanceOpen, setBalanceOpen] = useState(false);
   const { can } = usePermissions();
   const today = todayInColombia();
 
@@ -222,25 +288,47 @@ const ReportsPage = () => {
     }
     if (!report) return null;
 
-    const { totals } = report;
+    const { totals, warranties } = report;
+    const hasWarranties = warranties.refunds.count + warranties.exchanges.count > 0;
+    const hasExpenses = Boolean(report.expenses && report.expenses.count > 0);
+    // De la ganancia de las ventas a la que se muestra: menos garantías y menos gastos
+    const deductions = [
+      hasWarranties && `garantías ${formatCurrency(totals.profit - totals.netProfit)}`,
+      hasExpenses && `gastos ${formatCurrency(totals.expenses)}`,
+    ].filter(Boolean);
+    const profitDetail = deductions.length
+      ? `Ventas ${formatCurrency(totals.profit)} − ${deductions.join(" − ")}`
+      : marginOf(totals.finalProfit, totals.net) || "Sin ventas";
     const products = showAllProducts ? report.products : report.products.slice(0, PRODUCTS_SHOWN);
 
     return (
       <div className={`reports ${loading ? "reports--loading" : ""}`.trim()} aria-busy={loading} key={animKey}>
         <div className="reports-kpis">
-          <Kpi index={0} label="Vendido" value={totals.total} detail={salesLabel(totals.count)} />
-          {costs && <Kpi index={1} label="Ganancia" value={totals.profit} detail={marginOf(totals.profit, totals.total) || "Sin ventas"} tone="ok" />}
+          <Kpi
+            index={0}
+            label="Vendido"
+            value={totals.total}
+            detail={totals.refunds > 0 ? `${salesLabel(totals.count)} · neto ${formatCurrency(totals.net)} tras devoluciones` : salesLabel(totals.count)}
+          />
+          {costs && <Kpi index={1} label="Ganancia" value={totals.finalProfit} detail={profitDetail} tone="ok" />}
           <Kpi index={2} label="Fiado" value={totals.credit} detail="Queda en la cartera" tone={totals.credit > 0 ? "warning" : undefined} />
           <Kpi index={3} label="Descuentos" value={totals.discount} detail={`Sobre ${formatCurrency(totals.subtotal)} de lista`} />
         </div>
-        {costs && <p className="reports-note">Ganancia = lo vendido menos lo que costó lo vendido. Todavía no descuenta gastos del negocio.</p>}
+        {costs && (
+          <p className="reports-note">
+            Ganancia = lo vendido menos lo que costó lo vendido, menos lo devuelto y el costo de los cambios por garantía
+            {report.expenses ? ", menos los gastos del negocio." : ". Los gastos del negocio los ve quien tiene «Ver gastos»."}
+          </p>
+        )}
 
-        {totals.count === 0 && !report.receivablePayments?.total ? (
+        {totals.count === 0 && !report.receivablePayments?.total && !hasWarranties && !hasExpenses ? (
           <StateMessage icon="cart" title="No hubo ventas" text={`No hay ventas ${singleDay ? "ese día" : "en ese periodo"}${activeBranch ? ` en ${activeBranch.name}` : ""}.`} />
         ) : (
           <>
             <div className="reports-grid">
               <MoneyIn report={report} branchFiltered={Boolean(activeBranchId)} />
+              {hasWarranties && <WarrantiesSection warranties={warranties} costs={costs} index={1} />}
+              {hasExpenses && <ExpensesSection expenses={report.expenses} index={2} />}
               {report.scope === "todas" && report.bySeller.length > 0 && (
                 <Section title="Por vendedor" subtitle="Quién vendió más primero." index={1}>
                   <ol className="rank">
@@ -321,9 +409,9 @@ const ReportsPage = () => {
         </div>
         <div className="list-page__actions">
           {can("reports.balance") && (
-            <Button variant="outline" icon="download" onClick={() => setBalanceOpen(true)}>
+            <Link className="pos-new-sale balance-link" to="/ventas/balance">
               Balance mensual
-            </Button>
+            </Link>
           )}
           <Link className="pos-new-sale" to={historyLink}>
             Ver las ventas
@@ -363,7 +451,6 @@ const ReportsPage = () => {
 
       {renderReport()}
 
-      <BalanceModal open={balanceOpen} onClose={() => setBalanceOpen(false)} />
     </section>
   );
 };

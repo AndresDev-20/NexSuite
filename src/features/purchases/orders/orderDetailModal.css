@@ -314,3 +314,29 @@
 .order-payments__add {
   align-self: flex-start;
 }
+
+/* Lo ya cargado que la compra documenta (no sumó existencias otra vez) */
+.order-detail__loaded {
+  margin-left: 8px;
+  padding: 1px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--success-text);
+  background-color: var(--success-soft);
+  border-radius: 999px;
+}
+
+.order-detail__serial--loaded {
+  border: 1px dashed var(--success);
+}
+
+/* Compra compartida con sucursales ajenas: solo consulta (A8) */
+.order-detail__shared {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}

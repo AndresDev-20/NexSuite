@@ -1,0 +1,34 @@
+/* Detalle de la venta: aviso de venta anulada y botón Anular (Fase 11.1) */
+.sale-voided {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px;
+  font-size: 0.88rem;
+  color: var(--color-text);
+  background-color: var(--red-50);
+  border: 1px solid var(--red-200);
+  border-left: 4px solid var(--danger);
+  border-radius: 12px;
+}
+
+.sale-voided strong {
+  color: var(--danger);
+}
+
+.sale-voided__note {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.sale-void-button {
+  margin-right: auto;
+  color: var(--danger);
+  border-color: var(--red-200);
+}
+
+.sale-void-button:hover:not(:disabled) {
+  color: var(--on-accent);
+  background: var(--danger);
+  border-color: var(--danger);
+}

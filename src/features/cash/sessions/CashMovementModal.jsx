@@ -32,9 +32,12 @@ const MovementForm = ({ type, expected, busy, onCancel, onSubmit }) => {
 
   return (
     <FormLayout onSubmit={submit} error={serverError}>
-      <p className="my-cash__since">
-        En la caja debería haber <strong>{formatCurrency(expected)}</strong>.
-      </p>
+      {/* A ciegas (expected null) no se dice cuánto hay: el servidor revisa que el retiro alcance (A8) */}
+      {expected !== null && (
+        <p className="my-cash__since">
+          En la caja debería haber <strong>{formatCurrency(expected)}</strong>.
+        </p>
+      )}
       <Field
         label="Monto"
         required
@@ -48,7 +51,7 @@ const MovementForm = ({ type, expected, busy, onCancel, onSubmit }) => {
           validate: (value) => {
             const amount = Number(value);
             if (!value || !(amount > 0)) return "Escribe un monto mayor que 0.";
-            if (type === "retiro" && Math.round(amount * 100) > Math.round(expected * 100)) {
+            if (type === "retiro" && expected !== null && Math.round(amount * 100) > Math.round(expected * 100)) {
               return `No hay tanto efectivo (hay ${formatCurrency(expected)}).`;
             }
             return true;
@@ -75,7 +78,7 @@ const MovementForm = ({ type, expected, busy, onCancel, onSubmit }) => {
   );
 };
 
-/** Ingreso o retiro de efectivo del turno. type: "ingreso" | "retiro" | null (cerrado). */
+/** Ingreso o retiro de efectivo del turno. type: "ingreso" | "retiro" | null (cerrado). expected: null a ciegas. */
 const CashMovementModal = ({ type, expected, onClose, onSubmit }) => {
   const [busy, setBusy] = useState(false);
 

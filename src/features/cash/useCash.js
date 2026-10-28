@@ -7,6 +7,11 @@ import { getFullName } from "../../utils/userDisplay";
 
 const REGISTERS_PATH = "/cash-registers";
 const SESSIONS_PATH = "/cash-sessions";
+const CLOSURES_PATH = `${REGISTERS_PATH}/closures`;
+
+/** Quién tiene el turno: la persona o, si la caja abrió sola, la caja. */
+export const AUTO_LABEL = "Abrió sola";
+const money = (value) => (value != null ? toNumber(value) : null);
 
 export const normalizeRegister = (register) => ({
   id: register.id,
@@ -15,9 +20,20 @@ export const normalizeRegister = (register) => ({
   branchId: register.idbranch,
   branchName: register.branch?.nameBranch ?? "",
   hasHistory: Boolean(register.hasHistory),
+  // Caja automática: abre sola a openTime con openingBase y deja de vender a closeTime
+  autoOpen: register.autoopen !== false,
+  openTime: register.opentime ?? "08:00",
+  closeTime: register.closetime ?? "19:00",
+  openingBase: toNumber(register.openingbase ?? 550000),
   openSession: register.openSession
-    ? { id: register.openSession.id, openedAt: register.openSession.openedat, userName: getFullName(register.openSession.user) }
+    ? {
+        id: register.openSession.id,
+        openedAt: register.openSession.openedat,
+        auto: Boolean(register.openSession.auto),
+        userName: register.openSession.user ? getFullName(register.openSession.user) : AUTO_LABEL,
+      }
     : null,
+  pendingSessions: (register.pendingSessions ?? []).map((session) => ({ id: session.id, openedAt: session.openedat, salesClosedAt: session.salesclosedat })),
 });
 
 const normalizeTotals = (totals = {}) => ({
@@ -34,20 +50,40 @@ export const normalizeSession = (session) => ({
   status: session.status,
   registerId: session.idregister,
   registerName: session.register?.name ?? "",
+  registerBase: session.register?.openingbase != null ? toNumber(session.register.openingbase) : null,
+  registerCloseTime: session.register?.closetime ?? null,
   branchId: session.idbranch,
   branchName: session.branch?.nameBranch ?? "",
-  userId: session.iduser,
-  userName: session.user ? getFullName(session.user) : "",
+  userId: session.iduser ?? null,
+  auto: Boolean(session.auto),
+  userName: session.user ? getFullName(session.user) : session.auto ? AUTO_LABEL : "",
   openingNotes: session.openingnotes ?? "",
   openedAt: session.openedat,
   closedAt: session.closedat ?? null,
+  salesClosedAt: session.salesclosedat ?? null,
   // Cierre (null mientras está abierto): esperado, contado, diferencia (+ sobrante, − faltante)
   expectedAmount: session.expectedamount != null ? toNumber(session.expectedamount) : null,
   countedAmount: session.countedamount != null ? toNumber(session.countedamount) : null,
   difference: session.difference != null ? toNumber(session.difference) : null,
   closingNotes: session.closingnotes ?? "",
   closedByName: session.closer ? getFullName(session.closer) : "",
-  totals: normalizeTotals(session.totals),
+  // Al contar: lo que queda como base del día siguiente y lo que se entrega al administrador
+  keptAmount: money(session.keptamount),
+  handoverAmount: money(session.handoveramount),
+  receivedAmount: money(session.receivedamount),
+  receivedAt: session.receivedat ?? null,
+  receivedNotes: session.receivednotes ?? "",
+  receivedByName: session.receiver ? getFullName(session.receiver) : "",
+  // Reabierto para contarlo otra vez (12.2): la última vez y cuántas veces
+  reopenedAt: session.reopenedat ?? null,
+  reopenedByName: session.reopener ? getFullName(session.reopener) : "",
+  reopenReason: session.reopenreason ?? "",
+  reopenCount: session.reopencount ?? 0,
+  // null en la caja de hoy del vendedor: cuenta sin saber cuánto debería haber
+  totals: session.totals === null ? null : normalizeTotals(session.totals),
+  openingAmount: toNumber(session.openingamount),
+  // Lo que entró fuera de la caja (tarjeta, Nequi, Daviplata, transferencia y lo fiado)
+  outsideCash: (session.outsideCash ?? []).map((row) => ({ method: row.method, count: row.count, amount: toNumber(row.amount) })),
   movements: (session.movements ?? []).map((movement) => ({
     id: movement.id,
     type: movement.type,
@@ -92,6 +128,87 @@ export const useCashRegisters = () => {
   const deleteRegister = useCallback((id) => run(() => api.delete(`${REGISTERS_PATH}/${id}`)), [run]);
 
   return { registers, loading, error, getRegisters, createRegister, updateRegister, deleteRegister };
+};
+
+/** Días sin abrir de sus sucursales (desde hoy): sus cajas no abren solas ese día. */
+export const useBranchClosures = () => {
+  const [closures, setClosures] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const getClosures = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      setClosures(
+        toList(await api.get(CLOSURES_PATH)).map((closure) => ({
+          id: closure.id,
+          date: closure.date,
+          reason: closure.reason ?? "",
+          branchId: closure.idbranch,
+          branchName: closure.branch?.nameBranch ?? "",
+          createdByName: closure.creator ? getFullName(closure.creator) : "",
+        }))
+      );
+    } catch (err) {
+      setError(getErrorMessage(err, "No se pudieron cargar los días sin abrir."));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const addClosure = useCallback(
+    async (payload) => {
+      await api.post(CLOSURES_PATH, payload);
+      await getClosures();
+    },
+    [getClosures]
+  );
+  const removeClosure = useCallback(
+    async (id) => {
+      await api.delete(`${CLOSURES_PATH}/${id}`);
+      await getClosures();
+    },
+    [getClosures]
+  );
+
+  return { closures, loading, error, getClosures, addClosure, removeClosure };
+};
+
+/**
+ * Caja de hoy: los turnos abiertos o por contar de sus sucursales. Sin "Ver turnos" no trae el
+ * esperado (totals null): el vendedor cuenta sin saber cuánto debería haber.
+ */
+export const useTodayCash = () => {
+  const [sessions, setSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const getToday = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) {
+      setLoading(true);
+      setError("");
+    }
+    try {
+      setSessions(toList(await api.get(`${SESSIONS_PATH}/today`)).map(normalizeSession));
+    } catch (err) {
+      if (!silent) setError(getErrorMessage(err, "No se pudo cargar la caja de hoy."));
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  }, []);
+
+  /** Cuenta el efectivo de un turno: { countedamount, closingnotes }. Devuelve { session, message }. */
+  const countSession = useCallback(
+    async (id, payload) => {
+      const { data } = await api.post(`${SESSIONS_PATH}/${id}/close`, payload);
+      await getToday({ silent: true });
+      return { session: normalizeSession(data.data), message: data.message };
+    },
+    [getToday]
+  );
+
+  return { sessions, loading, error, getToday, countSession };
 };
 
 /** Mi turno abierto (null si no tengo) y sus acciones. */
@@ -171,5 +288,20 @@ export const useCashSessions = () => {
     []
   );
 
-  return { ...result, loading, error, getSessions, getSession, closeSession };
+  /** Deja de vender antes de hora: el turno queda "por contar". */
+  const stopSales = useCallback(async (id) => normalizeSession(unwrap(await api.post(`${SESSIONS_PATH}/${id}/stop-sales`))), []);
+
+  /** El administrador confirma el dinero que le entregaron: { receivedamount, receivednotes }. */
+  const receiveHandover = useCallback(
+    async (id, payload) => normalizeSession(unwrap(await api.post(`${SESSIONS_PATH}/${id}/receive`, payload))),
+    []
+  );
+
+  /** Reabre un turno contado (12.2): { reason }. Vuelve a «por contar». */
+  const reopenSession = useCallback(
+    async (id, payload) => normalizeSession(unwrap(await api.post(`${SESSIONS_PATH}/${id}/reopen`, payload))),
+    []
+  );
+
+  return { ...result, loading, error, getSessions, getSession, closeSession, stopSales, receiveHandover, reopenSession };
 };

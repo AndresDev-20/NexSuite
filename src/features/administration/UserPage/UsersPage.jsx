@@ -306,7 +306,8 @@ const UsersPage = () => {
       <UserBranchesModal
         open={Boolean(branchesFor)}
         user={branchesFor}
-        branches={branches}
+        // Solo asigna en sus sucursales (A8)
+        branches={branches.filter((branch) => branch.own)}
         assignedIds={branchesFor ? (branchesByUser?.get(branchesFor.id) ?? []).map((branch) => branch.id) : []}
         onToggle={handleToggleBranch}
         onClose={() => setBranchesFor(null)}

@@ -27,7 +27,9 @@ const buildColumns = (showProfit) => [
     primary: true,
     render: (sale) => (
       <div className="sales-cell">
-        <strong className="sales-cell__number">{sale.number}</strong>
+        <strong className="sales-cell__number">
+          {sale.number} {sale.isVoided && <span className="sales-cell__voided">Anulada</span>}
+        </strong>
         <span className="sales-cell__secondary">{formatDateTime(sale.createdAt)}</span>
       </div>
     ),
@@ -48,12 +50,17 @@ const buildColumns = (showProfit) => [
     header: "Pago",
     render: (sale) => [...new Set(sale.payments.map((payment) => getMethodLabel(payment.method)))].join(" + ") || "—",
   },
-  { key: "total", header: "Total", render: (sale) => <strong>{formatCurrency(sale.total)}</strong> },
+  {
+    key: "total",
+    header: "Total",
+    render: (sale) => <strong className={sale.isVoided ? "sales-cell__struck" : undefined}>{formatCurrency(sale.total)}</strong>,
+  },
   ...(showProfit ? [{ key: "profit", header: "Ganancia", render: (sale) => formatCurrency(sale.profit ?? 0) }] : []),
 ];
 
 const SalesPage = () => {
-  const { items, total, page, pages, loading, error, getSales, getSale } = useSales();
+  const { items, total, page, pages, loading, error, getSales, getSale, voidSale } = useSales();
+  const [reload, setReload] = useState(0);
   const { activeBranchId, activeBranch } = useActiveBranch();
   const { can } = usePermissions();
   const [searchParams] = useSearchParams();
@@ -82,10 +89,11 @@ const SalesPage = () => {
     };
     const timer = setTimeout(() => getSales(params), SEARCH_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [query, from, to, activeBranchId, currentPage, getSales, seesAll, sellerFilter]);
+  }, [query, from, to, activeBranchId, currentPage, getSales, seesAll, sellerFilter, reload]);
 
   const columns = useMemo(() => buildColumns(showProfit), [showProfit]);
-  const pageTotal = items.reduce((sum, sale) => sum + sale.total, 0);
+  // Las anuladas no suman
+  const pageTotal = items.filter((sale) => !sale.isVoided).reduce((sum, sale) => sum + sale.total, 0);
 
   const renderContent = () => {
     if (loading) {
@@ -186,7 +194,13 @@ const SalesPage = () => {
         {renderContent()}
       </div>
 
-      <SaleDetailModal saleId={viewing} getSale={getSale} onClose={() => setViewing(null)} />
+      <SaleDetailModal
+        saleId={viewing}
+        getSale={getSale}
+        voidSale={voidSale}
+        onVoided={() => setReload((value) => value + 1)}
+        onClose={() => setViewing(null)}
+      />
     </section>
   );
 };

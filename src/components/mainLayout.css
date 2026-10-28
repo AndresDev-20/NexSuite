@@ -47,3 +47,9 @@
     padding: 32px;
   }
 }
+/* Mientras se descarga una pantalla (React.lazy, Fase 17.2) */
+.main-layout__loading {
+  padding: 24px;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}

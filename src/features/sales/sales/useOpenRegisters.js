@@ -23,9 +23,9 @@ export const rememberSession = (id) => {
   }
 };
 
-/** Opciones de caja: "Caja 2 · Rovira Centro · turno de Ana". */
+/** Opciones de caja: "Caja 2 · Rovira Centro · turno de Ana" (o "abrió sola" si el turno es de la caja). */
 export const sessionOptions = (sessions) =>
-  sessions.map((session) => ({ value: String(session.id), label: `${session.registerName} · ${session.branchName} · turno de ${session.userName}` }));
+  sessions.map((session) => ({ value: String(session.id), label: `${session.registerName} · ${session.branchName} · ${session.userName ? `turno de ${session.userName}` : "abrió sola"}` }));
 
 const normalizeSession = (session) => ({
   id: session.id,

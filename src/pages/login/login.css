@@ -295,6 +295,23 @@
   text-decoration: none;
 }
 .form__link:hover { color: var(--red-800); text-decoration: underline; }
+/* Ahora es un botón (A9): sin el estilo del navegador */
+button.form__link {
+  padding: 0;
+  font-family: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.form__hint {
+  margin: 0 0 clamp(8px, 1.6dvh, 14px);
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
 
 /* ==========================================================================
    BLOQUE: button

@@ -79,7 +79,7 @@ const columns = [
 
 /**
  * onView: abre la ficha completa del proveedor.
- * canEdit: editar y activar/desactivar · canDelete: eliminar, solo si no tiene unidades ni pedidos
+ * canEdit: editar y activar/desactivar · canDelete: eliminar, solo si no tiene unidades ni compras
  * (con historia se desactiva).
  */
 const SuppliersTable = ({ suppliers, canEdit, canDelete, onView, onEdit, onToggleActive, onDelete }) => (
@@ -111,7 +111,7 @@ const SuppliersTable = ({ suppliers, canEdit, canDelete, onView, onEdit, onToggl
                   tone="danger"
                   label={
                     supplier.hasHistory
-                      ? "Tiene unidades o pedidos: desactívalo en lugar de eliminarlo"
+                      ? "Tiene unidades o compras: desactívalo en lugar de eliminarlo"
                       : `Eliminar ${supplier.companyname}`
                   }
                   disabled={supplier.hasHistory}

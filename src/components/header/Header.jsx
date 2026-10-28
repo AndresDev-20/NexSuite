@@ -3,15 +3,21 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Icon from "../ui/Icon/Icon";
 import Menu from "../menu/Menu";
 import BranchSelector from "../../features/branches/BranchSelector";
+import usePermissions from "../../features/auth/usePermissions";
+import { useChatSummary } from "../../features/chats/useChats";
 import { clearSession, getUser } from "../../utils/session";
 import { getFullName, getInitials, getShortName } from "../../utils/userDisplay";
 import "./header.css";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
 
-const Header = ({ notifications = 0 }) => {
+const Header = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  // Aviso: conversaciones de WhatsApp que esperan vendedor (Fase 16); solo con «Ver chats»
+  const { can } = usePermissions();
+  const seesChats = can("chats.read");
+  const { waiting: notifications } = useChatSummary(seesChats);
 
   const [menuOpen, setMenuOpen] = useState(false); // drawer móvil / tablet
   const [userOpen, setUserOpen] = useState(false); // menú del usuario
@@ -94,7 +100,9 @@ const Header = ({ notifications = 0 }) => {
             <button
               type="button"
               className="icon-button"
-              aria-label={notifications > 0 ? `Notificaciones (${notifications})` : "Notificaciones"}
+              aria-label={notifications > 0 ? `Chats esperando vendedor (${notifications})` : "Notificaciones"}
+              title={notifications > 0 ? `${notifications} ${notifications === 1 ? "chat espera" : "chats esperan"} vendedor` : undefined}
+              onClick={seesChats ? () => navigate("/ventas/chats") : undefined}
             >
               <Icon name="bell" className="icon-button__icon" />
               {notifications > 0 && (

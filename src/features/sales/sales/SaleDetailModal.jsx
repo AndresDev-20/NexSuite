@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import usePermissions from "../../auth/usePermissions";
+import useToast from "../../../components/feadback/Toast/useToast";
+import CancelReasonModal from "../receivables/CancelReasonModal";
 import Button from "../../../components/ui/Button/Button";
 import { FormActions } from "../../../components/forms/FormLayout/FormLayout";
 import Modal from "../../../components/feadback/Modal/Modal";
@@ -9,10 +12,14 @@ import { formatDay } from "../../purchases/orders/orderOptions";
 import ReceiptActions from "./ReceiptActions";
 import { getMethodLabel } from "./useSales";
 import "../../../styles/sheet.css";
+import "./saleDetail.css";
 
 /* ---------- Contenido (se monta por venta) ---------- */
-const SaleSheet = ({ saleId, getSale, onClose }) => {
+const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onClose }) => {
   const [state, setState] = useState({ sale: null, loading: true, error: "" });
+  const [voiding, setVoiding] = useState(null);
+  const { can } = usePermissions();
+  const toast = useToast();
 
   useEffect(() => {
     let current = true;
@@ -28,10 +35,33 @@ const SaleSheet = ({ saleId, getSale, onClose }) => {
   if (loading) return <p className="sheet__loading">Cargando la venta…</p>;
   if (error) return <p className="sheet__error">{error}</p>;
 
+  // Anular: con el permiso, venta completada y su turno de caja abierto (el servidor lo vuelve a revisar)
+  const canVoid = Boolean(voidSale) && can("sales.void") && !sale.isVoided && sale.sessionOpen !== false;
+  const handleVoid = async (reason) => {
+    const { sale: voided, message } = await voidSale(sale.id, reason);
+    setState({ sale: voided, loading: false, error: "" });
+    setVoiding(null);
+    toast.success(message ?? `Venta ${voided.number} anulada.`);
+    onVoided?.(voided);
+  };
+
   return (
     <div className="sheet">
+      {sale.isVoided && (
+        <div className="sale-voided" role="status">
+          <strong>Venta anulada</strong>
+          <span>
+            {sale.voidedAt ? formatDateTime(sale.voidedAt) : ""}
+            {sale.voiderName && ` · por ${sale.voiderName}`}
+          </span>
+          {sale.voidReason && <span>Motivo: {sale.voidReason}</span>}
+          <span className="sale-voided__note">No cuenta en caja, cartera ni reportes; sus productos volvieron al inventario.</span>
+        </div>
+      )}
       <header className="sheet__head">
-        <p className="sheet__name sheet__mono">{sale.number}</p>
+        <p className="sheet__name sheet__mono">
+          {sale.number} {sale.isVoided && <span className="sheet__badge sheet__badge--empty">Anulada</span>}
+        </p>
         <ul className="sheet__facts">
           <li>{formatDateTime(sale.createdAt)}</li>
           {sale.branch && <li>{sale.branch.name}</li>}
@@ -131,21 +161,41 @@ const SaleSheet = ({ saleId, getSale, onClose }) => {
       </section>
 
       <FormActions>
+        {canVoid && (
+          <Button
+            variant="outline"
+            icon="x"
+            className="sale-void-button"
+            onClick={() =>
+              setVoiding({
+                key: sale.id,
+                title: `Anular la venta ${sale.number}`,
+                confirmLabel: "Anular venta",
+                text: `¿Anular la venta ${sale.number} por ${formatCurrency(sale.total)}? Sus productos vuelven al inventario, el efectivo sale del esperado de la caja y lo fiado de la cartera. Solo se puede mientras su turno de caja siga abierto. El número no se reutiliza y queda en el historial con el motivo.`,
+              })
+            }
+          >
+            Anular venta
+          </Button>
+        )}
         <Button variant="outline" onClick={onClose}>
           Cerrar
         </Button>
       </FormActions>
+      <CancelReasonModal request={voiding} onClose={() => setVoiding(null)} onSubmit={handleVoid} />
     </div>
   );
 };
 
 /**
  * Detalle de una venta: productos, IMEI y garantía, pagos y (con "Ver costos") la ganancia.
- * Desde aquí se reimprime el comprobante, se descarga en PDF o se envía por correo. saleId null = cerrado.
+ * Desde aquí se reimprime el comprobante, se descarga en PDF o se envía por correo, y (con
+ * "Anular ventas") se anula mientras su turno siga abierto. saleId null = cerrado.
+ * voidSale(id, reason) y onVoided(venta) son opcionales: sin voidSale no aparece el botón.
  */
-const SaleDetailModal = ({ saleId, getSale, onClose }) => (
+const SaleDetailModal = ({ saleId, getSale, voidSale, onVoided, onClose }) => (
   <Modal open={Boolean(saleId)} title="Detalle de la venta" size="wide" onClose={onClose}>
-    {saleId && <SaleSheet key={saleId} saleId={saleId} getSale={getSale} onClose={onClose} />}
+    {saleId && <SaleSheet key={saleId} saleId={saleId} getSale={getSale} voidSale={voidSale} onVoided={onVoided} onClose={onClose} />}
   </Modal>
 );
 

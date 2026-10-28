@@ -2,9 +2,14 @@
  * Estado del formulario de compra y su conversión al payload de la API.
  *
  * products: [{ productId, name, sku, hasSerial, unitCost, serialType, warrantyMonths,
- *              quantities: { [branchId]: "2" }, serials: { [branchId]: "IMEI\nIMEI" } }]
+ *              quantities: { [branchId]: "2" }, serials: { [branchId]: "IMEI\nIMEI" },
+ *              loaded: { [branchId]: { count, units: [{ idunit, serial, imei2 }] } }, useLoaded }]
  * Los IMEI/seriales se escriben (o se escanean) uno por línea; si un celular trae IMEI 2,
  * va en la misma línea separado por coma: "35…, 35…".
+ *
+ * loaded (2026-10-28): lo que ya se cargó al crear el producto y aún no tiene compra. Con useLoaded,
+ * la compra lo documenta: esas unidades cuentan en la cantidad pero no suman otra vez al confirmar;
+ * en serials solo se escriben los IMEI de las unidades nuevas.
  */
 import { todayInColombia } from "../../../utils/dates";
 import { itemsTotal } from "./orderOptions";
@@ -22,18 +27,43 @@ export const parseSerials = (text = "") =>
 
 const serialsToText = (units) => units.map((unit) => (unit.imei2 ? `${unit.serial}, ${unit.imei2}` : unit.serial)).join("\n");
 
-/** Producto recién agregado: costo actual (vacío si no se puede ver) y 1 unidad en la sucursal por defecto. */
-export const newProductLine = (product, defaultBranchId) => ({
-  productId: product.id,
-  name: product.name,
-  sku: product.sku,
-  hasSerial: product.hasSerial,
-  unitCost: product.costPrice != null ? String(product.costPrice) : "",
-  serialType: "imei",
-  warrantyMonths: "",
-  quantities: defaultBranchId ? { [defaultBranchId]: "1" } : {},
-  serials: {},
-});
+/**
+ * Producto recién agregado: costo actual (vacío si no se puede ver). Si ya tiene existencias
+ * cargadas sin compra (loadedStock), se autocompletan sus cantidades por sucursal, sus IMEI, el
+ * tipo y la garantía; si no, 1 unidad en la sucursal por defecto.
+ */
+export const newProductLine = (product, defaultBranchId, loadedStock = null) => {
+  const loadedBranches = loadedStock?.branches ?? [];
+  const loaded = Object.fromEntries(loadedBranches.map((branch) => [branch.branchId, { count: branch.quantity, units: branch.units }]));
+  return {
+    productId: product.id,
+    name: product.name,
+    sku: product.sku,
+    hasSerial: product.hasSerial,
+    unitCost: product.costPrice != null ? String(product.costPrice) : "",
+    serialType: loadedStock?.serialType ?? "imei",
+    warrantyMonths: loadedStock?.warrantyMonths ? String(loadedStock.warrantyMonths) : "",
+    quantities:
+      loadedBranches.length > 0
+        ? Object.fromEntries(loadedBranches.map((branch) => [branch.branchId, String(branch.quantity)]))
+        : defaultBranchId
+          ? { [defaultBranchId]: "1" }
+          : {},
+    serials: {},
+    loaded,
+    useLoaded: loadedBranches.length > 0,
+  };
+};
+
+/** Cuántas de una sucursal ya estaban cargadas y se documentan (0 si no se usa lo cargado). */
+export const loadedCount = (line, branchId) => {
+  if (!line.useLoaded) return 0;
+  const loaded = line.loaded?.[branchId];
+  if (!loaded) return 0;
+  return line.hasSerial ? loaded.units.length : loaded.count;
+};
+
+export const hasLoaded = (line) => Object.keys(line.loaded ?? {}).length > 0;
 
 export const initialState = (order) => ({
   header: {
@@ -44,17 +74,30 @@ export const initialState = (order) => ({
     creditdays: order?.creditDays ? String(order.creditDays) : "",
     notes: order?.notes ?? "",
   },
-  products: (order?.items ?? []).map((item) => ({
-    productId: item.productId,
-    name: item.productName,
-    sku: item.productSku,
-    hasSerial: item.hasSerial,
-    unitCost: String(item.unitCost),
-    serialType: item.serialType ?? "imei",
-    warrantyMonths: item.warrantyMonths ? String(item.warrantyMonths) : "",
-    quantities: Object.fromEntries(item.branches.map((branch) => [branch.branchId, String(branch.quantity)])),
-    serials: Object.fromEntries(item.branches.map((branch) => [branch.branchId, serialsToText(branch.units)])),
-  })),
+  products: (order?.items ?? []).map((item) => {
+    // Lo ya cargado que esta compra documenta: con serial, las unidades con idunit
+    const loaded = Object.fromEntries(
+      item.branches
+        .map((branch) => {
+          const units = branch.units.filter((unit) => unit.idunit);
+          return [branch.branchId, { count: item.hasSerial ? units.length : branch.existing, units }];
+        })
+        .filter(([, value]) => value.count > 0)
+    );
+    return {
+      productId: item.productId,
+      name: item.productName,
+      sku: item.productSku,
+      hasSerial: item.hasSerial,
+      unitCost: String(item.unitCost),
+      serialType: item.serialType ?? "imei",
+      warrantyMonths: item.warrantyMonths ? String(item.warrantyMonths) : "",
+      quantities: Object.fromEntries(item.branches.map((branch) => [branch.branchId, String(branch.quantity)])),
+      serials: Object.fromEntries(item.branches.map((branch) => [branch.branchId, serialsToText(branch.units.filter((unit) => !unit.idunit))])),
+      loaded,
+      useLoaded: Object.keys(loaded).length > 0,
+    };
+  }),
 });
 
 /** Unidades de un producto en cada sucursal (solo las que tienen cantidad). */
@@ -86,10 +129,19 @@ export const validate = ({ header, products }) => {
     const messages = [];
     if (line.unitCost === "" || !(Number(line.unitCost) >= 0)) messages.push("Escribe el costo unitario.");
     if (lineQuantity(line) === 0) messages.push("Indica cuántas unidades van al menos a una sucursal.");
+    // Lo ya cargado cuenta dentro de la cantidad de cada sucursal
+    Object.keys(line.loaded ?? {}).forEach((branchId) => {
+      const loaded = loadedCount(line, branchId);
+      const quantity = Number(line.quantities[branchId]) || 0;
+      if (line.hasSerial && loaded > quantity) {
+        messages.push(`Hay ${loaded} ya cargadas en una sucursal: la cantidad no puede ser menor (o no documentes lo cargado).`);
+      }
+    });
     if (line.hasSerial) {
       allocationsOf(line).forEach(({ branchId, quantity }) => {
         const count = parseSerials(line.serials[branchId]).length;
-        if (count > quantity) messages.push(`Hay ${count} seriales para ${quantity} unidades en una sucursal.`);
+        const room = quantity - loadedCount(line, branchId);
+        if (count > room) messages.push(`Hay ${count} seriales nuevos para ${Math.max(room, 0)} unidades nuevas en una sucursal.`);
       });
     }
     if (messages.length > 0) errors.products[line.productId] = messages;
@@ -115,7 +167,16 @@ export const toPayload = ({ header, products }) => ({
       ...(line.warrantyMonths !== "" && { warrantymonths: Number(line.warrantyMonths) }),
     }),
     branches: allocationsOf(line).map(({ branchId, quantity }) => {
-      const units = line.hasSerial ? parseSerials(line.serials[branchId]) : [];
+      const loaded = loadedCount(line, branchId);
+      if (!line.hasSerial) {
+        // Sin serial: de la cantidad, cuántas ya estaban cargadas (no más que la cantidad)
+        const existing = Math.min(loaded, quantity);
+        return { idbranch: branchId, quantity, ...(existing > 0 && { existing }) };
+      }
+      const units = [
+        ...(loaded > 0 ? line.loaded[branchId].units.map((unit) => ({ idunit: unit.idunit })) : []),
+        ...parseSerials(line.serials[branchId]),
+      ];
       return { idbranch: branchId, quantity, ...(units.length > 0 && { units }) };
     }),
   })),

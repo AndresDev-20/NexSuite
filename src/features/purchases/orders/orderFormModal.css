@@ -230,3 +230,78 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Lo ya cargado al crear el producto: la compra lo documenta (2026-10-28) */
+.purchase-line__loaded {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background-color: var(--success-soft);
+  border-left: 4px solid var(--success);
+  border-radius: 10px;
+  animation: purchase-loaded-in 280ms ease both;
+}
+
+.purchase-line__loaded--off {
+  background-color: var(--gray-50);
+  border-left-color: var(--gray-300);
+}
+
+.purchase-line__loaded-toggle {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.purchase-line__loaded-text,
+.purchase-line__loaded-note {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+
+.purchase-line__serial-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.purchase-line__loaded-units ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.purchase-line__loaded-units li {
+  padding: 3px 8px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  background-color: var(--gray-100);
+  border-radius: 999px;
+}
+
+@keyframes purchase-loaded-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .purchase-line__loaded {
+    animation: none;
+  }
+}

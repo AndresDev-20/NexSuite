@@ -82,6 +82,12 @@ export const normalizeSale = (sale) => ({
   creditAmount: toNumber(sale.creditamount),
   dueDate: sale.duedate ?? null,
   notes: sale.notes ?? "",
+  // Anulación (Fase 11.1)
+  isVoided: sale.status === "anulada",
+  voidedAt: sale.voidedat ?? null,
+  voidReason: sale.voidreason ?? "",
+  voiderName: sale.voider ? getFullName(sale.voider) : "",
+  sessionOpen: sale.session?.status ? sale.session.status === "abierta" : null,
   items: (sale.items ?? []).map(normalizeItem),
   payments: (sale.payments ?? []).map((payment) => ({
     id: payment.id,
@@ -126,7 +132,13 @@ const useSales = () => {
     return { sale: normalizeSale(data.data), message: data.message };
   }, []);
 
-  return { ...result, loading, error, getSales, getSale, createSale };
+  /** Anula la venta (con su turno abierto) y devuelve la venta normalizada. Lanza el error del servidor. */
+  const voidSale = useCallback(async (id, reason) => {
+    const { data } = await api.post(`${SALES_PATH}/${id}/void`, { reason });
+    return { sale: normalizeSale(data.data), message: data.message };
+  }, []);
+
+  return { ...result, loading, error, getSales, getSale, createSale, voidSale };
 };
 
 export default useSales;

@@ -16,6 +16,7 @@ export const normalizeProduct = (product) => ({
   costPrice: product.cost_price === undefined ? null : toNumber(product.cost_price),
   salePrice: toNumber(product.sale_price),
   hasSerial: Boolean(product.hasserial),
+  warrantyMonths: Number(product.warrantymonths ?? 0),
   isActive: product.isactive !== false,
   categoryId: product.idcategory ?? product.category?.id ?? null,
   categoryName: product.category?.nameCategory ?? "",

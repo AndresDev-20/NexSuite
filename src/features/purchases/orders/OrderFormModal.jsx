@@ -14,14 +14,17 @@ import { sanitizeDecimal, stripNonDigits } from "../../../utils/validators";
 import { PAYMENT_TERMS, SERIAL_TYPES, itemsTotal } from "./orderOptions";
 import {
   allocationsOf,
+  hasLoaded,
   initialState,
   lineQuantity,
+  loadedCount,
   newProductLine,
   parseSerials,
   purchaseTotal,
   toPayload,
   validate,
 } from "./purchaseForm";
+import { fetchLoadedStock } from "./useOrders";
 import "./orderFormModal.css";
 
 const MAX_QUANTITY_LENGTH = 7; // hasta 1.000.000
@@ -52,6 +55,39 @@ const ProductLine = ({ line, branches, errors, onChange, onRemove }) => {
           <Icon name="trash" className="purchase-line__remove-icon" />
         </button>
       </header>
+
+      {hasLoaded(line) && (
+        <div className={`purchase-line__loaded ${line.useLoaded ? "" : "purchase-line__loaded--off"}`.trim()}>
+          <label className="purchase-line__loaded-toggle">
+            <input
+              type="checkbox"
+              checked={line.useLoaded}
+              onChange={(event) => {
+                const useLoaded = event.target.checked;
+                if (!useLoaded) return set({ useLoaded });
+                // Al volver a usarlo, cada sucursal tiene al menos lo cargado
+                const quantities = { ...line.quantities };
+                Object.keys(line.loaded).forEach((id) => {
+                  const loaded = loadedCount({ ...line, useLoaded }, id);
+                  quantities[id] = String(Math.max(Number(quantities[id]) || 0, loaded));
+                });
+                set({ useLoaded, quantities });
+              }}
+            />
+            <span>Documentar lo ya cargado</span>
+          </label>
+          <p className="purchase-line__loaded-text">
+            Ya se cargó al crear el producto:{" "}
+            {Object.entries(line.loaded)
+              .map(([id, value]) => `${line.hasSerial ? value.units.length : value.count} en ${branches.find((branch) => String(branch.id) === String(id))?.name ?? "otra sucursal"}`)
+              .join(", ")}
+            .{" "}
+            {line.useLoaded
+              ? "Se autocompletó: esta compra lo documenta y al confirmar no suma esas unidades otra vez. Si compraste más, súbele la cantidad."
+              : "Sin documentarlo, todo lo de esta compra se suma como mercancía nueva."}
+          </p>
+        </div>
+      )}
 
       <div className="purchase-line__fields">
         <Field
@@ -110,21 +146,53 @@ const ProductLine = ({ line, branches, errors, onChange, onRemove }) => {
         allocationsOf(line).map(({ branchId, quantity: branchQuantity }) => {
           const branch = branches.find((candidate) => candidate.id === branchId);
           const count = parseSerials(line.serials[branchId]).length;
+          const loaded = loadedCount(line, branchId);
+          const fresh = Math.max(branchQuantity - loaded, 0);
           return (
-            <Field
-              key={branchId}
-              className="purchase-line__serials"
-              label={`${serialLabel} para ${branch?.name ?? "la sucursal"} (${count} de ${branchQuantity})`}
-              multiline
-              autoComplete="off"
-              spellCheck={false}
-              placeholder={line.serialType === "imei" ? "Uno por línea. IMEI 2 en la misma línea: 35…, 35…" : "Uno por línea"}
-              hint={count < branchQuantity ? "Puedes guardar sin todos; para confirmar la compra deben estar completos." : undefined}
-              value={line.serials[branchId] ?? ""}
-              onChange={(event) => setSerials(branchId, event.target.value)}
-            />
+            <div className="purchase-line__serial-group" key={branchId}>
+              {loaded > 0 && (
+                <div className="purchase-line__loaded-units">
+                  <span className="purchase-line__legend">
+                    {serialLabel} ya cargados en {branch?.name ?? "la sucursal"} ({loaded})
+                  </span>
+                  <ul>
+                    {line.loaded[branchId].units.map((unit) => (
+                      <li key={unit.idunit}>
+                        {unit.serial}
+                        {unit.imei2 && ` · ${unit.imei2}`}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {fresh > 0 && (
+                <Field
+                  className="purchase-line__serials"
+                  label={`${serialLabel} ${loaded > 0 ? "nuevos " : ""}para ${branch?.name ?? "la sucursal"} (${count} de ${fresh})`}
+                  multiline
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder={line.serialType === "imei" ? "Uno por línea. IMEI 2 en la misma línea: 35…, 35…" : "Uno por línea"}
+                  hint={count < fresh ? "Puedes guardar sin todos; para confirmar la compra deben estar completos." : undefined}
+                  value={line.serials[branchId] ?? ""}
+                  onChange={(event) => setSerials(branchId, event.target.value)}
+                />
+              )}
+            </div>
           );
         })}
+
+      {!line.hasSerial && line.useLoaded && hasLoaded(line) && (
+        <p className="purchase-line__loaded-note">
+          {allocationsOf(line)
+            .map(({ branchId, quantity: branchQuantity }) => {
+              const loaded = Math.min(loadedCount(line, branchId), branchQuantity);
+              const branch = branches.find((candidate) => candidate.id === branchId);
+              return `${branch?.name ?? "Sucursal"}: ${loaded} ya ${loaded === 1 ? "cargada" : "cargadas"}${branchQuantity > loaded ? ` + ${branchQuantity - loaded} ${branchQuantity - loaded === 1 ? "nueva" : "nuevas"}` : ""}`;
+            })
+            .join(" · ")}
+        </p>
+      )}
 
       <footer className="purchase-line__foot">
         <span>{unitsText(quantity)}</span>
@@ -157,12 +225,21 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
     setState((current) => ({ ...current, products: current.products.map((item) => (item.productId === line.productId ? line : item)) }));
   const removeLine = (productId) =>
     setState((current) => ({ ...current, products: current.products.filter((item) => item.productId !== productId) }));
-  const addLine = (product) =>
+  // Si el producto ya tiene existencias cargadas sin compra, la línea se autocompleta con ellas
+  const addLine = async (product) => {
+    if (state.products.some((item) => item.productId === product.id)) return;
+    let loadedStock = null;
+    try {
+      loadedStock = await fetchLoadedStock(product.id, order?.id);
+    } catch {
+      // Sin poder consultarlo, se agrega como mercancía nueva (el servidor revisa igual al guardar)
+    }
     setState((current) =>
       current.products.some((item) => item.productId === product.id)
         ? current
-        : { ...current, products: [...current.products, newProductLine(product, defaultBranchId)] }
+        : { ...current, products: [...current.products, newProductLine(product, defaultBranchId, loadedStock)] }
     );
+  };
 
   const catalog = [...products, ...extraProducts.filter((extra) => !products.some((product) => product.id === extra.id))];
   const chosen = new Set(state.products.map((line) => line.productId));

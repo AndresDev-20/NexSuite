@@ -12,6 +12,8 @@ import useActiveBranch from "../../../features/branches/useActiveBranch";
 import { formatDateTime } from "../../../features/administration/audit/auditOptions";
 import SessionView from "../../../features/cash/sessions/SessionView";
 import CloseSessionModal from "../../../features/cash/sessions/CloseSessionModal";
+import ReceiveHandoverModal from "../../../features/cash/sessions/ReceiveHandoverModal";
+import ReopenSessionModal from "../../../features/cash/sessions/ReopenSessionModal";
 import { useCashSessions } from "../../../features/cash/useCash";
 import usePermissions from "../../../features/auth/usePermissions";
 import useToast from "../../../components/feadback/Toast/useToast";
@@ -24,10 +26,18 @@ import "./sessionsPage.css";
 
 const PAGE_SIZE = 25;
 const SKELETON_ITEMS = 4;
+// "entrega": contados cuyo dinero aún no confirma el administrador
 const STATUS_OPTIONS = [
-  { value: "abierta", label: "Abiertos" },
-  { value: "cerrada", label: "Cerrados" },
+  { value: "abierta", label: "Vendiendo" },
+  { value: "por_contar", label: "Por contar" },
+  { value: "entrega", label: "Entregas por recibir" },
+  { value: "cerrada", label: "Contados" },
 ];
+const STATUS_TAGS = {
+  abierta: { label: "Vendiendo", tone: "open" },
+  por_contar: { label: "Por contar", tone: "pending" },
+  cerrada: { label: "Contado", tone: "" },
+};
 const CLOSED_DETAIL = { open: false, session: null, loading: false, error: "" };
 
 const columns = [
@@ -54,36 +64,53 @@ const columns = [
   },
   {
     key: "money",
-    header: "Base / esperado",
+    header: "Esperado / entrega",
     render: (session) => (
       <div className="cash-cell">
         <span className="cash-cell__money">{formatCurrency(session.totals.expected)}</span>
-        <span className="cash-cell__secondary">Base {formatCurrency(session.totals.opening)}</span>
+        <span className="cash-cell__secondary">
+          {session.handoverAmount !== null ? `Entrega ${formatCurrency(session.handoverAmount)}` : `Base ${formatCurrency(session.totals.opening)}`}
+        </span>
       </div>
     ),
   },
   {
     key: "status",
     header: "Estado",
-    render: (session) => (
-      <span className={`cash-tag ${session.status === "abierta" ? "cash-tag--open" : ""}`.trim()}>
-        {session.status === "abierta" ? "Abierto" : "Cerrado"}
-      </span>
-    ),
+    render: (session) => {
+      const tag = STATUS_TAGS[session.status] ?? STATUS_TAGS.cerrada;
+      const pendingHandover = session.status === "cerrada" && session.handoverAmount > 0 && !session.receivedAt;
+      return (
+        <div className="cash-cell">
+          <span className={`cash-tag ${tag.tone ? `cash-tag--${tag.tone}` : ""}`.trim()}>{tag.label}</span>
+          {pendingHandover && <span className="cash-tag cash-tag--pending">Por recibir</span>}
+          {session.receivedAt && <span className="cash-tag cash-tag--received">Recibido</span>}
+        </div>
+      );
+    },
   },
 ];
 
 const SessionsPage = () => {
-  const { items, total, page, pages, loading, error, getSessions, getSession, closeSession } = useCashSessions();
+  const { items, total, page, pages, loading, error, getSessions, getSession, closeSession, stopSales, receiveHandover, reopenSession } = useCashSessions();
   const { can } = usePermissions();
   const toast = useToast();
   const currentUserId = getUser()?.id;
-  const [closing, setClosing] = useState(null); // turno que se está cerrando
+  const [closing, setClosing] = useState(null); // turno que se está contando
+  const [receiving, setReceiving] = useState(null); // turno cuyo dinero se recibe
+  const [reopening, setReopening] = useState(null); // turno contado que se reabre (12.2)
 
-  // El propio lo cierra quien opera caja; uno ajeno, quien tiene "Cerrar turnos de otros" (el servidor también lo exige)
+  // Contar: el propio quien opera caja; el de la caja (sin dueño) ya por contar, quien opera caja;
+  // cualquiera, quien tiene "Cerrar turnos de otros" (el servidor también lo exige)
   const canClose = (session) =>
-    session.status === "abierta" &&
-    (can("cash-sessions.close-any") || (session.userId === currentUserId && can("cash-sessions.operate")));
+    ["abierta", "por_contar"].includes(session.status) &&
+    (can("cash-sessions.close-any") ||
+      (can("cash-sessions.operate") && (session.userId === currentUserId || (session.userId === null && session.status === "por_contar"))));
+  const canStop = (session) => session.status === "abierta" && can("cash-sessions.close-any");
+  const canReceive = (session) => session.status === "cerrada" && session.handoverAmount > 0 && !session.receivedAt && can("cash-sessions.receive");
+  // Reabrir (12.2): contado y sin recibir la entrega; si no había nada que entregar, el servidor revisa
+  // que su caja no haya abierto otro turno
+  const canReopen = (session) => session.status === "cerrada" && !session.receivedAt && can("cash-sessions.reopen");
   const { status: branchStatus, hasBranches, activeBranchId, activeBranch } = useActiveBranch();
   const [searchParams, setSearchParams] = useSearchParams();
   const status = searchParams.get("status") ?? "";
@@ -91,7 +118,12 @@ const SessionsPage = () => {
   const [detail, setDetail] = useState(CLOSED_DETAIL);
 
   const params = useMemo(
-    () => ({ ...(status && { status }), ...(activeBranchId && { idbranch: activeBranchId }), page: currentPage, limit: PAGE_SIZE }),
+    () => ({
+      ...(status === "entrega" ? { pending: "entrega" } : status && { status }),
+      ...(activeBranchId && { idbranch: activeBranchId }),
+      page: currentPage,
+      limit: PAGE_SIZE,
+    }),
     [status, activeBranchId, currentPage]
   );
 
@@ -125,10 +157,35 @@ const SessionsPage = () => {
     setClosing(null);
     setDetail({ open: true, session: closed, loading: false, error: "" });
     toast.success(
-      closed.difference === 0
-        ? `Turno de ${closed.userName} cerrado: cuadró.`
-        : `Turno de ${closed.userName} cerrado: ${closed.difference > 0 ? "sobraron" : "faltaron"} ${formatCurrency(Math.abs(closed.difference))}.`
+      `${closed.registerName} contada${closed.difference === 0 ? ": cuadró" : `: ${closed.difference > 0 ? "sobraron" : "faltaron"} ${formatCurrency(Math.abs(closed.difference))}`}. Entrega ${formatCurrency(closed.handoverAmount ?? 0)}.`
     );
+    getSessions(params);
+  };
+
+  const handleStop = async (session) => {
+    try {
+      const stopped = await stopSales(session.id);
+      toast.success(`${stopped.registerName} dejó de vender: queda por contar.`);
+      if (detail.session?.id === stopped.id) setDetail({ open: true, session: stopped, loading: false, error: "" });
+      getSessions(params);
+    } catch (err) {
+      toast.error(getErrorMessage(err, "No se pudo detener la caja."));
+    }
+  };
+
+  const handleReceive = async (payload) => {
+    const updated = await receiveHandover(receiving.id, payload);
+    setReceiving(null);
+    if (detail.session?.id === updated.id) setDetail({ open: true, session: updated, loading: false, error: "" });
+    toast.success(`Recibiste ${formatCurrency(updated.receivedAmount)} de ${updated.registerName}.`);
+    getSessions(params);
+  };
+
+  const handleReopen = async (payload) => {
+    const updated = await reopenSession(reopening.id, payload);
+    setReopening(null);
+    if (detail.session?.id === updated.id) setDetail({ open: true, session: updated, loading: false, error: "" });
+    toast.success(`${updated.registerName} vuelve a «por contar»: cuéntala otra vez.`);
     getSessions(params);
   };
 
@@ -164,13 +221,19 @@ const SessionsPage = () => {
           getRowKey={(session) => session.id}
           renderActions={(session) => (
             <RowActions>
-              <RowAction icon="eye" label={`Ver el turno de ${session.userName} en ${session.registerName}`} onClick={() => openDetail(session.id)} />
+              <RowAction icon="eye" label={`Ver el turno de ${session.registerName}${session.auto ? "" : ` (${session.userName})`}`} onClick={() => openDetail(session.id)} />
               {canClose(session) && (
                 <RowAction
                   icon="lock"
-                  label={`Cerrar el turno de ${session.userName} en ${session.registerName}`}
+                  label={`Contar la caja de ${session.registerName}${session.auto ? "" : ` (${session.userName})`}`}
                   onClick={async () => setClosing(await getSession(session.id))}
                 />
+              )}
+              {canReceive(session) && (
+                <RowAction icon="wallet" label={`Recibir ${formatCurrency(session.handoverAmount)} de ${session.registerName}`} onClick={() => setReceiving(session)} />
+              )}
+              {canReopen(session) && (
+                <RowAction icon="refresh" label={`Reabrir el conteo de ${session.registerName}`} onClick={() => setReopening(session)} />
               )}
             </RowActions>
           )}
@@ -185,7 +248,9 @@ const SessionsPage = () => {
       <header className="list-page__header">
         <div>
           <h1 className="list-page__title">Turnos de caja</h1>
-          <p className="list-page__subtitle">Quién atiende cada caja{activeBranch ? ` en ${activeBranch.name}` : ""} y cuánto efectivo debería haber.</p>
+          <p className="list-page__subtitle">
+            Las cajas{activeBranch ? ` de ${activeBranch.name}` : ""}: cuánto efectivo debería haber, el conteo al cierre y el dinero que se entrega.
+          </p>
         </div>
       </header>
 
@@ -211,11 +276,28 @@ const SessionsPage = () => {
           <SessionView
             session={detail.session}
             actions={
-              canClose(detail.session) && (
+              (canClose(detail.session) || canStop(detail.session) || canReceive(detail.session) || canReopen(detail.session)) && (
                 <div className="my-cash__actions">
-                  <Button icon="lock" onClick={() => setClosing(detail.session)}>
-                    Cerrar turno
-                  </Button>
+                  {canStop(detail.session) && (
+                    <Button variant="outline" icon="lock" onClick={() => handleStop(detail.session)}>
+                      Dejar de vender
+                    </Button>
+                  )}
+                  {canClose(detail.session) && (
+                    <Button icon="lock" onClick={() => setClosing(detail.session)}>
+                      Contar la caja
+                    </Button>
+                  )}
+                  {canReopen(detail.session) && (
+                    <Button variant="outline" icon="refresh" onClick={() => setReopening(detail.session)}>
+                      Reabrir conteo
+                    </Button>
+                  )}
+                  {canReceive(detail.session) && (
+                    <Button icon="wallet" onClick={() => setReceiving(detail.session)}>
+                      Recibir {formatCurrency(detail.session.handoverAmount)}
+                    </Button>
+                  )}
                 </div>
               )
             }
@@ -223,7 +305,9 @@ const SessionsPage = () => {
         )}
       </Modal>
 
-      <CloseSessionModal session={closing} onClose={() => setClosing(null)} onSubmit={handleClose} />
+      <CloseSessionModal session={closing} base={closing?.registerBase ?? null} onClose={() => setClosing(null)} onSubmit={handleClose} />
+      <ReceiveHandoverModal session={receiving} onClose={() => setReceiving(null)} onSubmit={handleReceive} />
+      <ReopenSessionModal session={reopening} onClose={() => setReopening(null)} onSubmit={handleReopen} />
     </section>
   );
 };

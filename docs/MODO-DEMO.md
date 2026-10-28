@@ -12,7 +12,7 @@ Un solo interruptor: la variable de entorno **`VITE_DEMO_MODE`**.
 | Netlify | `true` (ya está en `netlify.toml`) | El sitio publicado usa `demo-db.json`, sin backend |
 | Tu equipo (`npm run dev`) | sin definir | Todo sigue conectado al backend real, como siempre |
 
-- Para conectar el sitio publicado a un backend real: en `netlify.toml` cambia `"true"` por `"false"` y define `VITE_REACT_APP_URL` con la URL pública de la API.
+- El sitio **real** es otro sitio de Netlify con el mismo repositorio: en su panel define `VITE_PRODUCTION_SITE=true` y `VITE_REACT_APP_URL` con la URL de la API. No cambies `netlify.toml`: así el demo sigue igual. Paso a paso en `docs/DESPLIEGUE.md` (sección 9).
 - Para probar la demo en tu equipo: `VITE_DEMO_MODE=true npm run dev` (en PowerShell: `$env:VITE_DEMO_MODE="true"; npm run dev`).
 - Si en Netlify el sitio usa otra carpeta base, define la variable en Netlify → Site configuration → Environment variables.
 

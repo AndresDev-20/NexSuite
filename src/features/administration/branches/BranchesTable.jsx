@@ -32,7 +32,10 @@ const columns = [
 
       return (
         <div className="branch-cell">
-          <span className="branch-cell__name">{branch.nameBranch}</span>
+          <span className="branch-cell__name">
+            {branch.nameBranch}
+            {!branch.isActive && <span className="branch-cell__tag">Inactiva</span>}
+          </span>
           {hostname && (
             <a className="branch-cell__link" href={branch.web} target="_blank" rel="noopener noreferrer">
               <Icon name="globe" className="branch-cell__link-icon" />
@@ -111,23 +114,30 @@ const columns = [
 ];
 
 /**
- * onEdit / onDelete: opcionales; sin ellos el botón no aparece (falta el permiso).
+ * onEdit / onDelete / onToggleStatus: opcionales; sin ellos el botón no aparece (falta el permiso).
  * onView: abre la ficha; canView(branch) dice si es una sucursal del usuario (solo de esas hay ficha).
  */
-const BranchesTable = ({ branches, onView, canView = () => false, onEdit, onDelete }) => (
+const BranchesTable = ({ branches, onView, canView = () => false, onEdit, onToggleStatus, onDelete }) => (
   <DataTable
     caption="Listado de sucursales"
     columns={columns}
     rows={branches}
     getRowKey={(branch) => branch.id}
     renderActions={
-      onView || onEdit || onDelete
+      onView || onEdit || onToggleStatus || onDelete
         ? (branch) => (
             <RowActions>
               {onView && canView(branch) && (
                 <RowAction icon="eye" label={`Ver la ficha de ${branch.nameBranch}`} onClick={() => onView(branch)} />
               )}
               {onEdit && <RowAction icon="edit" label={`Editar ${branch.nameBranch}`} onClick={() => onEdit(branch)} />}
+              {onToggleStatus && (
+                <RowAction
+                  icon={branch.isActive ? "lock" : "check"}
+                  label={branch.isActive ? `Desactivar ${branch.nameBranch}` : `Activar ${branch.nameBranch}`}
+                  onClick={() => onToggleStatus(branch)}
+                />
+              )}
               {onDelete && (
                 <RowAction
                   icon="trash"

@@ -31,6 +31,7 @@ const toFormValues = (product) => ({
   sale_price: product ? String(product.salePrice) : "",
   description: product?.description ?? "",
   hasserial: product?.hasSerial ?? false,
+  warrantymonths: String(product?.warrantyMonths ?? 0),
 });
 
 /**
@@ -51,6 +52,8 @@ const buildPayload = (values, isEdit, showCost) => {
     ...(showCost && { cost_price: Number(values.cost_price) }),
     sale_price: Number(values.sale_price),
     hasserial: values.hasserial,
+    // Garantía con el cliente para productos sin serial (con serial va en cada unidad)
+    ...(!values.hasserial && { warrantymonths: Number(values.warrantymonths) || 0 }),
     ...(sku && { sku }),
     ...((barcode || isEdit) && { barcode: barcode || null }),
     ...((description || isEdit) && { description: description || null }),
@@ -116,6 +119,7 @@ const ProductForm = ({ product, categories, categoryHint, showCost, busy, onCanc
   } = useForm({ defaultValues: toFormValues(product) });
 
   const [cost, sale] = watch(["cost_price", "sale_price"]);
+  const hasSerial = watch("hasserial");
   const categoryOptions = categories.map((category) => ({
     value: String(category.id),
     label: category.nameCategory,
@@ -238,6 +242,19 @@ const ProductForm = ({ product, categories, categoryHint, showCost, busy, onCanc
           />
         )}
       />
+
+      {!hasSerial && (
+        <Field
+          label="Meses de garantía"
+          inputMode="numeric"
+          maxLength={3}
+          hint="Garantía con el cliente desde el día de la venta (0 = sin garantía). Con serial, se pone en cada unidad."
+          error={errors.warrantymonths?.message}
+          {...register("warrantymonths", {
+            validate: (value) => (/^\d{1,3}$/.test(String(value).trim()) && Number(value) <= 120) || "Escribe de 0 a 120 meses.",
+          })}
+        />
+      )}
 
       <FormActions>
         <Button variant="outline" onClick={onCancel} disabled={busy}>

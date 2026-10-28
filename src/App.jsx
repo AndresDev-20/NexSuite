@@ -1,33 +1,47 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { lazy } from "react";
+import { Route, Routes } from "react-router-dom";
 import Login from "./pages/login/Login";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import MainLayout from "./components/MainLayout";
-import Home from "./pages/home/Home";
-import UsersPage from "./features/administration/UserPage/UsersPage";
-import RolesPage from "./features/administration/RolesPage/RolesPage";
-import RolePermissionsPage from "./features/administration/RolePermissionsPage/RolePermissionsPage";
-import BranchesPage from "./features/administration/BranchesPage/BranchesPage";
-import AuditPage from "./features/administration/AuditPage/AuditPage";
+const Home = lazy(() => import("./pages/home/Home"));
+const UsersPage = lazy(() => import("./features/administration/UserPage/UsersPage"));
+const RolesPage = lazy(() => import("./features/administration/RolesPage/RolesPage"));
+const RolePermissionsPage = lazy(() => import("./features/administration/RolePermissionsPage/RolePermissionsPage"));
+const BranchesPage = lazy(() => import("./features/administration/BranchesPage/BranchesPage"));
+const AuditPage = lazy(() => import("./features/administration/AuditPage/AuditPage"));
 import PermissionRoute from "./routes/PermissionRoute";
-import CategoriesPage from "./features/inventory/categories/CategoriesPage/CategoriesPage";
-import SuppliersPage from "./features/purchases/SuppliersPage/SuppliersPage";
-import OrdersPage from "./features/purchases/OrdersPage/OrdersPage";
-import PayablesPage from "./features/purchases/PayablesPage/PayablesPage";
-import ProductsPage from "./features/inventory/ProductsPage/ProductsPage";
-import BranchStockPage from "./features/inventory/BranchStockPage/BranchStockPage";
-import MovementsPage from "./features/inventory/MovementsPage/MovementsPage";
-import TransfersPage from "./features/inventory/TransfersPage/TransfersPage";
-import StockCountsPage from "./features/inventory/StockCountsPage/StockCountsPage";
-import MyCashPage from "./features/cash/MyCashPage/MyCashPage";
-import SessionsPage from "./features/cash/SessionsPage/SessionsPage";
-import RegistersPage from "./features/cash/RegistersPage/RegistersPage";
-import ProductUnitsPage from "./features/inventory/ProductUnitsPage/ProductUnitsPage";
-import CustomersPage from "./features/sales/CustomersPage/CustomersPage";
-import PosPage from "./features/sales/PosPage/PosPage";
-import SalesPage from "./features/sales/SalesPage/SalesPage";
-import ReceivablesPage from "./features/sales/ReceivablesPage/ReceivablesPage";
-import ReportsPage from "./features/sales/ReportsPage/ReportsPage";
-import SettingsPage from "./features/settings/SettingsPage/SettingsPage";
+import SectionRedirect from "./routes/SectionRedirect";
+
+// Cada pantalla se descarga cuando se abre (Fase 17.2): el inicio de sesión y el menú cargan primero
+const CategoriesPage = lazy(() => import("./features/inventory/categories/CategoriesPage/CategoriesPage"));
+const SuppliersPage = lazy(() => import("./features/purchases/SuppliersPage/SuppliersPage"));
+const OrdersPage = lazy(() => import("./features/purchases/OrdersPage/OrdersPage"));
+const PayablesPage = lazy(() => import("./features/purchases/PayablesPage/PayablesPage"));
+const ProductsPage = lazy(() => import("./features/inventory/ProductsPage/ProductsPage"));
+const BranchStockPage = lazy(() => import("./features/inventory/BranchStockPage/BranchStockPage"));
+const MovementsPage = lazy(() => import("./features/inventory/MovementsPage/MovementsPage"));
+const TransfersPage = lazy(() => import("./features/inventory/TransfersPage/TransfersPage"));
+const StockCountsPage = lazy(() => import("./features/inventory/StockCountsPage/StockCountsPage"));
+const MyCashPage = lazy(() => import("./features/cash/MyCashPage/MyCashPage"));
+const SessionsPage = lazy(() => import("./features/cash/SessionsPage/SessionsPage"));
+const RegistersPage = lazy(() => import("./features/cash/RegistersPage/RegistersPage"));
+const PaymentsPage = lazy(() => import("./features/cash/PaymentsPage/PaymentsPage"));
+const ProductUnitsPage = lazy(() => import("./features/inventory/ProductUnitsPage/ProductUnitsPage"));
+const CustomersPage = lazy(() => import("./features/sales/CustomersPage/CustomersPage"));
+const PosPage = lazy(() => import("./features/sales/PosPage/PosPage"));
+const SalesPage = lazy(() => import("./features/sales/SalesPage/SalesPage"));
+const ReceivablesPage = lazy(() => import("./features/sales/ReceivablesPage/ReceivablesPage"));
+const ReportsPage = lazy(() => import("./features/sales/ReportsPage/ReportsPage"));
+const BalancePage = lazy(() => import("./features/sales/BalancePage/BalancePage"));
+const ExpensesPage = lazy(() => import("./features/expenses/ExpensesPage/ExpensesPage"));
+const InventoryReportPage = lazy(() => import("./features/reports/InventoryReportPage/InventoryReportPage"));
+const PurchasesReportPage = lazy(() => import("./features/reports/PurchasesReportPage/PurchasesReportPage"));
+const CashReportPage = lazy(() => import("./features/reports/CashReportPage/CashReportPage"));
+const ExpensesReportPage = lazy(() => import("./features/reports/ExpensesReportPage/ExpensesReportPage"));
+const ComparisonPage = lazy(() => import("./features/reports/ComparisonPage/ComparisonPage"));
+const WarrantiesPage = lazy(() => import("./features/sales/WarrantiesPage/WarrantiesPage"));
+const ChatsPage = lazy(() => import("./features/chats/ChatsPage/ChatsPage"));
+const SettingsPage = lazy(() => import("./features/settings/SettingsPage/SettingsPage"));
 
 function App() {
   return (
@@ -42,7 +56,7 @@ function App() {
 
           <Route
             path="/compras"
-            element={<Navigate to="/compras/proveedores" replace />}
+            element={<SectionRedirect prefix="/compras" />}
           />
 
           <Route element={<PermissionRoute permission="cash-sessions.operate" />}>
@@ -53,6 +67,9 @@ function App() {
             <Route path="/caja/turnos" element={<SessionsPage />} />
           </Route>
 
+          <Route element={<PermissionRoute permission="payments.read" />}>
+            <Route path="/caja/pagos" element={<PaymentsPage />} />
+          </Route>
           <Route element={<PermissionRoute permission="cash-registers.read" />}>
             <Route path="/caja/cajas" element={<RegistersPage />} />
           </Route>
@@ -65,13 +82,47 @@ function App() {
             <Route path="/ventas/vender" element={<PosPage />} />
           </Route>
 
-          <Route element={<PermissionRoute permission="sales.read" />}>
+          <Route element={<PermissionRoute permission={["sales.read", "sales.read-all"]} />}>
             <Route path="/ventas/historial" element={<SalesPage />} />
           </Route>
 
           {/* Reportes: mismo acceso que el historial (las suyas o las de todos) */}
           <Route element={<PermissionRoute permission={["sales.read", "sales.read-all"]} />}>
             <Route path="/ventas/reportes" element={<ReportsPage />} />
+          </Route>
+          {/* Gastos (Fase 13): lo que sale del negocio sin ser compra de mercancía */}
+          <Route element={<PermissionRoute permission="expenses.read" />}>
+            <Route path="/gastos/registro" element={<ExpensesPage />} />
+          </Route>
+          {/* Informes (Fase 14): con el permiso de consulta de cada módulo */}
+          <Route element={<PermissionRoute permission="branch-stock.read" />}>
+            <Route path="/informes/inventario" element={<InventoryReportPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="orders.read" />}>
+            <Route path="/informes/compras" element={<PurchasesReportPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="cash-sessions.read" />}>
+            <Route path="/informes/caja" element={<CashReportPage />} />
+          </Route>
+          <Route element={<PermissionRoute permission="expenses.read" />}>
+            <Route path="/informes/gastos" element={<ExpensesReportPage />} />
+          </Route>
+          {/* Comparativo de todo el negocio, con el permiso del balance */}
+          <Route element={<PermissionRoute permission="reports.balance" />}>
+            <Route path="/informes/comparativo" element={<ComparisonPage />} />
+          </Route>
+          {/* Balance mensual en pantalla, con tablas y descarga en PDF / Excel */}
+          <Route element={<PermissionRoute permission="reports.balance" />}>
+            <Route path="/ventas/balance" element={<BalancePage />} />
+          </Route>
+
+          {/* Garantías (Fase 11.2): recibir y seguir los casos */}
+          <Route element={<PermissionRoute permission="warranties.manage" />}>
+            <Route path="/ventas/garantias" element={<WarrantiesPage />} />
+          </Route>
+          {/* Chats de WhatsApp (Fase 16) */}
+          <Route element={<PermissionRoute permission="chats.read" />}>
+            <Route path="/ventas/chats" element={<ChatsPage />} />
           </Route>
 
           {/* Cartera: se ve con "Consultar cartera" o, para cobrar, con "Registrar abonos" */}
@@ -92,7 +143,7 @@ function App() {
           </Route>
           <Route
             path="/inventario"
-            element={<Navigate to="/inventario/categorias" replace />}
+            element={<SectionRedirect prefix="/inventario" />}
           />
           
 
@@ -123,7 +174,7 @@ function App() {
 
           <Route
             path="/administrativo"
-            element={<Navigate to="/administrativo/usuarios" replace />}
+            element={<SectionRedirect prefix="/administrativo" />}
           />
 
           <Route element={<PermissionRoute permission="users.read" />}>

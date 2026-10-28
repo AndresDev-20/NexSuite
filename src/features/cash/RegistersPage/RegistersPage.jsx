@@ -9,6 +9,7 @@ import NoBranchesMessage from "../../../features/branches/NoBranchesMessage";
 import useActiveBranch from "../../../features/branches/useActiveBranch";
 import RegisterFormModal from "../../../features/cash/registers/RegisterFormModal";
 import RegistersTable from "../../../features/cash/registers/RegistersTable";
+import ClosuresSection from "../../../features/cash/registers/ClosuresSection";
 import { useCashRegisters } from "../../../features/cash/useCash";
 import "../../../styles/listPage.css";
 
@@ -108,7 +109,7 @@ const RegistersPage = () => {
         <div>
           <h1 className="list-page__title">Cajas</h1>
           <p className="list-page__subtitle">
-            Los puntos de cobro{activeBranch ? ` de ${activeBranch.name}` : " de cada sucursal"} y quién tiene turno abierto.
+            Los puntos de cobro{activeBranch ? ` de ${activeBranch.name}` : " de cada sucursal"}, su horario, su base y los días sin abrir.
           </p>
         </div>
         {canManage && hasBranches && (
@@ -119,6 +120,8 @@ const RegistersPage = () => {
       </header>
 
       <div className="list-page__card">{renderContent()}</div>
+
+      {hasBranches && <ClosuresSection branches={branches} activeBranchId={activeBranchId} canManage={canManage} />}
 
       <RegisterFormModal
         open={form.open}

@@ -4,9 +4,10 @@ import api from "../../../api/client";
  * Comprobante de venta (PDF del servidor): imprimir en tirilla 80 mm o en carta, descargar y enviar.
  * format: "tirilla" | "carta".
  */
-const fetchReceipt = async (saleId, format) => {
+/** Un PDF del servidor como blob (comprobantes de venta y de garantía). Si falla, lanza su mensaje. */
+export const fetchPdf = async (path, params) => {
   try {
-    const { data } = await api.get(`/sales/${saleId}/receipt`, { params: { format }, responseType: "blob" });
+    const { data } = await api.get(path, { params, responseType: "blob" });
     return data;
   } catch (error) {
     // Con responseType blob el error también llega como blob: se lee para mostrar su mensaje
@@ -22,13 +23,18 @@ const fetchReceipt = async (saleId, format) => {
   }
 };
 
+const fetchReceipt = (saleId, format) => fetchPdf(`/sales/${saleId}/receipt`, { format });
+
 /**
  * Imprime el PDF desde un marco oculto (la impresora la elige el usuario en el diálogo del
  * navegador: la térmica para la tirilla, la normal para la carta). Si el navegador no deja
  * imprimir el marco, lo abre en otra pestaña para imprimirlo desde allí.
  */
-export const printReceipt = async (saleId, format) => {
-  const url = URL.createObjectURL(await fetchReceipt(saleId, format));
+export const printReceipt = async (saleId, format) => printPdf(await fetchReceipt(saleId, format));
+
+/** Imprime un PDF (blob) desde un marco oculto; si el navegador no deja, lo abre en otra pestaña. */
+export const printPdf = (blob) => {
+  const url = URL.createObjectURL(blob);
   const frame = document.createElement("iframe");
   frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;";
   frame.src = url;
@@ -49,11 +55,14 @@ export const printReceipt = async (saleId, format) => {
 };
 
 /** Descarga el PDF con el número de la venta como nombre (CEN-000001.pdf). */
-export const downloadReceipt = async (saleId, number, format = "carta") => {
-  const url = URL.createObjectURL(await fetchReceipt(saleId, format));
+export const downloadReceipt = async (saleId, number, format = "carta") => downloadPdf(await fetchReceipt(saleId, format), `${number}.pdf`);
+
+/** Descarga un PDF (blob) con ese nombre de archivo. */
+export const downloadPdf = (blob, fileName) => {
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${number}.pdf`;
+  link.download = fileName;
   document.body.appendChild(link);
   link.click();
   link.remove();

@@ -22,6 +22,11 @@ export const PERMISSION_CATALOG = [
       { code: "sales.read", label: "Ver sus ventas", description: "Consultar las ventas que hizo." },
       { code: "sales.read-all", label: "Ver ventas de todos", description: "Consultar las ventas de todos los vendedores de sus sucursales." },
       { code: "sales.discount", label: "Dar descuentos", description: "Bajar el precio en una venta (por producto o a toda la venta)." },
+      {
+        code: "sales.void",
+        label: "Anular ventas",
+        description: "Anular con motivo una venta mal registrada mientras su turno de caja siga abierto: todo vuelve al inventario, la caja y la cartera.",
+      },
     ],
   },
   {
@@ -118,13 +123,54 @@ export const PERMISSION_CATALOG = [
     title: "Caja",
     permissions: [
       { code: "cash-registers.read", label: "Ver cajas", description: "Consultar las cajas de sus sucursales." },
-      { code: "cash-registers.manage", label: "Configurar cajas", description: "Crear, renombrar, desactivar o eliminar cajas." },
+      { code: "cash-registers.manage", label: "Configurar cajas", description: "Crear, renombrar, desactivar o eliminar cajas; su horario, su base del día y los días sin abrir." },
       { code: "cash-sessions.read", label: "Ver turnos", description: "Consultar los turnos de caja y su efectivo esperado." },
-      { code: "cash-sessions.operate", label: "Atender caja", description: "Abrir su turno con base, registrar ingresos y retiros de efectivo y cerrarlo contando el efectivo." },
+      { code: "cash-sessions.operate", label: "Atender caja", description: "Ver la caja de hoy de su sucursal y contarla al cierre; abrir a mano las cajas que no abren solas y mover el efectivo de su propio turno." },
       {
         code: "cash-sessions.close-any",
         label: "Cerrar turnos de otros",
-        description: "Cerrar, contando el efectivo, el turno abierto de otra persona en sus sucursales (p. ej. si lo olvidó).",
+        description: "Contar o dejar de vender en cualquier caja de sus sucursales, abrir a mano una caja que abre sola y registrar ingresos y retiros de la caja.",
+      },
+      {
+        code: "cash-sessions.receive",
+        label: "Recibir el dinero de las cajas",
+        description: "Confirmar cuánto le entregaron al contar una caja (lo que sobra después de dejar la base del día siguiente).",
+      },
+      {
+        code: "cash-sessions.reopen",
+        label: "Reabrir turnos contados",
+        description: "Devolver a «por contar» un turno ya contado (con el motivo) para contarlo otra vez, antes de recibir su entrega.",
+      },
+      {
+        code: "payments.read",
+        label: "Ver pagos por medio",
+        description: "Consultar los pagos por tarjeta, Nequi, Daviplata y transferencia, que no entran a la caja.",
+      },
+    ],
+  },
+  {
+    key: "expenses",
+    title: "Gastos",
+    permissions: [
+      { code: "expenses.read", label: "Ver gastos", description: "Consultar los gastos de sus sucursales (y los generales del negocio con acceso a todas)." },
+      { code: "expenses.create", label: "Registrar gastos", description: "Registrar arriendo, servicios, nómina, domicilios…; en efectivo, de una caja abierta o de fuera de caja." },
+      { code: "expenses.cancel", label: "Anular gastos", description: "Anular un gasto con motivo; si salió de una caja cuyo turno no se ha contado, el dinero vuelve a ella." },
+      { code: "expenses.configure", label: "Configurar gastos", description: "Agregar, renombrar, activar o desactivar las categorías de gastos (y los gastos fijos)." },
+    ],
+  },
+  {
+    key: "warranties",
+    title: "Ventas · Garantías",
+    permissions: [
+      {
+        code: "warranties.manage",
+        label: "Gestionar garantías",
+        description: "Recibir productos por garantía (buscando la venta por IMEI o número), seguir el caso con el proveedor y entregarlo con su comprobante.",
+      },
+      {
+        code: "warranties.approve",
+        label: "Aprobar cambios y devoluciones",
+        description: "Con la garantía vigente, cambiar el producto por otro de la sucursal o devolver lo que pagó (primero se rebaja lo que debe y el resto sale en efectivo de una caja abierta).",
       },
     ],
   },
@@ -215,6 +261,25 @@ export const PERMISSION_CATALOG = [
     title: "Administrativo · Auditoría",
     permissions: [
       { code: "audit.read", label: "Ver auditoría", description: "Consultar quién hizo qué y cuándo en el sistema." },
+    ],
+  },
+  {
+    key: "chats",
+    title: "Ventas · Chats de WhatsApp",
+    permissions: [
+      { code: "chats.read", label: "Ver chats", description: "Ver las conversaciones de WhatsApp de sus sucursales y lo que respondió el asistente; recibe el aviso de las que esperan vendedor." },
+      { code: "chats.reply", label: "Atender chats", description: "Tomar una conversación, responderle al cliente por el WhatsApp del negocio, cerrarla o devolvérsela al asistente." },
+    ],
+  },
+  {
+    key: "settings",
+    title: "Administrativo · Configuración del negocio",
+    permissions: [
+      {
+        code: "settings.manage",
+        label: "Configurar el negocio",
+        description: "Cambiar el nombre, NIT, teléfono, correo, dirección y pie de los comprobantes (Configuración → Datos del negocio).",
+      },
     ],
   },
   {

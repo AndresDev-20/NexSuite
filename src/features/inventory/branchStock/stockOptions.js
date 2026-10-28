@@ -21,6 +21,9 @@ export const reasonsFor = (direction) =>
 const REASON_LABELS = Object.fromEntries(ADJUSTMENT_REASONS.map((reason) => [reason.value, reason.label]));
 
 export const MOVEMENT_TYPES = [
+  { value: "venta", label: "Venta" },
+  { value: "anulacion", label: "Venta anulada" },
+  { value: "garantia", label: "Garantía" },
   { value: "compra", label: "Compra" },
   { value: "traslado", label: "Traslado" },
   { value: "ajuste", label: "Ajuste manual" },

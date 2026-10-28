@@ -17,7 +17,7 @@ export const normalizeSupplier = (supplier) => ({
   email: supplier.email ?? "",
   contact: supplier.contact ?? "",
   isActive: supplier.isactive !== false,
-  // Ya tiene unidades o pedidos: no se elimina, se desactiva
+  // Ya tiene unidades o compras: no se elimina, se desactiva
   hasHistory: Boolean(supplier.hasHistory),
 });
 

@@ -336,3 +336,69 @@
     transition: none;
   }
 }
+
+/* ---------- Datos del negocio (Fase 15) ---------- */
+.business-settings__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px 14px;
+}
+
+@media (min-width: 768px) {
+  .business-settings__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.business-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.business-preview__label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+/* Una tirilla de 80 mm en miniatura */
+.business-preview__ticket {
+  align-self: center;
+  width: min(100%, 300px);
+  padding: 16px 14px;
+  text-align: center;
+  font-family: "Courier New", monospace;
+  color: var(--gray-900, #18181b);
+  background-color: #fff;
+  border: 1px dashed var(--gray-300);
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 8%);
+}
+
+.business-preview__ticket p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.business-preview__name {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.business-preview__line {
+  font-size: 0.75rem;
+}
+
+.business-preview__branch {
+  margin-top: 6px !important;
+  font-size: 0.72rem;
+  color: #71717a;
+}
+
+.business-preview__dots {
+  color: #a1a1aa;
+}

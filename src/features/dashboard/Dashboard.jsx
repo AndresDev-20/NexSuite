@@ -659,9 +659,16 @@ function Dashboard() {
         key: "profit",
         icon: "trend",
         label: "Ganancia",
-        value: sold.report.totals.profit,
+        // Con las devoluciones y el costo de los cambios por garantía ya restados
+        // Con garantías y (si se ven) gastos ya restados
+        value: sold.report.totals.finalProfit,
         format: formatCompact,
-        hint: sold.report.totals.total > 0 ? `${Math.round((sold.report.totals.profit / sold.report.totals.total) * 100)}% del vendido` : "Sin ventas",
+        hint:
+          sold.report.totals.finalProfit !== sold.report.totals.profit
+            ? `Descontados ${sold.report.totals.expenses ? "gastos y garantías" : "garantías"} por ${formatCurrency(sold.report.totals.profit - sold.report.totals.finalProfit)}`
+            : sold.report.totals.total > 0
+              ? `${Math.round((sold.report.totals.finalProfit / sold.report.totals.total) * 100)}% del vendido`
+              : "Sin ventas",
         trend: sold.trends?.profit ?? null,
         spark: sold.buckets.map((bucket) => bucket.profit),
         color: "var(--gray-700)",

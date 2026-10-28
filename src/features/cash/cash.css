@@ -188,3 +188,262 @@
     justify-content: flex-start;
   }
 }
+
+/* ---------- Caja automática (2026-10-27) ---------- */
+.cash-tag--pending {
+  color: var(--warning-text, #92400e);
+  background-color: color-mix(in srgb, var(--warning, #f59e0b) 16%, transparent);
+}
+
+.cash-tag--received {
+  color: var(--gray-600);
+  background-color: var(--gray-100);
+}
+
+.register-schedule {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .register-schedule {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Mi caja de hoy */
+.today-cash__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+@media (min-width: 900px) {
+  .today-cash__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.today-cash {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--success);
+  border-radius: 14px;
+  animation: cash-rise 320ms ease both;
+}
+
+.today-cash--pending {
+  border-left-color: var(--warning, #f59e0b);
+}
+
+.today-cash__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.today-cash__note {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+
+.today-cash__note--pending {
+  color: var(--color-text);
+}
+
+.today-cash__totals,
+.cash-split {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 12px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.today-cash__totals div,
+.cash-split div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.88rem;
+}
+
+.today-cash__totals dt,
+.cash-split dt {
+  color: var(--color-text-muted);
+}
+
+.today-cash__totals dd,
+.cash-split dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.today-cash__expected,
+.cash-split__main {
+  padding-top: 6px;
+  border-top: 1px dashed var(--color-border);
+}
+
+.today-cash__expected dt,
+.today-cash__expected dd,
+.cash-split__main dt,
+.cash-split__main dd {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.cash-split__warn {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+/* Resultado del conteo: lo que se entrega */
+.handover-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  align-items: center;
+  justify-content: space-between;
+  border-left: 4px solid var(--success);
+  animation: cash-rise 320ms ease both;
+}
+
+.handover-card__amount {
+  display: flex;
+  flex-direction: column;
+}
+
+.handover-card__amount span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.handover-card__amount strong {
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--success-text);
+}
+
+/* Días sin abrir */
+.closures {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.closures__form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  align-items: end;
+}
+
+@media (min-width: 900px) {
+  .closures__form {
+    grid-template-columns: 1fr 1fr 1.4fr auto;
+  }
+}
+
+.closures__error {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.closures__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.closures__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+/* Lo que entró fuera de la caja (detalle del turno) */
+.outside-cash {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.outside-cash li {
+  display: flex;
+  flex-direction: column;
+  min-width: 130px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+@keyframes cash-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .today-cash,
+  .handover-card {
+    animation: none;
+  }
+}
+
+/* Pagos por medio: los periodos arriba y medio, caja y fechas en una fila debajo */
+.payments-filters-card.reports-filters {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+@media (min-width: 768px) {
+  .reports-filters__dates.payments-filters {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    min-width: 0;
+  }
+}
+
+/* Turno reabierto para contarlo otra vez (12.2) */
+.cash-reopened {
+  padding: 10px 12px;
+  background-color: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--warning, #e8a317);
+  border-radius: 10px;
+}

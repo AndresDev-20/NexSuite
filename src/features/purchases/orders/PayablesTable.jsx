@@ -66,7 +66,7 @@ const PayablesTable = ({ orders, canPay, onView, onPay }) => (
     renderActions={(order) => (
       <RowActions>
         <RowAction icon="eye" label={`Ver la compra ${order.number}`} onClick={() => onView(order)} />
-        {canPay && order.balance > 0 && (
+        {canPay && order.manageable && order.balance > 0 && (
           <RowAction icon="wallet" label={`Abonar a ${order.number}`} onClick={() => onPay(order)} />
         )}
       </RowActions>

@@ -50,6 +50,50 @@ const normalizeFigures = (row) => ({
   profit: row.profit === undefined ? null : toNumber(row.profit),
 });
 
+/**
+ * Totales con las garantías del periodo (11.3): lo devuelto se resta de lo vendido (net) y, con
+ * costos, también el costo de los cambios (netProfit). Sin costos, exchangeCost y netProfit en null.
+ */
+const normalizeTotals = (row) => ({
+  ...normalizeFigures(row),
+  refunds: toNumber(row.refunds),
+  net: row.net === undefined ? toNumber(row.total) : toNumber(row.net),
+  exchangeCost: row.exchangeCost === undefined ? null : toNumber(row.exchangeCost),
+  netProfit: row.netProfit === undefined ? (row.profit === undefined ? null : toNumber(row.profit)) : toNumber(row.netProfit),
+  // 13.3 · lo gastado (null si no ve los gastos del negocio) y la ganancia que se muestra: después
+  // de gastos cuando los ve, si no la neta de garantías
+  expenses: row.expenses === undefined ? null : toNumber(row.expenses),
+  finalProfit:
+    row.profitAfterExpenses !== undefined
+      ? toNumber(row.profitAfterExpenses)
+      : row.netProfit === undefined
+        ? row.profit === undefined
+          ? null
+          : toNumber(row.profit)
+        : toNumber(row.netProfit),
+});
+
+/** Gastos del periodo (13.3): total y por categoría y sucursal; null si no los ve. */
+const normalizeExpenses = (data) =>
+  data
+    ? {
+        total: toNumber(data.total),
+        count: data.count,
+        byCategory: data.byCategory.map((row) => ({ name: row.name, count: row.count, amount: toNumber(row.amount) })),
+        byBranch: data.byBranch.map((row) => ({ name: row.name, count: row.count, amount: toNumber(row.amount) })),
+      }
+    : null;
+
+const normalizeWarranties = (data) => ({
+  refunds: {
+    count: data?.refunds.count ?? 0,
+    amount: toNumber(data?.refunds.amount),
+    credit: toNumber(data?.refunds.credit),
+    cash: toNumber(data?.refunds.cash),
+  },
+  exchanges: { count: data?.exchanges.count ?? 0, cost: data?.exchanges.cost === undefined ? null : toNumber(data.exchanges.cost) },
+});
+
 const normalizeMethod = (row) => ({ method: row.method, count: row.count, amount: toNumber(row.amount) });
 
 export const normalizeReport = (report) => ({
@@ -57,7 +101,9 @@ export const normalizeReport = (report) => ({
   to: report.to,
   scope: report.scope,
   costs: report.costs,
-  totals: normalizeFigures(report.totals),
+  totals: normalizeTotals(report.totals),
+  warranties: normalizeWarranties(report.warranties),
+  expenses: normalizeExpenses(report.expenses),
   byMethod: report.byMethod.map(normalizeMethod),
   // null cuando se filtra por sucursal (los abonos no son de una sucursal)
   receivablePayments: report.receivablePayments && {

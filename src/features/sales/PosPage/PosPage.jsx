@@ -278,7 +278,7 @@ const PosPage = () => {
             <StateMessage
               icon="wallet"
               title="No hay cajas abiertas"
-              text="Para vender, alguien de la sucursal debe abrir el turno de una caja (Caja → Mi caja). Después todos pueden vender en ella."
+              text="Para vender, alguien de la sucursal debe abrir el turno de una caja (Caja → Mi caja de hoy). Después todos pueden vender en ella."
             >
               {can("cash-sessions.operate") && (
                 <Link className="pos__link-button" to="/caja/mi-caja">
@@ -294,7 +294,7 @@ const PosPage = () => {
                   <button key={item.id} type="button" className="pos__choose-item" onClick={() => setChosenSession(item.id)}>
                     <strong>{item.registerName}</strong>
                     <span>
-                      {item.branchName} · turno de {item.userName}
+                      {item.branchName} · {item.userName ? `turno de ${item.userName}` : "abrió sola"}
                     </span>
                   </button>
                 ))}
@@ -312,7 +312,7 @@ const PosPage = () => {
         <div>
           <h1 className="list-page__title">Vender</h1>
           <p className="list-page__subtitle">
-            {session.branchName} · {session.registerName} · turno de {session.userName}
+            {session.branchName} · {session.registerName} · {session.userName ? `turno de ${session.userName}` : "abrió sola"}
           </p>
         </div>
       </header>

@@ -62,7 +62,7 @@ const OrdersTable = ({ orders, canEdit, onView, onEdit }) => (
     renderActions={(order) => (
       <RowActions>
         <RowAction icon="eye" label={`Ver la compra ${order.number}`} onClick={() => onView(order)} />
-        {canEdit && order.status === "borrador" && (
+        {canEdit && order.manageable && order.status === "borrador" && (
           <RowAction icon="edit" label={`Editar la compra ${order.number}`} onClick={() => onEdit(order)} />
         )}
       </RowActions>

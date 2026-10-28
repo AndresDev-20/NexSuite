@@ -23,7 +23,7 @@ const normalize = (text) =>
     .replace(/[\u0300-\u036f]/g, "");
 
 const BranchesPage = () => {
-  const { branches, loading, error, getAllBranches, createBranch, updateBranch, deleteBranch } = useBranches();
+  const { branches, loading, error, getAllBranches, createBranch, updateBranch, setBranchStatus, deleteBranch } = useBranches();
   // Las sucursales del usuario (selector del encabezado, Asignar a sucursales…) se cargan al entrar: se refrescan aquí
   const { branches: myBranches, reload: reloadMyBranches } = useActiveBranch();
   const toast = useToast();
@@ -34,27 +34,32 @@ const BranchesPage = () => {
   const canCreate = can("branches.create");
   const canEdit = can("branches.update");
   const canDelete = can("branches.delete");
-  // La ficha solo existe para las sucursales del usuario (el servidor responde 403 con las demás)
+  // La ficha solo existe para las sucursales del usuario (el servidor responde 403 con las demás); también
+  // de las suyas inactivas, que ya no salen en el selector (A9)
   const myBranchIds = useMemo(() => new Set(myBranches.map((branch) => branch.id)), [myBranches]);
-  const canView = (branch) => myBranchIds.has(branch.id);
+  const canView = (branch) => branch.own || myBranchIds.has(branch.id);
 
   const [query, setQuery] = useState("");
   const [form, setForm] = useState({ open: false, branch: null }); // branch null = crear
   const [deleting, setDeleting] = useState(null); // sucursal pendiente de confirmar
   const [viewing, setViewing] = useState(null);
+  const [toggling, setToggling] = useState(null); // sucursal por activar o desactivar
 
   useEffect(() => {
     getAllBranches();
   }, [getAllBranches]);
 
+  // Solo las suyas: de las ajenas no tiene la ficha (A8)
+  const own = useMemo(() => branches.filter((branch) => branch.own), [branches]);
+
   const filtered = useMemo(() => {
     const term = normalize(query.trim());
-    if (!term) return branches;
+    if (!term) return own;
 
-    return branches.filter((branch) =>
+    return own.filter((branch) =>
       normalize([branch.nameBranch, branch.address, branch.email, branch.number].join(" ")).includes(term)
     );
-  }, [branches, query]);
+  }, [own, query]);
 
   const openCreate = () => setForm({ open: true, branch: null });
   const openEdit = (branch) => setForm({ open: true, branch });
@@ -79,11 +84,18 @@ const BranchesPage = () => {
     reloadMyBranches();
   };
 
-  const showToolbar = !loading && !error && branches.length > 0;
+  const handleToggle = async () => {
+    const result = await setBranchStatus(toggling.id, !toggling.isActive);
+    toast.success(result?.message ?? (toggling.isActive ? "Sucursal desactivada." : "Sucursal activada."));
+    setToggling(null);
+    reloadMyBranches();
+  };
+
+  const showToolbar = !loading && !error && own.length > 0;
   const countLabel =
-    filtered.length === branches.length
-      ? `${branches.length} ${branches.length === 1 ? "sucursal" : "sucursales"}`
-      : `${filtered.length} de ${branches.length}`;
+    filtered.length === own.length
+      ? `${own.length} ${own.length === 1 ? "sucursal" : "sucursales"}`
+      : `${filtered.length} de ${own.length}`;
 
   const usersWarning = (branch) => {
     const count = branch.users.length;
@@ -115,7 +127,7 @@ const BranchesPage = () => {
       );
     }
 
-    if (branches.length === 0) {
+    if (own.length === 0) {
       return (
         <StateMessage
           icon="inbox"
@@ -147,6 +159,7 @@ const BranchesPage = () => {
         onView={setViewing}
         canView={canView}
         onEdit={canEdit ? openEdit : undefined}
+        onToggleStatus={canEdit ? setToggling : undefined}
         onDelete={canDelete ? setDeleting : undefined}
       />
     );
@@ -220,6 +233,31 @@ const BranchesPage = () => {
       />
 
       <BranchFormModal open={form.open} branch={form.branch} onClose={closeForm} onSubmit={handleSave} />
+
+      <ConfirmDialog
+        open={Boolean(toggling)}
+        title={toggling?.isActive ? "Desactivar sucursal" : "Activar sucursal"}
+        message={
+          toggling &&
+          (toggling.isActive ? (
+            <>
+              ¿Desactivar <strong>{toggling.nameBranch}</strong>? Deja de vender y no recibe compras, traslados, cargas ni gastos; su caja no
+              abre. Su historial y sus informes se conservan y la puedes volver a activar.
+            </>
+          ) : (
+            <>
+              ¿Activar <strong>{toggling.nameBranch}</strong>? Vuelve a operar y a aparecer en el selector de sucursales.
+            </>
+          ))
+        }
+        detail={toggling?.isActive ? "Solo se puede sin existencias, sin turnos de caja abiertos o por contar, sin fiados pendientes y sin compras en borrador." : ""}
+        confirmLabel={toggling?.isActive ? "Desactivar" : "Activar"}
+        confirmIcon={toggling?.isActive ? "lock" : "check"}
+        confirmVariant={toggling?.isActive ? "danger" : "primary"}
+        errorFallback="No se pudo cambiar el estado de la sucursal."
+        onConfirm={handleToggle}
+        onClose={() => setToggling(null)}
+      />
 
       <ConfirmDialog
         open={Boolean(deleting)}

@@ -1,0 +1,447 @@
+/* Gastos (Fase 13.1): lista con filtros, registrar, detalle y categorías */
+
+/* Los botones del encabezado no se parten en dos líneas */
+.expenses-actions {
+  flex-shrink: 0;
+}
+
+.expenses-actions .btn {
+  white-space: nowrap;
+}
+
+.expenses-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.expenses-filters__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px 12px;
+  align-items: end;
+}
+
+@media (min-width: 768px) {
+  .expenses-filters__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .expenses-filters__grid {
+    grid-template-columns: 2fr repeat(3, minmax(0, 1fr));
+  }
+}
+
+.expenses-kpis {
+  margin-bottom: 16px;
+}
+
+.expense-cell {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.expense-cell > span {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.expense-cell--cancelled {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+.expense-money {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.expense-status {
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.expense-status--vigente {
+  color: var(--success-text);
+  background-color: var(--success-soft);
+}
+
+.expense-status--anulado {
+  color: var(--danger);
+  background-color: var(--red-50);
+}
+
+/* Registrar: cómo se pagó */
+.expense-methods {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.expense-methods__legend {
+  margin-bottom: 8px;
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.expense-methods__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (min-width: 640px) {
+  .expense-methods__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.expense-method {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  font: inherit;
+  text-align: left;
+  color: var(--color-text);
+  background-color: var(--white);
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.expense-method:hover {
+  border-color: var(--red-300);
+}
+
+.expense-method:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 2px;
+}
+
+.expense-method--on {
+  border-color: var(--red-600);
+  box-shadow: 0 0 0 3px var(--red-50);
+}
+
+.expense-method__title {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.expense-method__hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.expense-form__note,
+.expense-form__error {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.expense-form__note {
+  color: var(--color-text-muted);
+}
+
+.expense-form__error {
+  font-weight: 600;
+  color: var(--danger);
+}
+
+/* Detalle */
+.expense-amount {
+  margin: 4px 0 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.expense-facts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .expense-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.expense-facts dt {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.expense-facts dd {
+  margin: 2px 0 0;
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+
+/* Categorías */
+.expense-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.expense-categories__add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.expense-categories__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.expense-category {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+@media (min-width: 640px) {
+  .expense-category {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+}
+
+.expense-category--off {
+  background-color: var(--gray-50);
+  opacity: 0.8;
+}
+
+.expense-category__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 13.2 · Por pagar este mes (gastos fijos) */
+.due-month {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.due-month__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.due-month__head > .field {
+  min-width: 180px;
+}
+
+.due-month__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.due-month__title::first-letter {
+  text-transform: uppercase;
+}
+
+.due-month__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.due-month__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.due-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--gray-300);
+  border-radius: 12px;
+  animation: due-rise 300ms ease both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+.due-item--bad {
+  border-left-color: var(--danger);
+}
+
+.due-item--warn {
+  border-left-color: var(--warning, #e8a317);
+}
+
+.due-item--ok {
+  border-left-color: var(--success);
+  background-color: var(--gray-50);
+}
+
+.due-item__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.due-item__main > span {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.due-item__side {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+}
+
+.due-item__amount {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.due-badge {
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.due-badge--ok {
+  color: var(--success-text);
+  background-color: var(--success-soft);
+}
+
+.due-badge--warn {
+  color: var(--warning-text, #b45309);
+  background-color: color-mix(in srgb, var(--warning, #e8a317) 16%, transparent);
+}
+
+.due-badge--bad {
+  color: var(--danger);
+  background-color: var(--red-50);
+}
+
+.expense-fixed-note {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  background-color: var(--success-soft);
+  border-left: 4px solid var(--success);
+  border-radius: 10px;
+}
+
+/* Gastos fijos (configurar) */
+.fixed-expenses {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fixed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fixed-list__item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.fixed-list__item--off {
+  background-color: var(--gray-50);
+  opacity: 0.75;
+}
+
+.fixed-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+}
+
+.fixed-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+@keyframes due-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .due-item {
+    animation: none;
+  }
+}
