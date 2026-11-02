@@ -11,7 +11,11 @@ import usePermissions from "../../auth/usePermissions";
 import useActiveBranch from "../../branches/useActiveBranch";
 import { normalizeProduct } from "../../inventory/products/useProducts";
 import useCustomers from "../customers/useCustomers";
+import NewCustomerButton from "../customers/NewCustomerButton";
+import { emptyPlan, planPayload, planProblems } from "../sales/InstallmentsEditor";
+import { CreditPanel, buildPayments, creditAccess, downProblems, emptyDown } from "../sales/downPayment";
 import useOpenRegisters, { pickSession, rememberSession, sessionOptions } from "../sales/useOpenRegisters";
+import { useReservedQuantities } from "../../saleOrders/useSaleOrders";
 import useSales, { PAYMENT_METHODS, newSaleKey } from "../sales/useSales";
 import { unwrap } from "../../../utils/apiResponse";
 import getErrorMessage from "../../../utils/getErrorMessage";
@@ -55,6 +59,11 @@ const PosPage = () => {
   const [discount, setDiscount] = useState("");
   const [payments, setPayments] = useState([emptyPayment()]);
   const [notes, setNotes] = useState("");
+  // Cuotas de lo fiado (Fase 19); vacío = una sola al plazo del cliente
+  // Hasta cuándo se fía: una fecha o en cuotas (Fase 19)
+  const [plan, setPlan] = useState(emptyPlan);
+  // Cuota inicial al fiar (19.3): lo que paga hoy
+  const [down, setDown] = useState(emptyDown);
   const [saleKey, setSaleKey] = useState(newSaleKey);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -99,6 +108,10 @@ const PosPage = () => {
     loadProducts();
   }, [loadProducts]);
 
+  // Lo apartado en pedidos a caja (Fase 18) no se vende aquí: se resta de lo disponible
+  const { reserved, reloadReserved } = useReservedQuantities(branchId);
+  const freeOf = (product) => Math.max((product.branchQuantity ?? 0) - (reserved[product.id] ?? 0), 0);
+
   /* ---------- Buscar y agregar ---------- */
   const results = useMemo(() => {
     const term = normalizeText(query.trim());
@@ -114,7 +127,7 @@ const PosPage = () => {
     setError("");
     const existing = inCart(product.id);
     if (product.hasSerial) {
-      const line = existing ?? { productId: product.id, name: product.name, sku: product.sku, price: product.salePrice, hasSerial: true, available: product.branchQuantity ?? 0, units: [], discount: "" };
+      const line = existing ?? { productId: product.id, name: product.name, sku: product.sku, price: product.salePrice, hasSerial: true, available: freeOf(product), units: [], discount: "" };
       if (units) {
         const merged = [...line.units, ...units.filter((unit) => !line.units.some((current) => current.id === unit.id))];
         setLines((current) => (existing ? current.map((item) => (item.productId === product.id ? { ...item, units: merged } : item)) : [...current, { ...line, units: merged }]));
@@ -127,7 +140,7 @@ const PosPage = () => {
     } else {
       setLines((current) => [
         ...current,
-        { productId: product.id, name: product.name, sku: product.sku, price: product.salePrice, hasSerial: false, available: product.branchQuantity ?? 0, quantity: "1", units: [], discount: "" },
+        { productId: product.id, name: product.name, sku: product.sku, price: product.salePrice, hasSerial: false, available: freeOf(product), quantity: "1", units: [], discount: "" },
       ]);
     }
     setQuery("");
@@ -147,7 +160,7 @@ const PosPage = () => {
     // ¿Un IMEI? Se busca la unidad disponible en la sucursal y se agrega con su producto
     try {
       const units = unwrap(await api.get("/product-units", { params: { search: text.replace(/\s+/g, ""), idbranch: branchId, status: "disponible" } })) ?? [];
-      const unit = units.find((candidate) => candidate.serial === text.replace(/\s+/g, "").toUpperCase() || candidate.imei2 === text.replace(/\s+/g, ""));
+      const unit = units.find((candidate) => !candidate.reserved && (candidate.serial === text.replace(/\s+/g, "").toUpperCase() || candidate.imei2 === text.replace(/\s+/g, "")));
       const product = unit && products.items.find((item) => item.id === unit.idproduct);
       if (product) return addProduct(product, [{ id: unit.id, serial: unit.serial, imei2: unit.imei2 ?? null }]);
     } catch {
@@ -164,14 +177,16 @@ const PosPage = () => {
   const subtotal = lines.reduce((sum, line) => sum + lineGross(line), 0);
   const lineDiscounts = lines.reduce((sum, line) => sum + Math.min(cents(line.discount), lineGross(line)), 0);
   const total = Math.max(subtotal - lineDiscounts - cents(discount), 0);
-  // Con un solo pago, su valor es el total (se calcula al mostrar, no se guarda aparte)
+  // Con un solo pago, su valor es el total (se calcula al mostrar, no se guarda aparte); si es fiado,
+  // la cuota inicial va primero y lo fiado es el resto
   const singlePayment = payments.length === 1;
-  const effectivePayments = singlePayment ? [{ ...payments[0], amount: total > 0 ? String(pesos(total)) : "" }] : payments;
+  const { effectivePayments, creditOnly } = buildPayments({ payments, total, down });
   const paid = effectivePayments.reduce((sum, payment) => sum + cents(payment.amount), 0);
   const pending = total - paid;
 
   const customer = customers.find((item) => String(item.id) === customerId) ?? null;
-  const canCredit = Boolean(customer && customer.creditLimit > 0);
+  // Con cupo, o sin cupo con «Fiar sin cupo» (19.3)
+  const { canCredit, overLimit, problem: creditProblem } = creditAccess(customer, can("sales.credit-override"));
   const methods = PAYMENT_METHODS.filter((method) => method.value !== "credito" || canCredit);
 
   const updatePayment = (key, changes) => setPayments((current) => current.map((payment) => (payment.key === key ? { ...payment, ...changes } : payment)));
@@ -181,6 +196,8 @@ const PosPage = () => {
 
   const cashPayment = effectivePayments.find((payment) => payment.method === "efectivo");
   const change = cashPayment && cashPayment.received ? cents(cashPayment.received) - cents(cashPayment.amount) : 0;
+  // Lo fiado y sus cuotas (solo cuentan si hay una parte a crédito)
+  const credit = effectivePayments.filter((payment) => payment.method === "credito").reduce((sum, payment) => sum + cents(payment.amount), 0);
 
   /* ---------- Revisión antes de cobrar (el servidor vuelve a revisar todo) ---------- */
   const problems = [];
@@ -193,8 +210,11 @@ const PosPage = () => {
   });
   if (total > 0 && pending !== 0) problems.push(pending > 0 ? `Faltan ${formatCurrency(pesos(pending))} por pagar.` : `Los pagos pasan el total por ${formatCurrency(pesos(-pending))}.`);
   if (payments.some((payment) => payment.method === "credito") && !canCredit) problems.push("Para fiar elige un cliente con cupo.");
+  if (credit > 0 && creditProblem) problems.push(creditProblem);
+  problems.push(...downProblems(down, total, creditOnly));
   if (cashPayment && cashPayment.received && change < 0) problems.push("Lo recibido en efectivo no alcanza.");
   if (!sellerId) problems.push("Elige quién hizo la venta (vendedor).");
+  problems.push(...planProblems(plan, pesos(credit), customer?.creditDays));
 
   const resetSale = () => {
     setLines([]);
@@ -202,6 +222,8 @@ const PosPage = () => {
     setDiscount("");
     setPayments([emptyPayment()]);
     setNotes("");
+    setPlan(emptyPlan());
+    setDown(emptyDown());
     setSaleKey(newSaleKey());
     setError("");
     searchRef.current?.focus();
@@ -234,6 +256,7 @@ const PosPage = () => {
             ...(payment.method === "efectivo" && payment.received && { received: Number(payment.received) }),
             ...(payment.reference.trim() && { reference: payment.reference.trim() }),
           })),
+        ...planPayload(plan, pesos(credit), customer?.creditDays),
         ...(notes.trim() && { notes: notes.trim() }),
       });
       toast.success(message ?? `Venta ${sale.number} registrada.`);
@@ -241,6 +264,7 @@ const PosPage = () => {
       rememberSession(session.id);
       resetSale();
       loadProducts();
+      reloadReserved();
       refreshRegisters();
     } catch (err) {
       setError(getErrorMessage(err, "No se pudo registrar la venta. Inténtalo de nuevo."));
@@ -340,7 +364,7 @@ const PosPage = () => {
           placeholder="Elige quién vendió"
           options={branchSellers.map((seller) => ({ value: String(seller.id), label: seller.id === me ? `${seller.name} (tú)` : seller.name }))}
           value={sellerId}
-          hint={branchSellers.length === 0 ? "Nadie con permiso «Vender» está asignado a esta sucursal." : "La venta queda a su nombre."}
+          hint={branchSellers.length === 0 ? "Nadie con permiso «Vender» o «Enviar pedidos a caja» está asignado a esta sucursal." : "La venta queda a su nombre."}
           onChange={(event) => setChosenSeller(event.target.value)}
         />
       </div>
@@ -376,7 +400,8 @@ const PosPage = () => {
           {results.length > 0 && (
             <ul className="pos__results">
               {results.map((product) => {
-                const stock = product.branchQuantity ?? 0;
+                const stock = freeOf(product);
+                const held = reserved[product.id] ?? 0;
                 return (
                   <li key={product.id}>
                     <button type="button" className="pos__result" disabled={stock <= 0} onClick={() => addProduct(product)}>
@@ -385,6 +410,7 @@ const PosPage = () => {
                         <span className="pos__hint">
                           {product.sku}
                           {product.hasSerial && " · con serial"} · {stock > 0 ? `${stock} disponibles` : "Agotado"}
+                          {held > 0 && ` · ${held} ${held === 1 ? "apartada" : "apartadas"} en pedidos`}
                         </span>
                       </span>
                       <strong>{formatCurrency(product.salePrice)}</strong>
@@ -477,12 +503,23 @@ const PosPage = () => {
                 hint={customer && customer.creditLimit > 0 ? `Cupo de crédito ${formatCurrency(customer.creditLimit)} a ${customer.creditDays} días` : undefined}
                 onChange={(event) => {
                   setCustomerId(event.target.value);
+                  setPlan(emptyPlan());
                   setPayments((current) => current.map((payment) => (payment.method === "credito" ? { ...payment, method: "efectivo" } : payment)));
                 }}
               />
             ) : (
               <p className="pos__hint">Cliente: consumidor final.</p>
             )}
+            {/* Fase 19: crear el cliente ahí mismo y dejarlo elegido */}
+            <div className="pos__new-customer">
+              <NewCustomerButton
+                onCreated={async (created) => {
+                  await getAllCustomers();
+                  setCustomerId(String(created.id));
+                  setPlan(emptyPlan());
+                }}
+              />
+            </div>
             {canDiscount && (
               <Field
                 label="Descuento a la venta ($)"
@@ -516,6 +553,25 @@ const PosPage = () => {
 
           {/* ---------- Pagos ---------- */}
           <h2 className="pos__section-title">Pago</h2>
+          {creditOnly && customer ? (
+            <CreditPanel
+              customer={customer}
+              overLimit={overLimit}
+              credit={credit}
+              down={down}
+              onDownChange={setDown}
+              plan={plan}
+              onPlanChange={setPlan}
+              methodControl={
+                <Select
+                  label="Medio de pago"
+                  options={methods}
+                  value="credito"
+                  onChange={(event) => updatePayment(payments[0].key, { method: event.target.value, received: "", reference: "" })}
+                />
+              }
+            />
+          ) : (
           <ul className="pos__payments">
             {effectivePayments.map((payment) => (
               <li className="pos__payment" key={payment.key}>
@@ -556,7 +612,9 @@ const PosPage = () => {
                     onChange={(event) => updatePayment(payment.key, { reference: event.target.value })}
                   />
                 ) : (
-                  <p className="pos__hint">Queda fiado a {customer?.name}.</p>
+                  <p className="pos__hint">
+                    Queda fiado a {customer?.name}.{overLimit && " Sin cupo: con tu permiso «Fiar sin cupo»."}
+                  </p>
                 )}
                 {!singlePayment && (
                   <button type="button" className="pos__remove" aria-label="Quitar este pago" onClick={() => removePayment(payment.key)}>
@@ -566,6 +624,10 @@ const PosPage = () => {
               </li>
             ))}
           </ul>
+          )}
+          {credit > 0 && customer && !creditOnly && (
+            <CreditPanel customer={customer} overLimit={overLimit} credit={credit} showDown={false} plan={plan} onPlanChange={setPlan} />
+          )}
           <div className="pos__pay-actions">
             <Button variant="outline" icon="plus" onClick={addPayment} disabled={payments.length >= 6}>
               Otro medio de pago

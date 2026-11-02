@@ -75,7 +75,14 @@ No pongas `PORT`: Render lo da solo. No pongas variables de WhatsApp ni de Anthr
 5. Comprueba en el navegador: `https://<tu-servicio>.onrender.com/health` debe responder
    `{"status":"ok","database":"ok",…}`.
 
-## 3. Crear tu primer usuario (desde tu PC)
+## 3. Crear tu primer usuario
+
+**Automático:** al arrancar, `db:setup` crea el usuario **Developer** de Yeison (seeder
+`20261128000000-seed-first-developer.js`) si todavía no hay ningún Developer. En el log sale «Primer
+Developer: … creado». Entra con él y **cambia la contraseña** en *Administrativo → Usuarios*.
+
+**Opción desde tu PC:**
+
 
 En una base nueva nadie puede entrar todavía. En el plan gratis de Render no hay consola, así que el
 primer usuario se crea **desde tu computador**, conectado a la base de Aiven.

@@ -9,6 +9,11 @@ import usePermissions from "../../auth/usePermissions";
 import useActiveBranch from "../../branches/useActiveBranch";
 import { AnimatedNumber, AreaChart } from "../../dashboard/charts";
 import { formatDay } from "../../purchases/orders/orderOptions";
+import { downloadReport } from "../../reports/reportsApi";
+import DailyHistory from "./DailyHistory";
+import SoldProducts from "./SoldProducts";
+import useToast from "../../../components/feadback/Toast/useToast";
+import getErrorMessage from "../../../utils/getErrorMessage";
 import { getMethodLabel } from "../sales/useSales";
 import useSalesReport, { PERIODS, periodRange } from "../reports/useSalesReport";
 import { todayInColombia } from "../../../utils/dates";
@@ -231,12 +236,21 @@ const ReportsPage = () => {
 
   const costs = Boolean(report?.costs);
   const singleDay = from === to;
+
+  const toast = useToast();
+  const [downloading, setDownloading] = useState(false);
+  const downloadClose = async () => {
+    setDownloading(true);
+    try {
+      await downloadReport("sales/close", paramsOf(), singleDay ? `cuadre-${from}.xlsx` : `cuadre-${from}-a-${to}.xlsx`);
+    } catch (err) {
+      toast.error(getErrorMessage(err, "No se pudo descargar el cuadre. Inténtalo de nuevo."));
+    } finally {
+      setDownloading(false);
+    }
+  };
   const branchColumns = useMemo(
     () => figureColumns({ key: "name", header: "Sucursal", primary: true, render: (row) => <strong>{row.name}</strong> }, costs),
-    [costs]
-  );
-  const dayColumns = useMemo(
-    () => figureColumns({ key: "date", header: "Día", primary: true, render: (row) => <strong>{formatDay(row.date)}</strong> }, costs),
     [costs]
   );
   const productColumns = useMemo(
@@ -363,7 +377,7 @@ const ReportsPage = () => {
             )}
 
             {!singleDay && report.byDay.length > 0 && (
-              <Section title="Día a día" subtitle="Solo los días con ventas." index={3}>
+              <Section title="Día a día" subtitle="Una fila por día, con el total del periodo (también en «Cuadre en Excel»)." index={3}>
                 {report.byDay.length > 1 && (
                   <AreaChart
                     labels={report.byDay.map((row) => String(Number(row.date.slice(8))))}
@@ -377,18 +391,21 @@ const ReportsPage = () => {
                     ]}
                   />
                 )}
-                <DataTable caption="Ventas por día" columns={dayColumns} rows={report.byDay} getRowKey={(row) => row.date} />
+                <DailyHistory params={paramsOf()} />
               </Section>
             )}
 
             {report.products.length > 0 && (
               <Section index={4} title="Productos vendidos" subtitle={`${report.products.length} ${report.products.length === 1 ? "producto" : "productos"}, el de más valor vendido primero.`}>
-                <DataTable caption="Productos vendidos" columns={productColumns} rows={products} getRowKey={(row) => row.id} />
-                {report.products.length > PRODUCTS_SHOWN && (
-                  <button type="button" className="sheet__link" onClick={() => setShowAllProducts((current) => !current)}>
-                    {showAllProducts ? "Ver menos" : `Ver los ${report.products.length} productos`}
-                  </button>
-                )}
+                {/* Fase 22: el resumen por producto o el detalle de cada venta (como el sistema anterior), con Excel */}
+                <SoldProducts params={paramsOf()} fileName={singleDay ? `productos-vendidos-${from}.xlsx` : `productos-vendidos-${from}-a-${to}.xlsx`}>
+                  <DataTable caption="Productos vendidos" columns={productColumns} rows={products} getRowKey={(row) => row.id} />
+                  {report.products.length > PRODUCTS_SHOWN && (
+                    <button type="button" className="sheet__link" onClick={() => setShowAllProducts((current) => !current)}>
+                      {showAllProducts ? "Ver menos" : `Ver los ${report.products.length} productos`}
+                    </button>
+                  )}
+                </SoldProducts>
               </Section>
             )}
           </>
@@ -408,6 +425,10 @@ const ReportsPage = () => {
           </p>
         </div>
         <div className="list-page__actions">
+          {/* Fase 20: el cuadre del periodo elegido en Excel (detalle, ganancia del día, medios, abonos y cajas) */}
+          <Button icon="download" onClick={downloadClose} disabled={downloading}>
+            {downloading ? "Preparando…" : "Cuadre en Excel"}
+          </Button>
           {can("reports.balance") && (
             <Link className="pos-new-sale balance-link" to="/ventas/balance">
               Balance mensual

@@ -93,6 +93,9 @@ const NAV_ITEMS = [
     icon: "cart",
     children: [
       { label: "Vender", to: "/ventas/vender", permission: "sales.create" },
+      // Fase 18: el vendedor arma el pedido en la tablet; la caja lo cobra
+      { label: "Pedido a caja", to: "/ventas/pedido", permission: "sale-orders.create" },
+      { label: "Pedidos por cobrar", to: "/ventas/pedidos", permission: "sales.create" },
       { label: "Ventas", to: "/ventas/historial", permission: ["sales.read", "sales.read-all"] },
       { label: "Clientes", to: "/ventas/clientes", permission: "customers.read" },
       { label: "Cartera", to: "/ventas/cartera", permission: ["receivables.read", "receivables.pay"] },

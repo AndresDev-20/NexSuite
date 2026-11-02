@@ -28,6 +28,8 @@ const RegistersPage = lazy(() => import("./features/cash/RegistersPage/Registers
 const PaymentsPage = lazy(() => import("./features/cash/PaymentsPage/PaymentsPage"));
 const ProductUnitsPage = lazy(() => import("./features/inventory/ProductUnitsPage/ProductUnitsPage"));
 const CustomersPage = lazy(() => import("./features/sales/CustomersPage/CustomersPage"));
+const OrderPage = lazy(() => import("./features/saleOrders/OrderPage/OrderPage"));
+const OrdersQueuePage = lazy(() => import("./features/saleOrders/OrdersQueuePage/OrdersQueuePage"));
 const PosPage = lazy(() => import("./features/sales/PosPage/PosPage"));
 const SalesPage = lazy(() => import("./features/sales/SalesPage/SalesPage"));
 const ReceivablesPage = lazy(() => import("./features/sales/ReceivablesPage/ReceivablesPage"));
@@ -80,6 +82,13 @@ function App() {
 
           <Route element={<PermissionRoute permission="sales.create" />}>
             <Route path="/ventas/vender" element={<PosPage />} />
+            {/* Fase 18: la caja cobra o rechaza los pedidos que envían los vendedores */}
+            <Route path="/ventas/pedidos" element={<OrdersQueuePage />} />
+          </Route>
+
+          {/* Fase 18: el vendedor arma el pedido en la tablet y lo envía a caja */}
+          <Route element={<PermissionRoute permission="sale-orders.create" />}>
+            <Route path="/ventas/pedido" element={<OrderPage />} />
           </Route>
 
           <Route element={<PermissionRoute permission={["sales.read", "sales.read-all"]} />}>

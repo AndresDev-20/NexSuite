@@ -1,0 +1,111 @@
+/* Histórico de ventas día a día (Fase 21): tabla ancha con la fecha fija a la izquierda */
+.daily {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.daily__caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.daily__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.daily__table th,
+.daily__table td {
+  padding: 8px 12px;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.daily__table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--on-accent, #fff);
+  background-color: var(--red-600);
+}
+
+.daily__table tbody tr:nth-child(even) td,
+.daily__table tbody tr:nth-child(even) .daily__date {
+  background-color: var(--gray-50);
+}
+
+/* La fecha queda fija al desplazar a la derecha */
+.daily__date {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  text-align: left !important;
+  font-weight: 600;
+  background-color: var(--white);
+}
+
+.daily__table thead .daily__date {
+  z-index: 2;
+  background-color: var(--red-600);
+}
+
+.daily__row--empty td,
+.daily__row--empty .daily__date {
+  color: var(--color-text-muted);
+}
+
+.daily__zero {
+  color: var(--color-text-muted);
+}
+
+.daily__cell--strong {
+  font-weight: 700;
+}
+
+.daily__cell--missing {
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.daily__cell--surplus {
+  font-weight: 600;
+  color: var(--success);
+}
+
+.daily__table tfoot td,
+.daily__table tfoot th {
+  font-weight: 800;
+  background-color: var(--gray-100);
+  border-bottom: none;
+}
+
+/* Productos vendidos con detalle (Fase 22) */
+.sold__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.sold__table .sold__text {
+  text-align: left;
+}
+
+.sold__serials {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}

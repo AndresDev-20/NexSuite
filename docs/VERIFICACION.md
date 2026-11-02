@@ -140,7 +140,57 @@ Con Meta y Anthropic conectados (`docs/CHATBOT-WHATSAPP.md`, paso 6):
 - [ ] Pedir algo que no hay: dice que no hay y ofrece algo parecido, sin inventar.
 - [ ] «Lo quiero comprar» pasa a un vendedor y la campana lo avisa; la respuesta desde la bandeja llega al celular.
 
-## 10. Producción (cuando montes el VPS)
+## 10. Pedidos a caja desde la tablet (Fase 18)
+
+Usa los roles **Vendedor** (tablet: arma y envía pedidos) y **Cajero** (abre la caja, cobra y recibe abonos). El rol «Cajero / vendedor» pasó a llamarse «Vendedor»: a quien maneja la caja, cámbiale el rol a «Cajero».
+
+- [ ] **Ventas → Pedido a caja** en una tablet: busca, suma cantidades con − / +, elige el IMEI de un celular y
+      envía. *Debes ver* «Pedido #N» con el total y el tiempo que le queda.
+- [ ] Mientras está pendiente, en **Vender** ese producto sale con «apartadas» y el IMEI apartado no aparece.
+- [ ] **Ventas → Pedidos por cobrar** (cajero con «Vender»): el pedido aparece solo, con cuenta regresiva y la
+      campana avisa. Cóbralo con un cliente con cupo y parte fiada: *la venta queda a nombre del vendedor*.
+- [ ] **Rechazar** con motivo: en la tablet, «Últimos pedidos» muestra «Rechazado» y el motivo.
+- [ ] Deja uno sin cobrar 20 minutos: *se vence solo* y lo apartado vuelve a estar libre.
+
+## 11. Clientes al vender y fiado a cuotas (Fase 19)
+
+- [ ] **Vender → + Nuevo cliente** (con el rol Cajero): crea un cliente; *debe quedar elegido* en la venta y sin campos de
+      cupo. Como Administrador o Gerente el formulario sí trae cupo y plazo.
+- [ ] Vende fiado a un cliente con cupo: *sale* «una sola cuota el …» a su plazo. Pulsa **Pagar en cuotas**, arma 3
+      cuotas y cobra. *No deja cobrar* si no suman lo fiado o si una fecha va antes que la anterior.
+- [ ] El **comprobante** imprime el plan de cuotas.
+- [ ] **Cartera → la cuenta del cliente**: *debe mostrar* los productos que debe (con IMEI) y las cuotas.
+- [ ] Registra un abono mayor que la primera cuota: la primera sale **pagada** y la segunda con lo que falta.
+- [ ] **Pedidos por cobrar → Cobrar**: también deja crear el cliente y fiar a cuotas.
+- [ ] En la **tablet**, **+ Nuevo cliente** crea el cliente (el pedido sigue sin cliente; lo elige la caja).
+- [ ] **Fiar sin cupo** (con el permiso «Fiar sin cupo»): a un cliente sin cupo con documento y teléfono, elige
+      «Crédito (fiado)», escribe la **cuota inicial** (por ejemplo la mitad) y en **Plazo para pagar lo fiado** elige una
+      sola fecha (prueba los botones de 15/30/60/90 días) o «En cuotas». *El efectivo de
+      entrada entra a la caja y en la cartera queda debiendo solo el resto.* Sin documento o teléfono *no deja fiar*.
+
+## 12. Cuadre del día en Excel (Fase 20)
+
+- [ ] Haz un día de prueba: una venta de contado, una fiada con cuota inicial, una fiada sin dar nada, una anulada,
+      un gasto y un abono. En **Ventas → Reportes → Cuadre en Excel** *debes ver* en «Cuadre del día» la ganancia de lo
+      vendido, los gastos y la **GANANCIA DEL DÍA**, y en «Ventas» quién vendió cada cosa, lo que pagó y lo que debe.
+- [ ] Las cifras coinciden con la pantalla de Reportes e Inicio del mismo día.
+- [ ] Con un usuario sin «Ver costos» el Excel sale sin costos ni ganancias.
+
+## 13. Histórico día a día (Fase 21)
+
+- [ ] **Ventas → Reportes → Este mes**: la sección **Día a día** muestra todos los días del mes (los sin ventas en gris)
+      y la fila **Total**; compárala con tu sistema anterior para unos días.
+- [ ] **Cuadre en Excel** del mes: la primera hoja es **Día a día**, con título, encabezado fijo y total resaltado.
+- [ ] Un turno con faltante sale en rojo y uno con sobrante en verde.
+
+## 14. P y G y productos vendidos (Fase 22)
+
+- [ ] **Ventas → Reportes → Balance mensual**: el bloque **Balance de P y G** y la primera hoja «P y G» del Excel (y en el
+      PDF). Compara un mes con el P y G de tu sistema anterior (aquí el % es sobre las ventas netas).
+- [ ] **Ventas → Reportes → Productos vendidos → Detalle**: cada producto con vendedor, código, hora, valor y comprobante;
+      **Productos en Excel** lo descarga.
+
+## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 13). Además:
 

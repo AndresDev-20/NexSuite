@@ -5,6 +5,8 @@ import Menu from "../menu/Menu";
 import BranchSelector from "../../features/branches/BranchSelector";
 import usePermissions from "../../features/auth/usePermissions";
 import { useChatSummary } from "../../features/chats/useChats";
+import { usePendingOrders } from "../../features/saleOrders/useSaleOrders";
+import useActiveBranch from "../../features/branches/useActiveBranch";
 import { clearSession, getUser } from "../../utils/session";
 import { getFullName, getInitials, getShortName } from "../../utils/userDisplay";
 import "./header.css";
@@ -17,7 +19,20 @@ const Header = () => {
   // Aviso: conversaciones de WhatsApp que esperan vendedor (Fase 16); solo con «Ver chats»
   const { can } = usePermissions();
   const seesChats = can("chats.read");
-  const { waiting: notifications } = useChatSummary(seesChats);
+  const { waiting: chatsWaiting } = useChatSummary(seesChats);
+  // Y pedidos a caja esperando cobro (Fase 18); solo para quien cobra («Vender»)
+  const seesOrders = can("sales.create");
+  const { activeBranchId } = useActiveBranch();
+  const ordersWaiting = usePendingOrders(seesOrders, activeBranchId);
+  const notifications = chatsWaiting + ordersWaiting;
+  const noticeLabel = [
+    ordersWaiting > 0 && `${ordersWaiting} ${ordersWaiting === 1 ? "pedido espera" : "pedidos esperan"} en caja`,
+    chatsWaiting > 0 && `${chatsWaiting} ${chatsWaiting === 1 ? "chat espera" : "chats esperan"} vendedor`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  // Primero los pedidos: el cliente está esperando en la caja
+  const noticeTarget = ordersWaiting > 0 ? "/ventas/pedidos" : seesChats ? "/ventas/chats" : null;
 
   const [menuOpen, setMenuOpen] = useState(false); // drawer móvil / tablet
   const [userOpen, setUserOpen] = useState(false); // menú del usuario
@@ -100,9 +115,9 @@ const Header = () => {
             <button
               type="button"
               className="icon-button"
-              aria-label={notifications > 0 ? `Chats esperando vendedor (${notifications})` : "Notificaciones"}
-              title={notifications > 0 ? `${notifications} ${notifications === 1 ? "chat espera" : "chats esperan"} vendedor` : undefined}
-              onClick={seesChats ? () => navigate("/ventas/chats") : undefined}
+              aria-label={notifications > 0 ? `Avisos: ${noticeLabel}` : "Notificaciones"}
+              title={notifications > 0 ? noticeLabel : undefined}
+              onClick={noticeTarget ? () => navigate(noticeTarget) : undefined}
             >
               <Icon name="bell" className="icon-button__icon" />
               {notifications > 0 && (

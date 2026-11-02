@@ -238,6 +238,12 @@
   gap: 8px;
 }
 
+/* Fase 19: «+ Nuevo cliente» debajo del cliente, a todo lo ancho */
+.pos__new-customer {
+  grid-column: 1 / -1;
+  display: flex;
+}
+
 .pos__totals {
   display: flex;
   flex-direction: column;

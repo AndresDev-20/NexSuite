@@ -82,7 +82,35 @@ const AccountSheet = ({ account, canPay, canManage, onPay, onAddBalance, onCance
                   <span className="sheet__row-meta">
                     {formatCurrency(debt.amount)}
                     {debt.paid > 0 && ` · abonado ${formatCurrency(debt.paid)}`}
+                    {debt.overdueAmount > 0 && debt.overdueAmount < debt.balance && ` · vencido ${formatCurrency(debt.overdueAmount)}`}
                   </span>
+                  {/* Fase 19: por qué productos debe y sus cuotas */}
+                  {debt.items.length > 0 && (
+                    <ul className="debt-items">
+                      {debt.items.map((item, index) => (
+                        <li key={`${item.productId}-${index}`}>
+                          {item.quantity} × {item.name}
+                          {item.serials.length > 0 && <span className="debt-items__serials"> · {item.serials.join(", ")}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {debt.installments.length > 1 && (
+                    <ol className="debt-installments">
+                      {debt.installments.map((installment) => (
+                        <li key={installment.number} className={`debt-installments__item debt-installments__item--${installment.status}`}>
+                          <span>
+                            Cuota {installment.number} · {formatDay(installment.dueDate)}
+                          </span>
+                          <span>
+                            {installment.status === "pagada"
+                              ? `${formatCurrency(installment.amount)} · pagada`
+                              : `${formatCurrency(installment.balance)}${installment.paid > 0 ? ` de ${formatCurrency(installment.amount)}` : ""}${installment.status === "vencida" ? " · vencida" : ""}`}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
                 </div>
                 <div className="sheet__row-side">
                   <span className="sheet__number">{formatCurrency(debt.balance)}</span>

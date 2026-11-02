@@ -1,0 +1,268 @@
+/* Venta fiada (Fase 19): cuota inicial, lo que queda fiado y hasta cuándo. En Vender y al cobrar un pedido */
+.credit-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background-color: var(--white);
+  border: 1.5px solid var(--red-200);
+  border-radius: 14px;
+}
+
+.credit-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.credit-panel__head > :last-child {
+  min-width: 180px;
+}
+
+.credit-panel__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.credit-panel__meta {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.credit-panel__badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--red-700);
+  background-color: var(--red-50);
+  border-radius: 999px;
+}
+
+.credit-panel__step {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.credit-panel__step-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  font-weight: 700;
+}
+
+.credit-panel__step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 0.8rem;
+  color: var(--on-accent, #fff);
+  background-color: var(--red-600);
+  border-radius: 50%;
+}
+
+.credit-panel__step-hint {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.credit-panel__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+/* Lo que queda fiado, bien visible */
+.credit-panel__owed {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background-color: var(--red-50);
+  border-radius: 10px;
+}
+
+.credit-panel__owed span {
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.credit-panel__owed strong {
+  font-size: 1.35rem;
+  color: var(--red-700);
+}
+
+/* ---------- ¿Hasta cuándo? ---------- */
+.credit-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.credit-plan__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.credit-plan__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.credit-plan__modes {
+  display: inline-flex;
+  padding: 3px;
+  background-color: var(--gray-100);
+  border-radius: 10px;
+}
+
+.credit-plan__mode {
+  min-height: 38px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.credit-plan__mode--on {
+  color: var(--red-700);
+  background-color: var(--white);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--gray-900) 15%, transparent);
+}
+
+.credit-plan__mode:focus-visible,
+.credit-plan__chip:focus-visible {
+  outline: 2px solid var(--red-600);
+  outline-offset: 2px;
+}
+
+.credit-plan__single {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.credit-plan__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.credit-plan__chip {
+  min-height: 36px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.credit-plan__chip--on {
+  color: var(--red-700);
+  background-color: var(--red-50);
+  border-color: var(--red-300);
+}
+
+/* ---------- Cuotas ---------- */
+.installments__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.installments__row {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.installments__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--red-700);
+  background-color: var(--white);
+  border: 1px solid var(--red-200);
+  border-radius: 50%;
+}
+
+.installments__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.installments__sum {
+  margin: 0;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.installments__sum--ok {
+  color: var(--success);
+}
+
+@media (min-width: 768px) {
+  .credit-panel__row {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .credit-plan__single {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  .credit-plan__single .pos__hint {
+    flex-basis: 100%;
+  }
+}
+
+/* Celular: fecha y valor de la cuota uno debajo del otro */
+@media (max-width: 479px) {
+  .installments__row {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .installments__row > :nth-child(3) {
+    grid-column: 2;
+  }
+}

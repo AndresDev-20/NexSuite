@@ -9,6 +9,7 @@ import { formatDateTime } from "../../administration/audit/auditOptions";
 import { formatDay } from "../../purchases/orders/orderOptions";
 import { getMethodLabel } from "../sales/useSales";
 import { downloadBalance, getBalancePreview } from "../reports/balance";
+import useActiveBranch from "../../branches/useActiveBranch";
 import BalanceTable from "./BalanceTable";
 import { todayInColombia } from "../../../utils/dates";
 import getErrorMessage from "../../../utils/getErrorMessage";
@@ -311,6 +312,57 @@ const Results = ({ summary, data }) => {
 };
 
 /**
+ * P y G del mes (Fase 22), como el del sistema anterior: ventas netas, utilidad con su % sobre la
+ * venta, utilidad neta (− gastos), cuentas por cobrar y por pagar y efectivo disponible.
+ */
+const Pyg = ({ pyg }) => {
+  const rows = [
+    { label: "Ventas totales", value: pyg.totalSales },
+    { label: "Devolución ventas (−)", value: pyg.refunds },
+    { label: "Ventas netas", value: pyg.netSales, strong: true },
+    { gap: true },
+    { label: "Ventas a crédito", value: pyg.credit },
+    { label: "Total abonos", value: pyg.collected },
+    { gap: true },
+    { label: "Costo de venta", value: pyg.saleCost },
+    { label: "% Utilidad (sobre ventas netas)", percent: pyg.margin },
+    { label: "Utilidad en pesos", value: pyg.profit, strong: true },
+    { gap: true },
+    { label: "Gastos", value: pyg.expenses },
+    { label: "Utilidad neta (crecimiento en pesos)", value: pyg.netProfit, strong: true, main: true },
+    { label: "% Utilidad neta", percent: pyg.netMargin },
+    { gap: true },
+    { label: "Inversión en mercancía (compras, no se resta)", value: pyg.purchases },
+    { label: "Cuentas por cobrar (a hoy)", value: pyg.receivables },
+    { label: "Cuentas por pagar (a hoy)", value: pyg.payables },
+    { label: "Efectivo disponible", value: pyg.cashAvailable, strong: true },
+  ];
+  return (
+    <section className="list-page__card balance-results__card balance-pyg" aria-labelledby="balance-pyg-title">
+      <h2 className="balance-section-title" id="balance-pyg-title">
+        Balance de P y G
+      </h2>
+      <dl className="balance-statement">
+        {rows.map((row, index) =>
+          row.gap ? (
+            <div key={`gap-${index}`} className="balance-pyg__gap" aria-hidden="true" />
+          ) : (
+            <div key={row.label} className={`balance-statement__row ${row.strong ? "balance-statement__row--strong" : ""} ${row.main ? "balance-statement__row--main" : ""}`.trim()}>
+              <dt>{row.label}</dt>
+              <dd>{row.percent !== undefined ? percent(row.percent) : money(row.value)}</dd>
+            </div>
+          )
+        )}
+      </dl>
+      <p className="reports-note">
+        Utilidad = ventas netas − costo de venta. Utilidad neta = utilidad − gastos (las compras no se restan: son inventario y su costo entra al venderse). Efectivo
+        disponible = ventas netas − fiado + abonos − gastos.
+      </p>
+    </section>
+  );
+};
+
+/**
  * Balance mensual en pantalla: el resumen del mes, el resultado renglón por renglón y los datos en
  * tablas por pestaña (con búsqueda, orden y páginas) para que se manejen aunque sean muchos. Se
  * puede descargar en PDF o Excel.
@@ -325,24 +377,26 @@ const BalancePage = () => {
   const [busy, setBusy] = useState("");
   const [attempt, setAttempt] = useState(0); // Reintentar vuelve a calcular el mismo mes
   const valid = /^\d{4}-\d{2}$/.test(month) && month <= currentMonth;
+  // La sucursal elegida en el encabezado (sin ella, todo el negocio)
+  const { activeBranchId, activeBranch } = useActiveBranch();
 
-  const requestKey = `${month}#${attempt}`;
+  const requestKey = `${month}#${activeBranchId ?? "todas"}#${attempt}`;
 
   useEffect(() => {
     if (!valid) return undefined;
     let current = true;
-    getBalancePreview(month)
+    getBalancePreview(month, activeBranchId)
       .then((data) => current && setState({ key: requestKey, data, error: "" }))
       .catch((error) => current && setState({ key: requestKey, data: null, error: getErrorMessage(error, "No se pudo calcular el balance.") }));
     return () => {
       current = false;
     };
-  }, [month, valid, requestKey]);
+  }, [month, valid, requestKey, activeBranchId]);
 
   const download = async (format) => {
     setBusy(format);
     try {
-      await downloadBalance(month, format);
+      await downloadBalance(month, format, activeBranchId);
       toast.success(`Balance de ${month} descargado en ${format === "pdf" ? "PDF" : "Excel"}.`);
     } catch (error) {
       toast.error(getErrorMessage(error, "No se pudo descargar el balance."));
@@ -378,7 +432,7 @@ const BalancePage = () => {
     return (
       <div className={`reports balance ${loading ? "reports--loading" : ""}`.trim()} aria-busy={loading} key={month}>
         <p className="balance-status">
-          {data.complete ? `${data.monthName}: mes completo` : `${data.monthName}: mes en curso, hasta hoy`} · Todas las sucursales · Calculado el{" "}
+          {data.complete ? `${data.monthName}: mes completo` : `${data.monthName}: mes en curso, hasta hoy`} · {data.branch ? `Sucursal ${data.branch.name}` : "Todas las sucursales"} · Calculado el{" "}
           {formatDateTime(data.generatedAt)}
         </p>
         <div className="reports-kpis">
@@ -394,6 +448,7 @@ const BalancePage = () => {
         </div>
 
         <Results summary={summary} data={data} />
+        {data.pyg && <Pyg pyg={data.pyg} />}
 
         <section className="list-page__card balance-data" aria-labelledby="balance-data-title">
           <h2 className="balance-section-title" id="balance-data-title">
@@ -424,7 +479,9 @@ const BalancePage = () => {
       <header className="list-page__header">
         <div>
           <h1 className="list-page__title">Balance mensual</h1>
-          <p className="list-page__subtitle">Ventas, ganancia, gastos, compras, inventario, cartera, cuentas por pagar y caja del mes, de todas las sucursales.</p>
+          <p className="list-page__subtitle">
+            Ventas, ganancia, gastos, compras, inventario, cartera, cuentas por pagar y caja del mes · {activeBranch ? `sucursal ${activeBranch.name}` : "todas las sucursales"}
+          </p>
         </div>
         <Link className="pos-new-sale" to="/ventas/reportes">
           Volver a reportes

@@ -86,6 +86,17 @@ export const normalizeAccount = (account) => ({
     paid: toNumber(debt.paid),
     balance: toNumber(debt.balance),
     overdue: debt.overdue,
+    overdueAmount: toNumber(debt.overdueAmount ?? 0),
+    // Fase 19: las cuotas de la venta fiada y por qué productos debe
+    installments: (debt.installments ?? []).map((installment) => ({
+      number: installment.number,
+      dueDate: installment.duedate,
+      amount: toNumber(installment.amount),
+      paid: toNumber(installment.paid),
+      balance: toNumber(installment.balance),
+      status: installment.status,
+    })),
+    items: (debt.items ?? []).map((item) => ({ productId: item.idproduct, name: item.name, quantity: item.quantity, total: toNumber(item.total), serials: item.serials ?? [] })),
   })),
   balances: account.balances.map((balance) => ({
     id: balance.id,

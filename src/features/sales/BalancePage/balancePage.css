@@ -202,3 +202,12 @@
     animation: none;
   }
 }
+
+/* P y G (Fase 22) */
+.balance-pyg {
+  margin-top: 16px;
+}
+
+.balance-pyg__gap {
+  height: 8px;
+}

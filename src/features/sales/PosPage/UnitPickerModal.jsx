@@ -10,7 +10,7 @@ import { normalizeUnit } from "../../inventory/productUnits/useProductUnits";
 import { formatDate } from "../../inventory/productUnits/productUnitOptions";
 
 /* ---------- Contenido (solo existe mientras el modal está abierto) ---------- */
-const Picker = ({ line, branchId, onCancel, onConfirm }) => {
+const Picker = ({ line, branchId, verb, onCancel, onConfirm }) => {
   const [state, setState] = useState({ units: [], loading: true, error: "" });
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(() => new Set(line.units.map((unit) => unit.id)));
@@ -18,7 +18,8 @@ const Picker = ({ line, branchId, onCancel, onConfirm }) => {
   useEffect(() => {
     let current = true;
     getAvailableUnits(line.productId, branchId)
-      .then((data) => current && setState({ units: (data ?? []).map(normalizeUnit), loading: false, error: "" }))
+      // Las apartadas por un pedido a caja no se ofrecen (Fase 18)
+      .then((data) => current && setState({ units: (data ?? []).map(normalizeUnit).filter((unit) => !unit.reserved), loading: false, error: "" }))
       .catch((error) => current && setState({ units: [], loading: false, error: getErrorMessage(error, "No se pudieron cargar los IMEI.") }));
     return () => {
       current = false;
@@ -54,12 +55,12 @@ const Picker = ({ line, branchId, onCancel, onConfirm }) => {
   return (
     <div className="pos-picker">
       <p className="pos-picker__intro">
-        <strong>{line.name}</strong> · elige los IMEI o seriales que entregas (cada uno es una unidad).
+        <strong>{line.name}</strong> · elige los IMEI o seriales que se llevan (cada uno es una unidad).
       </p>
       {state.loading && <p className="pos-picker__hint">Cargando los disponibles…</p>}
       {state.error && <p className="pos-picker__error">{state.error}</p>}
       {!state.loading && !state.error && state.units.length === 0 && (
-        <p className="pos-picker__hint">No hay unidades disponibles en esta sucursal.</p>
+        <p className="pos-picker__hint">No hay unidades disponibles en esta sucursal (o están apartadas en pedidos a caja).</p>
       )}
       {state.units.length > 0 && (
         <>
@@ -89,7 +90,7 @@ const Picker = ({ line, branchId, onCancel, onConfirm }) => {
           Cancelar
         </Button>
         <Button icon="check" disabled={selected.size === 0} onClick={confirm}>
-          {selected.size === 0 ? "Elige al menos uno" : `Vender ${selected.size} ${selected.size === 1 ? "unidad" : "unidades"}`}
+          {selected.size === 0 ? "Elige al menos uno" : `${verb} ${selected.size} ${selected.size === 1 ? "unidad" : "unidades"}`}
         </Button>
       </FormActions>
     </div>
@@ -99,11 +100,11 @@ const Picker = ({ line, branchId, onCancel, onConfirm }) => {
 /**
  * Elegir los IMEI/seriales de un producto con serial que se entregan en la venta.
  * line: { productId, name, units: [{ id, serial, imei2 }] } o null (cerrado).
- * onConfirm(units) recibe las unidades elegidas.
+ * onConfirm(units) recibe las unidades elegidas. verb: el botón ("Vender", o "Apartar" en un pedido a caja).
  */
-const UnitPickerModal = ({ line, branchId, onClose, onConfirm }) => (
+const UnitPickerModal = ({ line, branchId, verb = "Vender", onClose, onConfirm }) => (
   <Modal open={Boolean(line)} title="Elegir IMEI o seriales" onClose={onClose}>
-    {line && <Picker key={line.productId} line={line} branchId={branchId} onCancel={onClose} onConfirm={onConfirm} />}
+    {line && <Picker key={line.productId} line={line} branchId={branchId} verb={verb} onCancel={onClose} onConfirm={onConfirm} />}
   </Modal>
 );
 

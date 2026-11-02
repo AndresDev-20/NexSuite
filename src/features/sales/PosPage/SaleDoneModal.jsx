@@ -8,9 +8,9 @@ import { getMethodLabel } from "../sales/useSales";
 
 /**
  * Venta registrada: número, total, pagos y vueltas, con el comprobante (imprimir, PDF y correo).
- * result: { sale, change } o null (cerrado).
+ * result: { sale, change } o null (cerrado). nextLabel: el botón para seguir ("Nueva venta").
  */
-const SaleDoneModal = ({ result, onClose }) => (
+const SaleDoneModal = ({ result, onClose, nextLabel = "Nueva venta" }) => (
   <Modal open={Boolean(result)} title="Venta registrada" onClose={onClose}>
     {result && (
       <div className="pos-done">
@@ -36,7 +36,7 @@ const SaleDoneModal = ({ result, onClose }) => (
             Ver la venta
           </Link>
           <Button icon="plus" data-autofocus onClick={onClose}>
-            Nueva venta
+            {nextLabel}
           </Button>
         </FormActions>
       </div>

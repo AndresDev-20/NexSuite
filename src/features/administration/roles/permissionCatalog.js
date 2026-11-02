@@ -23,6 +23,11 @@ export const PERMISSION_CATALOG = [
       { code: "sales.read-all", label: "Ver ventas de todos", description: "Consultar las ventas de todos los vendedores de sus sucursales." },
       { code: "sales.discount", label: "Dar descuentos", description: "Bajar el precio en una venta (por producto o a toda la venta)." },
       {
+        code: "sales.credit-override",
+        label: "Fiar sin cupo",
+        description: "Fiarle a un cliente que no tiene cupo o por encima de su cupo, sin máximo (el cliente debe tener documento y teléfono). Queda en la auditoría quién lo autorizó.",
+      },
+      {
         code: "sales.void",
         label: "Anular ventas",
         description: "Anular con motivo una venta mal registrada mientras su turno de caja siga abierto: todo vuelve al inventario, la caja y la cartera.",
@@ -261,6 +266,17 @@ export const PERMISSION_CATALOG = [
     title: "Administrativo · Auditoría",
     permissions: [
       { code: "audit.read", label: "Ver auditoría", description: "Consultar quién hizo qué y cuándo en el sistema." },
+    ],
+  },
+  {
+    key: "sale-orders",
+    title: "Ventas · Pedidos a caja",
+    permissions: [
+      {
+        code: "sale-orders.create",
+        label: "Enviar pedidos a caja",
+        description: "Armar el pedido en la tablet (productos, cantidades e IMEI) y enviarlo a las cajas de su sucursal; las unidades quedan apartadas 20 minutos. La venta queda a su nombre. Necesita también consultar productos, existencias y unidades con serial; para cobrarlo, la caja necesita «Vender».",
+      },
     ],
   },
   {

@@ -65,3 +65,45 @@
 .receivables-note--warning {
   color: var(--warning-text);
 }
+
+/* Fase 19: productos que se deben y cuotas de cada venta fiada */
+.debt-items,
+.debt-installments {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.debt-items {
+  color: var(--gray-700);
+}
+
+.debt-items__serials {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.debt-installments__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background-color: var(--gray-50);
+}
+
+.debt-installments__item--pagada {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.debt-installments__item--vencida {
+  font-weight: 600;
+  color: var(--danger);
+}

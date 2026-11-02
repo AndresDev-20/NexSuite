@@ -38,15 +38,10 @@ const Modal = ({ open, title, onClose, busy = false, size, children }) => {
     };
   }, [open]);
 
-  // Escape
+  // Solo se cierra con la X, con su botón de cancelar o al guardar: ni Escape ni un clic en el fondo
+  // oscuro lo cierran, para no perder lo que se estaba escribiendo (pedido del desarrollador, 2026-11-02)
   const handleCancel = (event) => {
     event.preventDefault();
-    if (!busy) onClose();
-  };
-
-  // Clic en el fondo oscuro
-  const handleClick = (event) => {
-    if (event.target === event.currentTarget && !busy) onClose();
   };
 
   return (
@@ -55,7 +50,6 @@ const Modal = ({ open, title, onClose, busy = false, size, children }) => {
       className={`modal ${size === "wide" ? "modal--wide" : ""}`.trim()}
       aria-labelledby={titleId}
       onCancel={handleCancel}
-      onClick={handleClick}
     >
       <div className="modal__panel">
         <header className="modal__header">

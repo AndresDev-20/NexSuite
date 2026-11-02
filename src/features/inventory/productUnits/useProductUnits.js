@@ -25,6 +25,8 @@ export const normalizeUnit = (unit) => ({
   // Se compara como texto "AAAA-MM-DD": vigente si hoy no ha pasado la fecha
   warrantyActive: Boolean(unit.warrantyuntil) && unit.warrantyuntil >= todayInColombia(),
   notes: unit.notes ?? "",
+  // Apartada por un pedido a caja (Fase 18): sigue disponible pero no se puede vender a otro
+  reserved: Boolean(unit.reserved),
 });
 
 const LOAD_ERROR = "No se pudieron cargar las unidades.";
