@@ -634,7 +634,7 @@ const PosPage = () => {
             </Button>
             {change > 0 && (
               <p className="pos__change" role="status">
-                Vueltas: <strong>{formatCurrency(pesos(change))}</strong>
+                Cambios: <strong>{formatCurrency(pesos(change))}</strong>
               </p>
             )}
             {!singlePayment && pending !== 0 && (

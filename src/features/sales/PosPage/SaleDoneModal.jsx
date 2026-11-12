@@ -7,7 +7,7 @@ import ReceiptActions from "../sales/ReceiptActions";
 import { getMethodLabel } from "../sales/useSales";
 
 /**
- * Venta registrada: número, total, pagos y vueltas, con el comprobante (imprimir, PDF y correo).
+ * Venta registrada: número, total, pagos y cambios, con el comprobante (imprimir, PDF y correo).
  * result: { sale, change } o null (cerrado). nextLabel: el botón para seguir ("Nueva venta").
  */
 const SaleDoneModal = ({ result, onClose, nextLabel = "Nueva venta" }) => (
@@ -18,7 +18,7 @@ const SaleDoneModal = ({ result, onClose, nextLabel = "Nueva venta" }) => (
         <p className="pos-done__total">{formatCurrency(result.sale.total)}</p>
         {result.change > 0 && (
           <p className="pos-done__change">
-            Vueltas: <strong>{formatCurrency(result.change)}</strong>
+            Cambios: <strong>{formatCurrency(result.change)}</strong>
           </p>
         )}
         <ul className="pos-done__payments">

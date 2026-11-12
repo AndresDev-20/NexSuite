@@ -93,7 +93,7 @@ Ninguna plantilla trae «Dar descuentos», «Ver costos», «Ver clientes» ni �
 - **Pago:**
   - con un solo medio, su valor sigue al total;
   - **Otro medio de pago** (hasta 6) para repartir; dice «Falta $…» o «Sobra $…»;
-  - **Efectivo:** campo **Recibido** y **Vueltas** en vivo;
+  - **Efectivo:** campo **Recibido** y **Cambios** en vivo;
   - transferencia, Nequi, Daviplata y tarjeta: **Referencia** («Nº de la transacción»);
   - **Crédito (fiado)** solo aparece con un cliente que tenga cupo: «Queda fiado a *cliente*».
 - **Notas** (opcional) y botones **Cancelar venta** y **Cobrar $…**. Antes de enviar avisa el primer problema: «Agrega al menos un producto.», «*Producto*: elige los IMEI.», «*Producto*: solo hay N.», «Faltan $… por pagar.», «Los pagos pasan el total por $….», «Para fiar elige un cliente con cupo.», «Lo recibido en efectivo no alcanza.» o «Elige quién hizo la venta (vendedor).»
@@ -107,7 +107,7 @@ Ninguna plantilla trae «Dar descuentos», «Ver costos», «Ver clientes» ni �
 
 **Comprobante** (al terminar la venta y en el detalle)
 - **Imprimir tirilla**, **Imprimir carta**, **Descargar PDF** (carta) y **Enviar por correo**: al correo del cliente o al que se escriba, en «Hoja carta» o «Tirilla 80 mm».
-- El PDF lleva: datos del negocio (de *Configuración → Datos del negocio*, Fase 15) y de la sucursal, número, fecha, vendedor, caja, cliente y documento, productos con **IMEI/Serial**, **IMEI 2** y «Garantía N meses, hasta *fecha*», descuentos, total, pagos con «Recibido $… · Vueltas $…», «Saldo fiado $… · vence *fecha*», notas, el pie del negocio y «Documento de venta interno. No es factura electrónica.». Una venta anulada dice **ANULADA** con fecha, quién y motivo.
+- El PDF lleva: datos del negocio (de *Configuración → Datos del negocio*, Fase 15) y de la sucursal, número, fecha, vendedor, caja, cliente y documento, productos con **IMEI/Serial**, **IMEI 2** y «Garantía N meses, hasta *fecha*», descuentos, total, pagos con «Recibido $… · Cambios $…», «Saldo fiado $… · vence *fecha*», notas, el pie del negocio y «Documento de venta interno. No es factura electrónica.». Una venta anulada dice **ANULADA** con fecha, quién y motivo.
 
 **Reportes de ventas** (`/ventas/reportes`, con `sales.read` o `sales.read-all`)
 - Periodos **Hoy**, **Ayer**, **Este mes**, **Mes anterior** o **Desde / Hasta** (quedan en la dirección). Sigue la sucursal activa.
@@ -265,7 +265,7 @@ Ninguna plantilla trae «Dar descuentos», «Ver costos», «Ver clientes» ni �
 | Pagos que no suman el total | 400 "Los pagos suman $… y la venta es de $…: deben ser iguales." |
 | Dos partes a crédito | 400 "Pagos: solo una parte a crédito." |
 | Fiar sin cliente | 400 "Cliente: obligatorio para fiar (pago a crédito)." |
-| Recibido en un medio que no es efectivo | 400 "Pago 1: lo recibido y las vueltas solo aplican al efectivo." |
+| Recibido en un medio que no es efectivo | 400 "Pago 1: lo recibido y los cambios solo aplican al efectivo." |
 | Recibido menor que el valor | 400 "Pago 1: lo recibido no alcanza para ese valor." |
 | El cliente no existe | 404 "El cliente no existe." |
 | Cliente inactivo | 409 "*Cliente* está inactivo: actívalo para venderle." |

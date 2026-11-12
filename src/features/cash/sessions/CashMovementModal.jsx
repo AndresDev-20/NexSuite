@@ -9,7 +9,7 @@ import { formatCurrency } from "../../../utils/money";
 import { sanitizeDecimal } from "../../../utils/validators";
 
 const COPY = {
-  ingreso: { title: "Registrar ingreso", reason: "Ej: sencillo para dar vueltas", confirm: "Registrar ingreso" },
+  ingreso: { title: "Registrar ingreso", reason: "Ej: sencillo para dar cambios", confirm: "Registrar ingreso" },
   retiro: { title: "Registrar retiro", reason: "Ej: consignación al banco", confirm: "Registrar retiro" },
 };
 

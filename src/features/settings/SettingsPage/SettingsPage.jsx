@@ -3,6 +3,7 @@ import Icon from "../../../components/ui/Icon/Icon";
 import useToast from "../../../components/feadback/Toast/useToast";
 import usePermissions from "../../auth/usePermissions";
 import BusinessSettings from "../BusinessSettings";
+import StorageArchive from "../StorageArchive";
 import { DEFAULT_PREFERENCES, resetPreferences, savePreferences, usePreferences } from "../preferences";
 import { useCallback, useEffect, useRef, useState } from "react";
 import getErrorMessage from "../../../utils/getErrorMessage";
@@ -298,8 +299,14 @@ const SettingsPage = () => {
         </Section>
       )}
 
+      {isDeveloper && (
+        <Section icon="inbox" title="Espacio y archivo (Developer)" subtitle="Cuánto ocupa la base y la auditoría de más de 12 meses." index={6}>
+          <StorageArchive />
+        </Section>
+      )}
+
       {can("settings.manage") && (
-        <Section icon="store" title="Datos del negocio" subtitle="Para todos: salen en los comprobantes y documentos del sistema." index={6}>
+        <Section icon="store" title="Datos del negocio" subtitle="Para todos: salen en los comprobantes y documentos del sistema." index={7}>
           <BusinessSettings />
         </Section>
       )}

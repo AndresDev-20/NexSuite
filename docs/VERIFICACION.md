@@ -265,6 +265,15 @@ Usa los roles **Vendedor** (tablet: arma y envía pedidos) y **Cajero** (abre la
 - [ ] Al entrar en temporada suena su canción corta (10 a 15 s): «Jingle Bells» en Navidad, el órgano de Bach en
       Halloween… La «×» del saludo la silencia. En **Configuración → Diseño de temporada** escúchalas todas (▶).
 
+## 14.6 Espacio y archivo de la auditoría (Fase 26)
+
+- [ ] Como **Developer**, en **Configuración → Espacio y archivo** ves cuánto ocupa la base y las tablas que más pesan.
+      Con otro usuario esa sección no aparece.
+- [ ] Pon `DB_STORAGE_LIMIT_MB` (el límite de tu plan de Aiven) en el `.env` del servidor y reinícialo: sale la barra
+      con el % usado.
+- [ ] Hoy no hay auditoría de más de 12 meses, así que dice que todo es del último año (es lo correcto). Cuando
+      haya, **Descargar Excel** baja el archivo y solo entonces se puede escribir ARCHIVAR y archivar.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 13). Además:

@@ -141,7 +141,7 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onClose }) => {
                 {payment.reference && <span className="sheet__row-meta">Referencia {payment.reference}</span>}
                 {payment.received !== null && (
                   <span className="sheet__row-meta">
-                    Recibido {formatCurrency(payment.received)} · vueltas {formatCurrency(payment.change ?? 0)}
+                    Recibido {formatCurrency(payment.received)} · cambios {formatCurrency(payment.change ?? 0)}
                   </span>
                 )}
               </div>
