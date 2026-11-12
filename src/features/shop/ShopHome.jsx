@@ -5,6 +5,8 @@ import getErrorMessage from "../../utils/getErrorMessage";
 import Reveal from "./Reveal";
 import { Arrow, ChatIcon, ProductCard, ProductRail } from "./ShopParts";
 import { getShopProducts } from "./shopApi";
+import { useSeason } from "../seasons/seasonContext";
+import { SeasonScene } from "../seasons/SeasonScene";
 import { STORE_NAME, initialOf, toneOf } from "./shopFormat";
 
 const SORTS = [
@@ -19,7 +21,10 @@ const reducedMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce
 
 /** Portada con anuncios que pasan solos (se detienen al pasar el mouse o con «Animaciones reducidas»). */
 const HeroCarousel = ({ shop, categories }) => {
+  // Con temporada, su anuncio va primero (Fase 25)
+  const { shown, config } = useSeason();
   const slides = [
+    ...(config ? [{ key: `season-${shown}`, ...config.slide, tone: `season-${shown}` }] : []),
     {
       key: "welcome",
       eyebrow: shop?.name ? `La tienda en línea de ${shop.name}` : "Tienda en línea",
@@ -69,6 +74,7 @@ const HeroCarousel = ({ shop, categories }) => {
         <div key={slide.key} className={`shop-hero__slide shop-hero__slide--${slide.tone} ${position === current ? "shop-hero__slide--on" : ""}`.trim()} aria-hidden={position !== current}>
           <span className="shop-hero__orb shop-hero__orb--one" />
           <span className="shop-hero__orb shop-hero__orb--two" />
+          {slide.key.startsWith("season-") && <SeasonScene variant="hero" />}
           <div className="shop-hero__content">
             <p className="shop-hero__eyebrow">{slide.eyebrow}</p>
             <h1 className="shop-hero__title">{slide.title}</h1>

@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Login from "./pages/login/Login";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import MainLayout from "./components/MainLayout";
+import SeasonProvider from "./features/seasons/SeasonProvider";
 const Home = lazy(() => import("./pages/home/Home"));
 const UsersPage = lazy(() => import("./features/administration/UserPage/UsersPage"));
 const RolesPage = lazy(() => import("./features/administration/RolesPage/RolesPage"));
@@ -48,6 +49,8 @@ const ShopProduct = lazy(() => import("./features/shop/ShopProduct"));
 
 function App() {
   return (
+    // Diseño de temporada (Fase 25): en el inicio de sesión, el sistema y NexStore
+    <SeasonProvider>
     <Routes>
       <Route path="/" element={<Login />} />
 
@@ -222,6 +225,7 @@ function App() {
         </Route>
       </Route>
     </Routes>
+    </SeasonProvider>
   );
 }
 

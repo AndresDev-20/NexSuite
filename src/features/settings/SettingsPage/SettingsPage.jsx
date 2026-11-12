@@ -4,6 +4,11 @@ import useToast from "../../../components/feadback/Toast/useToast";
 import usePermissions from "../../auth/usePermissions";
 import BusinessSettings from "../BusinessSettings";
 import { DEFAULT_PREFERENCES, resetPreferences, savePreferences, usePreferences } from "../preferences";
+import { useCallback, useEffect, useRef, useState } from "react";
+import getErrorMessage from "../../../utils/getErrorMessage";
+import { getSeasonSettings, saveSeasonMode } from "../../seasons/seasonApi";
+import { useSeason } from "../../seasons/seasonContext";
+import { playSeasonMusic, stopSeasonMusic } from "../../seasons/seasonMusic";
 import "../../../styles/listPage.css";
 import "./settingsPage.css";
 
@@ -22,6 +27,127 @@ const TEXT_SIZES = [
   { value: "normal", label: "Normal", hint: "El tamaño de siempre." },
   { value: "large", label: "Grande", hint: "Un poco más grande, más fácil de leer." },
 ];
+
+const SEASONAL = [
+  { value: "on", label: "Con adornos", hint: "Nieve, luces, telarañas, corazones… según la fecha." },
+  { value: "off", label: "Sin adornos", hint: "El diseño de siempre, aunque sea temporada." },
+];
+
+// La preferencia se sigue llamando «voice» en este equipo (antes era la voz); ahora es la música al entrar
+const VOICE = [
+  { value: "on", label: "Con música", hint: "Al entrar, 10 a 15 segundos de la canción de la temporada." },
+  { value: "off", label: "En silencio", hint: "El saludo sale solo en la pantalla." },
+];
+
+const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+// "2026-12-01" → "1 dic"
+const shortDate = (value) => {
+  const [, month, day] = String(value ?? "").split("-").map(Number);
+  return month ? `${day} ${MONTHS[month - 1]}` : "";
+};
+
+/**
+ * Diseño de temporada para todos (Fase 25): solo el Developer. Automático (por la fecha), apagado o
+ * una temporada a la fuerza. El servidor vuelve a revisar que sea el Developer.
+ */
+const SeasonMode = () => {
+  const toast = useToast();
+  const { refresh } = useSeason();
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [listening, setListening] = useState(null); // la canción que se está oyendo
+  const listenTimer = useRef(null);
+
+  useEffect(
+    () => () => {
+      clearTimeout(listenTimer.current);
+      stopSeasonMusic();
+    },
+    []
+  );
+
+  const listen = (key) => {
+    clearTimeout(listenTimer.current);
+    if (listening === key) {
+      stopSeasonMusic();
+      setListening(null);
+      return;
+    }
+    const seconds = playSeasonMusic(key);
+    if (!seconds) {
+      toast.error("Este navegador no pudo tocar la canción.");
+      return;
+    }
+    setListening(key);
+    listenTimer.current = setTimeout(() => setListening(null), seconds * 1000);
+  };
+
+  const load = useCallback(() => {
+    getSeasonSettings()
+      .then(setData)
+      .catch((err) => setError(getErrorMessage(err, "No se pudo cargar el diseño de temporada.")));
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  if (error) {
+    return (
+      <div className="settings-season__error" role="alert">
+        <p>{error}</p>
+        <Button
+          variant="outline"
+          icon="refresh"
+          onClick={() => {
+            setError("");
+            load();
+          }}
+        >
+          Reintentar
+        </Button>
+      </div>
+    );
+  }
+  if (!data) return <p className="settings-season__loading" role="status">Cargando…</p>;
+
+  const byDateName = data.seasons.find((item) => item.key === data.byDate)?.name;
+  const options = [
+    { value: "auto", label: "Automático", hint: byDateName ? `Por la fecha. Hoy: ${byDateName}.` : "Por la fecha. Hoy no hay temporada." },
+    { value: "off", label: "Apagado", hint: "Nadie ve adornos, aunque sea temporada." },
+    ...data.seasons.map((item) => ({ value: item.key, label: item.name, hint: item.from ? `Fechas: ${shortDate(item.from)} – ${shortDate(item.to)}` : "Forzar ahora" })),
+  ];
+
+  const change = async (mode) => {
+    if (mode === data.mode || saving) return;
+    setSaving(true);
+    try {
+      setData(await saveSeasonMode(mode));
+      await refresh();
+      toast.success(mode === "auto" ? "La temporada vuelve a ir por la fecha." : mode === "off" ? "Diseño de temporada apagado para todos." : "Temporada activada para todos.");
+    } catch (err) {
+      toast.error(getErrorMessage(err, "No se pudo cambiar el diseño de temporada."));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="settings-season" aria-busy={saving}>
+      <Options label="Diseño de temporada para todos" options={options} value={data.mode} onChange={change} />
+      <div className="settings-season__songs">
+        <span>Canción al entrar (10 a 15 s):</span>
+        {data.seasons.map((item) => (
+          <button key={item.key} type="button" className={`settings-season__song ${listening === item.key ? "settings-season__song--on" : ""}`.trim()} aria-pressed={listening === item.key} onClick={() => listen(item.key)}>
+            {listening === item.key ? "■" : "▶"} {item.name}
+          </button>
+        ))}
+      </div>
+      <p className="settings-season__note">Se ve en el inicio de sesión, en todo el sistema y en NexStore. Cada equipo puede quitar los adornos desde «Temporadas en este equipo».</p>
+    </div>
+  );
+};
 
 /** Miniatura de la pantalla en cada tema (el automático muestra mitad y mitad). */
 const ThemePreview = ({ value }) => (
@@ -97,7 +223,7 @@ const Section = ({ icon, title, subtitle, index, children }) => (
 const SettingsPage = () => {
   const { preferences, activeTheme } = usePreferences();
   const toast = useToast();
-  const { can } = usePermissions();
+  const { can, isDeveloper } = usePermissions();
   const isDefault = Object.entries(DEFAULT_PREFERENCES).every(([key, value]) => preferences[key] === value);
 
   return (
@@ -142,6 +268,15 @@ const SettingsPage = () => {
         </Section>
       </div>
 
+      <div className="settings-page__grid">
+        <Section icon="sparkles" title="Temporadas en este equipo" subtitle="Navidad, Halloween, Amor y Amistad… cuando llegan." index={3}>
+          <Options label="Adornos de temporada" options={SEASONAL} value={preferences.seasonal} onChange={(seasonal) => savePreferences({ seasonal })} />
+        </Section>
+        <Section icon="bell" title="Música de bienvenida" subtitle="Una canción corta al entrar en temporada." index={4}>
+          <Options label="Música de bienvenida" options={VOICE} value={preferences.voice} onChange={(voice) => savePreferences({ voice })} />
+        </Section>
+      </div>
+
       <footer className="settings-page__footer">
         <p>Estas preferencias se guardan en este equipo y navegador: cada computador o celular puede tener las suyas.</p>
         <Button
@@ -157,8 +292,14 @@ const SettingsPage = () => {
         </Button>
       </footer>
 
+      {isDeveloper && (
+        <Section icon="shield" title="Diseño de temporada (Developer)" subtitle="Para todos: automático por la fecha, apagado o una temporada a la fuerza." index={5}>
+          <SeasonMode />
+        </Section>
+      )}
+
       {can("settings.manage") && (
-        <Section icon="store" title="Datos del negocio" subtitle="Para todos: salen en los comprobantes y documentos del sistema." index={3}>
+        <Section icon="store" title="Datos del negocio" subtitle="Para todos: salen en los comprobantes y documentos del sistema." index={6}>
           <BusinessSettings />
         </Section>
       )}

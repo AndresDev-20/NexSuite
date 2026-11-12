@@ -5,6 +5,9 @@ import "./login.css";
 import useAuthentication from "../../hooks/useAuthentication";
 import getErrorMessage from "../../utils/getErrorMessage";
 import { DEMO_MODE } from "../../demo/demoMode";
+import { SeasonAccessory, SeasonParticles } from "../../features/seasons/SeasonDecor";
+import { GREETING_FLAG } from "../../features/seasons/WelcomeGreeting";
+import { SeasonScene, SeasonSky } from "../../features/seasons/SeasonScene";
 
 // Tiempos de las animaciones (deben coincidir con --power-ms en login.css)
 const LOADING_MS = 2400;
@@ -133,6 +136,12 @@ function Login() {
       return;
     }
 
+    // El sistema saluda una vez al entrar (con la voz de la temporada si la hay)
+    try {
+      sessionStorage.setItem(GREETING_FLAG, "1");
+    } catch {
+      // sin almacenamiento: entra sin saludo
+    }
     timers.current.push(
       setTimeout(() => setStatus("success"), LOADING_MS),
       setTimeout(() => navigate("/welcome"), LOADING_MS + SUCCESS_MS), // cambia la ruta si es otra
@@ -149,9 +158,16 @@ function Login() {
         <span className="login__hex login__hex--2" />
         <span className="login__hex login__hex--3" />
       </div>
+      <SeasonParticles variant="login" />
+      <SeasonSky variant="login" />
+      <SeasonScene variant="login" />
 
       <header className="login__brand">
-        <LogoMark className="login__logo" />
+        {/* El gorro (o el accesorio de la temporada) va pegado al logo en cualquier tamaño */}
+        <span className="season-logo-holder">
+          <SeasonAccessory className="season-accessory--login" />
+          <LogoMark className="login__logo" />
+        </span>
         <p className="login__wordmark">
           <span className="login__wordmark-nex">Nex</span>Suite
         </p>

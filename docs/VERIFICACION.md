@@ -244,6 +244,27 @@ Usa los roles **Vendedor** (tablet: arma y envía pedidos) y **Cajero** (abre la
 - [ ] La portada cambia sola cada pocos segundos; las filas por categoría se deslizan con el dedo; al agregar sale el aviso
       «Agregado al carrito» y el número del carrito salta; el buscador de arriba busca mientras escribes.
 
+## 14.5 Diseños de temporada (Fase 25)
+
+- [ ] Hoy (12 nov) no hay temporada: al entrar sale el saludo normal («Buenos días / Buenas tardes…») y nada más.
+- [ ] Como **Developer**, en **Configuración → Diseño de temporada (Developer)** elige **Navidad**: al instante cae nieve,
+      salen las luces bajo el encabezado, la franja roja y verde y el gorro en el logo. Cierra sesión y vuelve a entrar:
+      el inicio de sesión tiene nieve y gorro, y al entrar sale «¡Jo, jo, jo! Bienvenido…» **con su canción**.
+- [ ] Prueba también Halloween (telarañas, murciélagos y el órgano de Bach), Año Nuevo, Amor y Amistad, Madre, Padre e
+      Independencia (banderines amarillo, azul y rojo). Vuelve a **Automático** al terminar.
+- [ ] Con un usuario que no sea Developer, esa sección no aparece.
+- [ ] **Temporadas en este equipo → Sin adornos** quita todo solo en ese equipo; **Música de bienvenida → En silencio**
+      deja el saludo sin música. **Animaciones → Reducidas** deja los adornos quietos y sin música.
+- [ ] Abre **NexStore** en temporada: la portada empieza con el anuncio de la temporada, el encabezado cambia de color,
+      salen los adornos y, al primer toque, el saludo con la canción (una vez por visita).
+- [ ] Los adornos no tapan nada: puedes tocar botones, escribir en formularios y usar el menú normal, en celular y PC,
+      en claro y en noche.
+- [ ] En Navidad, cada medio minuto Papá Noel cruza la barra con sus renos; en el espacio vacío de la barra cuelgan
+      bolas, estrellas y bastones; debajo del menú está el árbol con regalos y el muñeco de nieve. Lo mismo con su
+      propio estilo en las demás (la bruja, el cóndor con la bandera, la avioneta de Año Nuevo…).
+- [ ] Al entrar en temporada suena su canción corta (10 a 15 s): «Jingle Bells» en Navidad, el órgano de Bach en
+      Halloween… La «×» del saludo la silencia. En **Configuración → Diseño de temporada** escúchalas todas (▶).
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 13). Además:

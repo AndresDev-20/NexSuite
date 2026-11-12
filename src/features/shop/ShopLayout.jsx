@@ -9,6 +9,9 @@ import { useCart } from "./cartContext";
 import { ChatIcon } from "./ShopParts";
 import { getShop } from "./shopApi";
 import { STORE_NAME, money } from "./shopFormat";
+import { SeasonAccessory, SeasonGarland, SeasonParticles } from "../seasons/SeasonDecor";
+import WelcomeGreeting from "../seasons/WelcomeGreeting";
+import { SeasonSky } from "../seasons/SeasonScene";
 import "./shop.css";
 
 const SEARCH_DELAY_MS = 350;
@@ -89,8 +92,10 @@ const ShopHeader = ({ shop }) => {
 
   return (
     <header className="shop-header">
+      <SeasonSky variant="store" />
       <div className="shop-header__top">
         <Link to="/tienda" className="shop-brand" aria-label={`${STORE_NAME}: inicio`}>
+          <SeasonAccessory className="season-accessory--store" />
           <span className="shop-brand__mark" aria-hidden="true">
             <img src="/nexsuite-logo-icono.png" alt="" className="shop-brand__logo" />
           </span>
@@ -126,6 +131,7 @@ const ShopHeader = ({ shop }) => {
           ))}
         </nav>
       )}
+      <SeasonGarland />
     </header>
   );
 };
@@ -233,12 +239,12 @@ const ShopLayout = () => {
   const [attempt, setAttempt] = useState(0);
 
   // Al salir de la tienda (por ejemplo, al sistema) la pestaña vuelve a su nombre de siempre
-  useEffect(() => {
-    const title = document.title;
-    return () => {
-      document.title = title;
-    };
-  }, []);
+  useEffect(
+    () => () => {
+      document.title = "NexSuite";
+    },
+    []
+  );
 
   useEffect(() => {
     let current = true;
@@ -257,6 +263,7 @@ const ShopLayout = () => {
   return (
     <CartProvider>
       <div className="shop">
+        <SeasonParticles variant="store" />
         <ShopHeader shop={state.shop} />
         <main className="shop-main">
           <Suspense fallback={<p className="shop-count">Cargando…</p>}>
@@ -267,6 +274,7 @@ const ShopLayout = () => {
         <FloatingCart />
         <AddedNotice />
         <CartDrawer shop={state.shop} />
+        <WelcomeGreeting mode="store" />
       </div>
     </CartProvider>
   );

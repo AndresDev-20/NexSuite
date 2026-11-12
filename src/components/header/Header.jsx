@@ -9,6 +9,8 @@ import { usePendingOrders } from "../../features/saleOrders/useSaleOrders";
 import useActiveBranch from "../../features/branches/useActiveBranch";
 import { clearSession, getUser } from "../../utils/session";
 import { getFullName, getInitials, getShortName } from "../../utils/userDisplay";
+import { SeasonAccessory, SeasonGarland } from "../../features/seasons/SeasonDecor";
+import { SeasonSky } from "../../features/seasons/SeasonScene";
 import "./header.css";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
@@ -101,8 +103,10 @@ const Header = () => {
   return (
     <>
       <header className="header">
+        <SeasonSky variant="app" />
         <div className="header__inner">
           <Link to="/welcome" className="header__logo" aria-label="NexSuite - Inicio">
+            <SeasonAccessory className="season-accessory--header" />
             <img src="/nexsuite-logo-icono.png" alt="" className="header__logo-image" />
             <span className="header__logo-text">
               <span className="header__logo-nex">Nex</span>Suite
@@ -187,6 +191,7 @@ const Header = () => {
             </button>
           </div>
         </div>
+        <SeasonGarland />
       </header>
 
       {/* Fondo oscuro detrás del drawer */}

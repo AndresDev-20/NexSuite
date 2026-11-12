@@ -1,0 +1,512 @@
+/* ==========================================================================
+   Diseños de temporada (Fase 25). Todo con transform y opacity; nada se puede tocar
+   (pointer-events: none) y nada tapa botones ni tablas. Con «Animaciones reducidas» (o la
+   preferencia del equipo) queda quieto; con la pestaña escondida, en pausa.
+   ========================================================================== */
+
+/* ---------- Partículas ---------- */
+.season-particles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Sistema y NexStore: caen por encima del contenido (las pantallas tienen fondo propio), suaves y sin
+   poderse tocar; por debajo del encabezado, el menú, los avisos y el carrito. En el inicio de sesión van
+   detrás de la tarjeta. */
+.season-particles--app {
+  z-index: 150;
+}
+
+.season-particles--store {
+  z-index: 20;
+}
+
+.season-particle {
+  position: absolute;
+  top: -40px;
+  left: var(--left);
+  width: var(--size);
+  height: var(--size);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: season-fall var(--duration) linear var(--delay) infinite;
+}
+
+.season-particle svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.season-particles--app .season-particle,
+.season-particles--store .season-particle {
+  --peak: 0.45;
+}
+
+/* En el sistema se trabaja: menos partículas que en NexStore y el inicio de sesión */
+.season-particles--app .season-particle:nth-child(n + 13) {
+  display: none;
+}
+
+.season-particles--login .season-particle {
+  --peak: 0.9;
+}
+
+/* Colores de cada temporada (tres tonos por temporada) */
+.season-particles--snow { color: #b9d3ea; }
+:root[data-theme="dark"] .season-particles--snow,
+.season-particles--login.season-particles--snow { color: #ffffff; }
+.season-particles--bats .season-particle--tone0 { color: #3b1a5a; }
+.season-particles--bats .season-particle--tone1 { color: #1f1f24; }
+.season-particles--bats .season-particle--tone2 { color: #5b2a86; }
+:root[data-theme="dark"] .season-particles--bats .season-particle { color: #b48be8; }
+.season-particles--hearts .season-particle--tone0 { color: #e8457a; }
+.season-particles--hearts .season-particle--tone1 { color: #ff8fb1; }
+.season-particles--hearts .season-particle--tone2 { color: #d6182e; }
+.season-particles--petals .season-particle--tone0 { color: #f28cb8; }
+.season-particles--petals .season-particle--tone1 { color: #c9a0e8; }
+.season-particles--petals .season-particle--tone2 { color: #ffb3c8; }
+.season-particles--stars .season-particle--tone0 { color: #f5c542; }
+.season-particles--stars .season-particle--tone1 { color: #5b8def; }
+.season-particles--stars .season-particle--tone2 { color: #9fb3c8; }
+.season-particles--confetti .season-particle--tone0 { color: #fcd116; }
+.season-particles--confetti .season-particle--tone1 { color: #003893; }
+.season-particles--confetti .season-particle--tone2 { color: #ce1126; }
+.season-particles--fireworks .season-particle--tone0 { color: #f5c542; }
+.season-particles--fireworks .season-particle--tone1 { color: #e53a4e; }
+.season-particles--fireworks .season-particle--tone2 { color: #5b8def; }
+
+/* Corazones: suben desde abajo */
+.season-particles--hearts .season-particle {
+  top: auto;
+  bottom: -40px;
+  animation-name: season-rise;
+}
+
+/* Murciélagos: cruzan volando, a distintas alturas */
+.season-particles--bats .season-particle {
+  top: var(--top);
+  left: -60px;
+  width: calc(var(--size) * 1.7);
+  height: calc(var(--size) * 1.7);
+  animation-name: season-fly;
+}
+
+/* Estrellas y fuegos artificiales: aparecen y brillan en su sitio */
+.season-particles--stars .season-particle,
+.season-particles--fireworks .season-particle {
+  top: var(--top);
+  animation-name: season-twinkle;
+  animation-timing-function: ease-in-out;
+}
+
+.season-particles--fireworks .season-particle {
+  animation-name: season-burst;
+  animation-duration: calc(var(--duration) * 0.45);
+}
+
+@keyframes season-fall {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(0deg); }
+  10% { opacity: var(--peak); }
+  90% { opacity: var(--peak); }
+  100% { opacity: 0; transform: translate3d(var(--drift), 110vh, 0) rotate(300deg); }
+}
+
+@keyframes season-rise {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.7); }
+  15% { opacity: var(--peak); }
+  85% { opacity: var(--peak); }
+  100% { opacity: 0; transform: translate3d(var(--drift), -110vh, 0) scale(1.1); }
+}
+
+@keyframes season-fly {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) scaleY(1); }
+  8% { opacity: var(--peak); }
+  25% { transform: translate3d(28vw, -30px, 0) scaleY(0.6); }
+  50% { transform: translate3d(55vw, 20px, 0) scaleY(1); }
+  75% { transform: translate3d(82vw, -24px, 0) scaleY(0.6); }
+  92% { opacity: var(--peak); }
+  100% { opacity: 0; transform: translate3d(110vw, 0, 0) scaleY(1); }
+}
+
+@keyframes season-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.4) rotate(0deg); }
+  50% { opacity: var(--peak); transform: scale(1) rotate(40deg); }
+}
+
+@keyframes season-burst {
+  0% { opacity: 0; transform: scale(0.1); }
+  25% { opacity: var(--peak); transform: scale(1.4); }
+  60% { opacity: 0; transform: scale(1.8); }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+
+/* En celular, menos partículas */
+@media (max-width: 639px) {
+  .season-particle:nth-child(n + 11) {
+    display: none;
+  }
+}
+
+/* ---------- Guirnalda bajo el encabezado ---------- */
+.season-garland {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  height: 22px;
+  padding: 0 10px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.season-garland__item {
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: 50% 0;
+  animation: season-sway 3.2s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.27s);
+}
+
+/* Navidad: cable y bombillos que titilan */
+.season-garland--christmas::before {
+  position: absolute;
+  top: 3px;
+  right: 0;
+  left: 0;
+  height: 2px;
+  content: "";
+  background: #1f5c3a;
+}
+
+.season-garland--christmas .season-garland__item {
+  top: 4px;
+  width: 9px;
+  height: 13px;
+  border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+  animation: season-glow 1.6s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.4s);
+}
+
+.season-garland--christmas .season-garland__item--0 { background: #e53a4e; box-shadow: 0 2px 8px #e53a4e; }
+.season-garland--christmas .season-garland__item--1 { background: #2ecc71; box-shadow: 0 2px 8px #2ecc71; }
+.season-garland--christmas .season-garland__item--2 { background: #f5c542; box-shadow: 0 2px 8px #f5c542; }
+.season-garland--christmas .season-garland__item--3 { background: #4f8df5; box-shadow: 0 2px 8px #4f8df5; }
+
+/* Independencia: banderines amarillo, azul y rojo */
+.season-garland--independence .season-garland__item {
+  width: 14px;
+  height: 18px;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.season-garland--independence .season-garland__item--0,
+.season-garland--independence .season-garland__item--3 { background: #fcd116; }
+.season-garland--independence .season-garland__item--1 { background: #003893; }
+.season-garland--independence .season-garland__item--2 { background: #ce1126; }
+
+/* Año Nuevo, Amor y Amistad, Madre y Padre: figuritas colgando que se mecen */
+.season-garland--newyear .season-garland__item::after,
+.season-garland--lovefriendship .season-garland__item::after,
+.season-garland--mothers .season-garland__item::after,
+.season-garland--fathers .season-garland__item::after {
+  display: block;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.season-garland--newyear .season-garland__item::after { content: "✦"; color: #d4a017; }
+.season-garland--newyear .season-garland__item { animation-name: season-glow; }
+.season-garland--lovefriendship .season-garland__item::after { content: "♥"; color: #e8457a; }
+.season-garland--lovefriendship .season-garland__item--1::after { color: #ff8fb1; }
+.season-garland--mothers .season-garland__item::after { content: "✿"; color: #f28cb8; }
+.season-garland--mothers .season-garland__item--1::after { color: #c9a0e8; }
+.season-garland--fathers .season-garland__item::after { content: "★"; color: #5b8def; }
+.season-garland--fathers .season-garland__item--1::after { color: #f5c542; }
+
+/* Halloween: telarañas en las esquinas y una araña que sube y baja */
+.season-garland--halloween {
+  height: 64px;
+  padding: 0;
+  color: #9a8aa8;
+}
+
+:root[data-theme="dark"] .season-garland--halloween {
+  color: #6b5a7d;
+}
+
+.season-web {
+  width: 64px;
+  height: 64px;
+}
+
+.season-web--right {
+  transform: scaleX(-1);
+}
+
+.season-spider {
+  animation: season-spider 4s ease-in-out infinite;
+}
+
+@keyframes season-sway {
+  0%, 100% { transform: rotate(-8deg); }
+  50% { transform: rotate(8deg); }
+}
+
+@keyframes season-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@keyframes season-spider {
+  0%, 100% { transform: translateY(-14px); }
+  50% { transform: translateY(6px); }
+}
+
+/* Franja de marca del encabezado del sistema con los colores de la temporada */
+:root[data-season="christmas"] .header::before { background: repeating-linear-gradient(90deg, #d6182e 0 24px, #1f8a4c 24px 48px, #ffffff 48px 56px); }
+:root[data-season="newyear"] .header::before { background: linear-gradient(90deg, #d4a017, #fff3c4, #d4a017); }
+:root[data-season="halloween"] .header::before { background: repeating-linear-gradient(90deg, #f5a623 0 30px, #5b2a86 30px 60px); }
+:root[data-season="lovefriendship"] .header::before { background: linear-gradient(90deg, #e8457a, #ff8fb1, #e8457a); }
+:root[data-season="mothers"] .header::before { background: linear-gradient(90deg, #f28cb8, #c9a0e8, #f28cb8); }
+:root[data-season="fathers"] .header::before { background: linear-gradient(90deg, #1d3f9a, #5b8def, #1d3f9a); }
+:root[data-season="independence"] .header::before { background: linear-gradient(180deg, #fcd116 0 50%, #003893 50% 75%, #ce1126 75%); }
+
+/* ---------- Accesorio del logo ---------- */
+.header__logo,
+.shop-brand {
+  position: relative;
+}
+
+.season-accessory {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  animation: season-hat 3s ease-in-out infinite;
+}
+
+.season-accessory--header {
+  top: -9px;
+  left: 21px;
+  width: 25px;
+  height: 25px;
+  transform-origin: 30% 100%;
+}
+
+.season-accessory--store {
+  top: -8px;
+  left: 20px;
+  width: 25px;
+  height: 25px;
+}
+
+.season-logo-holder {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+}
+
+.season-accessory--login {
+  top: -18%;
+  right: -6%;
+  width: 44%;
+  height: 44%;
+}
+
+/* Inicio de sesión en dos paneles (portátil): los adornos van por encima del panel rojo */
+@media (min-width: 1024px) {
+  .login .season-particles--login,
+  .login .season-sky--login,
+  .login .season-scene--login {
+    z-index: 2;
+  }
+
+  .season-particles--login .season-particle {
+    --peak: 0.7;
+  }
+}
+
+@keyframes season-hat {
+  0%, 100% { transform: rotate(-10deg); }
+  50% { transform: rotate(-2deg) translateY(-1px); }
+}
+
+/* ---------- Tarjeta de bienvenida ---------- */
+.season-welcome {
+  --welcome-accent: var(--red-600);
+  --welcome-soft: var(--red-50);
+  position: fixed;
+  top: 78px;
+  left: 50%;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(460px, calc(100% - 24px));
+  padding: 14px 16px;
+  color: var(--color-text);
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-left: 5px solid var(--welcome-accent);
+  border-radius: 18px;
+  box-shadow: 0 24px 48px -20px rgba(0, 0, 0, 0.45);
+  transform: translateX(-50%);
+  animation: season-welcome-in 650ms cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+.season-welcome--christmas { --welcome-accent: #1f8a4c; --welcome-soft: #e6f6ec; }
+.season-welcome--newyear { --welcome-accent: #d4a017; --welcome-soft: #fff6d8; }
+.season-welcome--halloween { --welcome-accent: #f5a623; --welcome-soft: #2b0f45; color: #fff; background: linear-gradient(135deg, #2b0f45, #14081f); border-color: #3b1a5a; }
+.season-welcome--lovefriendship { --welcome-accent: #e8457a; --welcome-soft: #ffe4ee; }
+.season-welcome--mothers { --welcome-accent: #e07aa8; --welcome-soft: #fde8f2; }
+.season-welcome--fathers { --welcome-accent: #2f6fd6; --welcome-soft: #e4eeff; }
+.season-welcome--independence { --welcome-accent: #003893; --welcome-soft: #fff6c7; }
+
+:root[data-theme="dark"] .season-welcome:not(.season-welcome--halloween) { --welcome-soft: rgba(255, 255, 255, 0.08); }
+
+.season-welcome__icon {
+  position: relative;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  color: var(--welcome-accent);
+  background: var(--welcome-soft);
+  border-radius: 16px;
+}
+
+.season-welcome__icon .icon {
+  width: 28px;
+  height: 28px;
+}
+
+.season-welcome__art {
+  position: static;
+  width: 36px;
+  height: 36px;
+  animation: season-hat 1.6s ease-in-out infinite;
+}
+
+.season-welcome__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.season-welcome__text strong {
+  font-family: var(--font-brand);
+  font-size: 1.15rem;
+  font-style: italic;
+  line-height: 1.2;
+}
+
+.season-welcome__text span {
+  font-size: 0.86rem;
+  line-height: 1.4;
+  opacity: 0.85;
+}
+
+.season-welcome__close {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.season-welcome__close .icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Estallido de puntitos al aparecer */
+.season-welcome__burst {
+  position: absolute;
+  top: 41px;
+  left: 43px;
+  pointer-events: none;
+}
+
+.season-welcome__burst span {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px;
+  background: var(--welcome-accent);
+  border-radius: 50%;
+  opacity: 0;
+  animation: season-burst-dot 900ms 200ms ease-out forwards;
+}
+
+.season-welcome__burst span:nth-child(3n + 1) { background: #f5c542; }
+.season-welcome__burst span:nth-child(3n + 2) { background: #e53a4e; }
+
+@keyframes season-burst-dot {
+  0% { opacity: 1; transform: rotate(var(--angle)) translateX(0) scale(1); }
+  100% { opacity: 0; transform: rotate(var(--angle)) translateX(70px) scale(0.4); }
+}
+
+@keyframes season-welcome-in {
+  from { opacity: 0; transform: translate(-50%, -24px) scale(0.85); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+/* ---------- NexStore con la temporada ---------- */
+:root[data-season="christmas"] .shop-header { background: linear-gradient(90deg, #b3121f, #1f6b3e); }
+:root[data-season="newyear"] .shop-header { background: linear-gradient(90deg, #1a1a1a, #6b5410); }
+:root[data-season="halloween"] .shop-header { background: linear-gradient(90deg, #2b0f45, #b45309); }
+:root[data-season="lovefriendship"] .shop-header { background: linear-gradient(90deg, #c2185b, #e8457a); }
+:root[data-season="mothers"] .shop-header { background: linear-gradient(90deg, #b5487e, #8e5bb8); }
+:root[data-season="fathers"] .shop-header { background: linear-gradient(90deg, #1d3f9a, #2f6fd6); }
+:root[data-season="independence"] .shop-header { background: linear-gradient(90deg, #003893, #ce1126); }
+
+.shop-hero__slide--season-christmas { background: linear-gradient(120deg, #b3121f 0%, #7a0d17 50%, #1f6b3e 100%); }
+.shop-hero__slide--season-newyear { background: linear-gradient(120deg, #1a1a1a 0%, #3b2f0b 60%, #b8860b 100%); }
+.shop-hero__slide--season-halloween { background: linear-gradient(120deg, #2b0f45 0%, #4a1c6b 50%, #c2410c 100%); }
+.shop-hero__slide--season-lovefriendship { background: linear-gradient(120deg, #e8457a 0%, #c2185b 60%, #7a0d3d 100%); }
+.shop-hero__slide--season-mothers { background: linear-gradient(120deg, #f28cb8 0%, #b5487e 55%, #6d3a8e 100%); }
+.shop-hero__slide--season-fathers { background: linear-gradient(120deg, #2f6fd6 0%, #1d3f9a 60%, #0f1f4d 100%); }
+.shop-hero__slide--season-independence { background: linear-gradient(180deg, #fcd116 0 50%, #003893 50% 75%, #ce1126 75%); }
+.shop-hero__slide--season-independence .shop-hero__content { padding: 10px 14px; background: rgba(0, 0, 0, 0.35); border-radius: 14px; }
+
+/* ---------- Quieto o en pausa ---------- */
+:root[data-page-hidden="true"] .season-particles *,
+:root[data-page-hidden="true"] .season-garland * {
+  animation-play-state: paused !important;
+}
+
+:root[data-motion="reduced"] .season-particle {
+  top: var(--top);
+  opacity: var(--peak);
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .season-particle {
+    top: var(--top);
+    opacity: var(--peak);
+    animation: none !important;
+  }
+
+  .season-garland *,
+  .season-accessory,
+  .season-welcome,
+  .season-welcome * {
+    animation: none !important;
+  }
+}

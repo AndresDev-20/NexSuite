@@ -8,7 +8,8 @@ import { useSyncExternalStore } from "react";
 const STORAGE_KEY = "nexsuite.preferences";
 const CHANGE_EVENT = "nexsuite:preferences";
 
-export const DEFAULT_PREFERENCES = { theme: "light", motion: "full", text: "normal" };
+// seasonal y voice (Fase 25): ver los adornos de temporada y oír el saludo con voz en este equipo
+export const DEFAULT_PREFERENCES = { theme: "light", motion: "full", text: "normal", seasonal: "on", voice: "on" };
 
 const darkQuery = () => window.matchMedia?.("(prefers-color-scheme: dark)");
 
@@ -30,6 +31,7 @@ export const applyPreferences = (preferences = readPreferences()) => {
   root.dataset.theme = theme;
   root.dataset.motion = preferences.motion;
   root.dataset.text = preferences.text;
+  root.dataset.seasonal = preferences.seasonal;
   // Color de la barra del navegador en el celular
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#0B1324" : "#FAFAFA");
 };
