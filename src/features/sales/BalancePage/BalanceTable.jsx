@@ -15,11 +15,13 @@ const PAGE_SIZE = 15;
  *   se pueden elegir en "Ordenar por" (números de mayor a menor, textos de la A a la Z).
  * searchText(row): texto donde buscar (sin él, no hay búsqueda).
  * totals(rows): [{ label, value }] para el pie.
+ * keepOrderLabel: opcional (Fase 23). Agrega primero en "Ordenar por" la opción de dejar las filas en
+ *   el orden en que llegan (con ese texto) y empieza así.
  */
-const BalanceTable = ({ caption, columns, rows, getRowKey, searchText, totals, defaultSort, emptyText, label = "filas" }) => {
+const BalanceTable = ({ caption, columns, rows, getRowKey, searchText, totals, defaultSort, emptyText, label = "filas", keepOrderLabel }) => {
   const sortable = columns.filter((column) => column.sortValue);
   const [query, setQuery] = useState("");
-  const [sortKey, setSortKey] = useState(defaultSort ?? sortable[0]?.key ?? "");
+  const [sortKey, setSortKey] = useState(keepOrderLabel ? "" : (defaultSort ?? sortable[0]?.key ?? ""));
   const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
@@ -40,7 +42,7 @@ const BalanceTable = ({ caption, columns, rows, getRowKey, searchText, totals, d
 
   return (
     <div className="balance-table">
-      {(searchText || sortable.length > 1) && rows.length > 0 && (
+      {(searchText || sortable.length > (keepOrderLabel ? 0 : 1)) && rows.length > 0 && (
         <div className="balance-table__tools">
           {searchText && (
             <SearchInput
@@ -52,10 +54,10 @@ const BalanceTable = ({ caption, columns, rows, getRowKey, searchText, totals, d
               }}
             />
           )}
-          {sortable.length > 1 && (
+          {sortable.length > (keepOrderLabel ? 0 : 1) && (
             <Select
               label="Ordenar por"
-              options={sortable.map((column) => ({ value: column.key, label: column.header }))}
+              options={[...(keepOrderLabel ? [{ value: "", label: keepOrderLabel }] : []), ...sortable.map((column) => ({ value: column.key, label: column.header }))]}
               value={sortKey}
               onChange={(event) => {
                 setSortKey(event.target.value);

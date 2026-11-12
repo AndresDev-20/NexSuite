@@ -288,6 +288,23 @@ export const PERMISSION_CATALOG = [
     ],
   },
   {
+    key: "report-center",
+    title: "Informes · Centro de informes",
+    permissions: [
+      { code: "reports.sales", label: "Informe de ventas", description: "Cuánto se vendió: por periodo, sucursal, vendedor y medio de pago." },
+      { code: "reports.profit", label: "Informe de ganancias", description: "Utilidad bruta, neta y margen. Necesita también «Ver costos»." },
+      { code: "reports.products", label: "Informe de productos", description: "Qué se vende y qué no: los más y menos vendidos y la mercancía quieta." },
+      { code: "reports.inventory", label: "Informe de inventario", description: "Existencias, bajo mínimo y rotación de sus sucursales." },
+      { code: "reports.purchases", label: "Informe de compras", description: "Compras por proveedor, producto y sucursal." },
+      { code: "reports.receivables", label: "Informe de cartera", description: "Lo que deben los clientes: por cliente, antigüedad y cuotas vencidas." },
+      { code: "reports.payables", label: "Informe de cuentas por pagar", description: "Lo que se debe a proveedores, vencido y por vencer." },
+      { code: "reports.cash", label: "Informe de caja", description: "Turnos, faltantes, sobrantes y medios de pago." },
+      { code: "reports.expenses", label: "Informe de gastos", description: "Gastos por categoría, sucursal y mes." },
+      { code: "reports.comparison", label: "Informe comparativo", description: "Este periodo contra el mismo tramo del anterior y el año a la fecha." },
+      { code: "reports.export", label: "Descargar informes", description: "Descargar los informes del centro en Excel y PDF." },
+    ],
+  },
+  {
     key: "settings",
     title: "Administrativo · Configuración del negocio",
     permissions: [

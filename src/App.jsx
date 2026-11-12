@@ -1,5 +1,5 @@
-import { lazy } from "react";
-import { Route, Routes } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Login from "./pages/login/Login";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import MainLayout from "./components/MainLayout";
@@ -11,6 +11,7 @@ const BranchesPage = lazy(() => import("./features/administration/BranchesPage/B
 const AuditPage = lazy(() => import("./features/administration/AuditPage/AuditPage"));
 import PermissionRoute from "./routes/PermissionRoute";
 import SectionRedirect from "./routes/SectionRedirect";
+import REPORT_PERMISSIONS from "./features/reports/center/reportPermissions";
 
 // Cada pantalla se descarga cuando se abre (Fase 17.2): el inicio de sesión y el menú cargan primero
 const CategoriesPage = lazy(() => import("./features/inventory/categories/CategoriesPage/CategoriesPage"));
@@ -36,19 +37,32 @@ const ReceivablesPage = lazy(() => import("./features/sales/ReceivablesPage/Rece
 const ReportsPage = lazy(() => import("./features/sales/ReportsPage/ReportsPage"));
 const BalancePage = lazy(() => import("./features/sales/BalancePage/BalancePage"));
 const ExpensesPage = lazy(() => import("./features/expenses/ExpensesPage/ExpensesPage"));
-const InventoryReportPage = lazy(() => import("./features/reports/InventoryReportPage/InventoryReportPage"));
-const PurchasesReportPage = lazy(() => import("./features/reports/PurchasesReportPage/PurchasesReportPage"));
-const CashReportPage = lazy(() => import("./features/reports/CashReportPage/CashReportPage"));
-const ExpensesReportPage = lazy(() => import("./features/reports/ExpensesReportPage/ExpensesReportPage"));
-const ComparisonPage = lazy(() => import("./features/reports/ComparisonPage/ComparisonPage"));
+const ReportCatalogPage = lazy(() => import("./features/reports/center/ReportCatalogPage"));
+const ReportPage = lazy(() => import("./features/reports/center/ReportPage"));
 const WarrantiesPage = lazy(() => import("./features/sales/WarrantiesPage/WarrantiesPage"));
 const ChatsPage = lazy(() => import("./features/chats/ChatsPage/ChatsPage"));
 const SettingsPage = lazy(() => import("./features/settings/SettingsPage/SettingsPage"));
+const ShopLayout = lazy(() => import("./features/shop/ShopLayout"));
+const ShopHome = lazy(() => import("./features/shop/ShopHome"));
+const ShopProduct = lazy(() => import("./features/shop/ShopProduct"));
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
+
+      {/* Tienda en línea (Fase 24): pública, sin iniciar sesión */}
+      <Route
+        path="/tienda"
+        element={
+          <Suspense fallback={null}>
+            <ShopLayout />
+          </Suspense>
+        }
+      >
+        <Route index element={<ShopHome />} />
+        <Route path="producto/:id" element={<ShopProduct />} />
+      </Route>
 
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
@@ -103,23 +117,17 @@ function App() {
           <Route element={<PermissionRoute permission="expenses.read" />}>
             <Route path="/gastos/registro" element={<ExpensesPage />} />
           </Route>
-          {/* Informes (Fase 14): con el permiso de consulta de cada módulo */}
-          <Route element={<PermissionRoute permission="branch-stock.read" />}>
-            <Route path="/informes/inventario" element={<InventoryReportPage />} />
+          {/* Centro de informes (Fase 23): con el permiso de algún informe; cada informe revisa el suyo en el servidor */}
+          <Route element={<PermissionRoute permission={REPORT_PERMISSIONS} />}>
+            <Route path="/informes" element={<ReportCatalogPage />} />
+            <Route path="/informes/:type" element={<ReportPage />} />
           </Route>
-          <Route element={<PermissionRoute permission="orders.read" />}>
-            <Route path="/informes/compras" element={<PurchasesReportPage />} />
-          </Route>
-          <Route element={<PermissionRoute permission="cash-sessions.read" />}>
-            <Route path="/informes/caja" element={<CashReportPage />} />
-          </Route>
-          <Route element={<PermissionRoute permission="expenses.read" />}>
-            <Route path="/informes/gastos" element={<ExpensesReportPage />} />
-          </Route>
-          {/* Comparativo de todo el negocio, con el permiso del balance */}
-          <Route element={<PermissionRoute permission="reports.balance" />}>
-            <Route path="/informes/comparativo" element={<ComparisonPage />} />
-          </Route>
+          {/* Las pantallas de Informes de la Fase 14 pasaron al centro: sus direcciones llevan a las nuevas */}
+          <Route path="/informes/inventario" element={<Navigate to="/informes/inventory" replace />} />
+          <Route path="/informes/compras" element={<Navigate to="/informes/purchases" replace />} />
+          <Route path="/informes/caja" element={<Navigate to="/informes/cash" replace />} />
+          <Route path="/informes/gastos" element={<Navigate to="/informes/expenses" replace />} />
+          <Route path="/informes/comparativo" element={<Navigate to="/informes/comparison?periodo=12-meses&agrupar=month" replace />} />
           {/* Balance mensual en pantalla, con tablas y descarga en PDF / Excel */}
           <Route element={<PermissionRoute permission="reports.balance" />}>
             <Route path="/ventas/balance" element={<BalancePage />} />

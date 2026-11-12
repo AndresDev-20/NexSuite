@@ -44,6 +44,7 @@ const buildColumns = (branchName) => [
         <span className="product-cell__meta">
           <span className="product-cell__sku">{product.sku}</span>
           {product.hasSerial && <span className="product-cell__tag">Con serial</span>}
+          {product.showInShop && !product.isArchived && <span className="product-cell__tag product-cell__tag--shop">En tienda</span>}
           {product.isArchived && <span className="product-cell__tag product-cell__tag--inactive">Archivado</span>}
           {!product.isActive && !product.isArchived && <span className="product-cell__tag product-cell__tag--inactive">Inactivo</span>}
           {product.pendingAssignment && product.isActive && (

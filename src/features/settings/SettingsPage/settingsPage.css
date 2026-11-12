@@ -338,6 +338,34 @@
 }
 
 /* ---------- Datos del negocio (Fase 15) ---------- */
+/* Dirección de la tienda en línea (Fase 24) */
+.shop-address {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--color-bg-alt);
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+}
+
+.shop-address__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.shop-address__url {
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+  color: var(--color-text-muted);
+}
+
+.shop-address__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .business-settings__grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

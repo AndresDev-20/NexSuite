@@ -14,7 +14,8 @@ function useCountUp(target, duration = 1100) {
   const fromRef = useRef(0);
 
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Sin animar con la preferencia del equipo o con Configuración → Animaciones reducidas
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.dataset.motion === "reduced";
     const from = fromRef.current;
     const start = performance.now();
     let frame;

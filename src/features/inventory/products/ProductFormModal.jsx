@@ -9,7 +9,8 @@ import Modal from "../../../components/feadback/Modal/Modal";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { calculateMargin, formatCurrency } from "../../../utils/money";
 import { sanitizeDecimal } from "../../../utils/validators";
-import { PRODUCT_UNITS } from "./productOptions";
+import { PRODUCT_UNITS, cleanFeatures } from "./productOptions";
+import FeaturesEditor from "./FeaturesEditor";
 
 const MAX_PRICE_LENGTH = 13;
 const MAX_DESCRIPTION = 500;
@@ -32,6 +33,8 @@ const toFormValues = (product) => ({
   description: product?.description ?? "",
   hasserial: product?.hasSerial ?? false,
   warrantymonths: String(product?.warrantyMonths ?? 0),
+  showinshop: product?.showInShop ?? false,
+  features: (product?.features ?? []).map((feature) => ({ name: feature.name, value: feature.value })),
 });
 
 /**
@@ -57,6 +60,9 @@ const buildPayload = (values, isEdit, showCost) => {
     ...(sku && { sku }),
     ...((barcode || isEdit) && { barcode: barcode || null }),
     ...((description || isEdit) && { description: description || null }),
+    // Tienda en línea (Fase 24): la lista completa reemplaza la anterior
+    showinshop: values.showinshop,
+    features: cleanFeatures(values.features),
   };
 };
 
@@ -255,6 +261,21 @@ const ProductForm = ({ product, categories, categoryHint, showCost, busy, onCanc
           })}
         />
       )}
+
+      <Controller
+        name="showinshop"
+        control={control}
+        render={({ field }) => (
+          <Switch
+            label="Mostrar en la tienda"
+            description="Sale en la tienda en línea con su precio y características. Si no hay existencias, sale como «Agotado»."
+            checked={field.value}
+            onChange={field.onChange}
+          />
+        )}
+      />
+
+      <FeaturesEditor control={control} register={register} errors={errors} />
 
       <FormActions>
         <Button variant="outline" onClick={onCancel} disabled={busy}>

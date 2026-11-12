@@ -1,0 +1,430 @@
+/* Centro de informes (Fase 23): catálogo de tarjetas. Primero el celular; las animaciones solo usan
+   transform y opacity y se apagan con «Animaciones reducidas» (index.css) o con la preferencia del equipo. */
+
+.report-catalog {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.report-catalog__group-title {
+  margin-bottom: 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.report-catalog__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.report-catalog__grid > li {
+  display: flex;
+  min-width: 0;
+  animation: report-card-in 450ms ease both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+.report-catalog__skeleton {
+  height: 92px;
+}
+
+.report-card {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  min-height: 92px;
+  padding: 16px;
+  color: inherit;
+  text-decoration: none;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(26, 26, 26, 0.04);
+  transition: transform 220ms ease;
+}
+
+/* La sombra del realce está lista en una capa y solo cambia su opacidad (nada de animar sombras) */
+.report-card::after {
+  position: absolute;
+  inset: -1px;
+  content: "";
+  pointer-events: none;
+  border: 1px solid var(--red-200);
+  border-radius: inherit;
+  box-shadow: 0 14px 28px -16px rgba(214, 24, 46, 0.4);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.report-card:hover {
+  transform: translateY(-2px);
+}
+
+.report-card:hover::after {
+  opacity: 1;
+}
+
+.report-card:focus-visible {
+  outline: 3px solid var(--red-500);
+  outline-offset: 2px;
+}
+
+.report-card__icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  border-radius: 14px;
+}
+
+.report-card__icon .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.report-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.report-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.report-card__text {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+.report-card__arrow {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-muted);
+  transform: rotate(-90deg);
+  transition: transform 220ms ease;
+}
+
+.report-card:hover .report-card__arrow {
+  color: var(--color-primary);
+  transform: rotate(-90deg) translateY(3px);
+}
+
+.report-card--disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.report-card--disabled:hover {
+  transform: none;
+}
+
+.report-card--disabled::after {
+  display: none;
+}
+
+.report-card__soon {
+  flex-shrink: 0;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--color-bg-alt);
+  border-radius: 999px;
+}
+
+@media (min-width: 640px) {
+  .report-catalog__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .report-catalog__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@keyframes report-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .report-catalog__grid > li,
+  .report-card,
+  .report-card::after,
+  .report-card__arrow {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* ---------- Página de un informe (F2) ---------- */
+
+.report-back {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.report-back:hover {
+  text-decoration: underline;
+}
+
+.report-header__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.report-center-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.report-center-filters .sheet__chips {
+  flex-wrap: wrap;
+}
+
+.report-center-filters__row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.report-center-filters__dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+
+.report-charts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+/* Tarjetas: cada una con ancho para una cifra de miles de millones en un renglón */
+.reports-kpis.report-center-kpis {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  margin-bottom: 16px;
+}
+
+.report-center-kpis .reports-kpi__value {
+  font-size: 1.35rem;
+  white-space: nowrap;
+}
+
+/* El realce de la tarjeta (reportsPage.css) anima sombra y borde: aquí solo el movimiento */
+.report-center-kpis .reports-kpi {
+  transition: transform 250ms ease;
+}
+
+/* En celular cada indicador es una fila compacta: nombre a la izquierda, cifra a la derecha */
+@media (max-width: 639px) {
+  .reports-kpis.report-center-kpis {
+    gap: 8px;
+  }
+
+  .report-center-kpis .reports-kpi {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+  }
+
+  .report-center-kpis .reports-kpi__value {
+    font-size: 1.1rem;
+  }
+}
+
+.report-chart__empty {
+  padding: 24px 0;
+  font-size: 0.9rem;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.report-table__title {
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.report-cell {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.report-cell--number {
+  display: block;
+  text-align: right;
+}
+
+.report-cell--negative {
+  color: var(--red-600);
+}
+
+.report-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.report-skeleton__kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.report-skeleton__chart {
+  height: 260px;
+}
+
+.report-skeleton__table {
+  height: 320px;
+}
+
+/* Barras: crecen desde la línea del 0 (solo transform) */
+.bar-chart__legend {
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.bar-chart__bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: bar-chart-grow 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 12ms);
+}
+
+.bar-chart__bar--down {
+  transform-origin: 50% 0;
+}
+
+.bar-chart__hover {
+  fill: var(--gray-100);
+  opacity: 0.7;
+}
+
+.bar-chart__zero {
+  stroke: var(--gray-500);
+  stroke-width: 1;
+}
+
+@keyframes bar-chart-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@media (min-width: 768px) {
+  .report-header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .report-header__actions {
+    display: flex;
+  }
+
+  .report-center-filters__row {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .report-center-filters__dates {
+    min-width: 340px;
+  }
+
+  .report-center-filters__group {
+    margin-left: auto;
+  }
+
+  .report-skeleton__kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  /* Barras anchas a la izquierda y la dona a su lado; una sola o dos barras ocupan todo el ancho */
+  .report-charts {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+
+  /* Filtros en una fila: periodo a la izquierda, agrupar (y fechas) a la derecha.
+     Dos clases para ganarle a .report-filters.reports-filters (reports.css) */
+  .reports-filters.report-center-filters {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .report-center-filters > .sheet__chips {
+    flex: 0 1 auto;
+    width: auto;
+  }
+
+  .report-center-filters__row {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+
+  .report-center-filters__group {
+    margin-left: 0;
+  }
+
+  .report-chart--donut .report-chart__body {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .report-chart--wide:only-child,
+  .report-chart--wide:has(+ .report-chart--wide),
+  .report-chart--wide + .report-chart--wide {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar-chart__bar {
+    animation: none;
+  }
+}

@@ -48,6 +48,7 @@ const MenuGroup = ({
             <li key={child.to}>
               <NavLink
                 to={child.to}
+                end={child.end}
                 onClick={onNavigate}
                 className={getLinkClass("menu__sublink")}
               >
@@ -109,6 +110,20 @@ const Menu = ({ onNavigate }) => {
               onToggle={() => toggleGroup(item)}
               onNavigate={onNavigate}
             />
+          ) : item.newTab ? (
+            // Se abre en otra pestaña (la tienda en línea): el sistema queda abierto en esta
+            <li className="menu__item" key={item.to} style={{ "--i": index }}>
+              <a className="menu__link" href={`#${item.to}`} target="_blank" rel="noopener noreferrer" onClick={onNavigate}>
+                <span className="menu__icon-box">
+                  <Icon name={item.icon} className="menu__icon" />
+                </span>
+                <span className="menu__text">{item.label}</span>
+                <span className="menu__external" aria-hidden="true">
+                  ↗
+                </span>
+                <span className="menu__sr">(se abre en otra pestaña)</span>
+              </a>
+            </li>
           ) : (
             <li className="menu__item" key={item.to} style={{ "--i": index }}>
               <NavLink

@@ -190,6 +190,60 @@ Usa los roles **Vendedor** (tablet: arma y envía pedidos) y **Cajero** (abre la
 - [ ] **Ventas → Reportes → Productos vendidos → Detalle**: cada producto con vendedor, código, hora, valor y comprobante;
       **Productos en Excel** lo descarga.
 
+## 14.1 Centro de informes: catálogo (Fase 23, F1)
+
+- [ ] **Informes → Centro de informes** muestra las tarjetas por tema (Ventas y ganancias, Mercancía, Dinero), cada una
+      con su ícono, título y descripción. Con tu rol de Developer o Administrador salen las 10.
+- [ ] Con un rol que tenga solo algunos permisos de *Informes · Centro de informes* (en Roles), salen solo esos;
+      **Ganancias** pide además «Ver costos». Sin «Descargar informes» no sale el aviso de Excel y PDF.
+- [ ] Se ve bien en celular, tablet y computador, en claro y en noche.
+
+## 14.2 Centro de informes: la página de cada informe (Fase 23, F2)
+
+- [ ] Abre cada uno de los 10 informes desde el catálogo. Compara **Ventas** y **Ganancias** de un mes con *Ventas →
+      Reportes* y el *Balance mensual*: deben dar lo mismo.
+- [ ] **Hoy, Esta semana, Este mes, Mes anterior, Este año y Otro rango** cambian las cifras; **Automático / Por día /
+      Por mes** cambia las gráficas y la tabla día a día o mes a mes. Recarga la página: sigue con el mismo filtro.
+- [ ] La **sucursal** de arriba filtra el informe.
+- [ ] En **Caja**, los faltantes salen en rojo en la gráfica y en la tabla.
+- [ ] En **Detalle**, cada pestaña muestra su tabla con buscar, ordenar, páginas y totales.
+- [ ] **Excel** y **PDF** descargan el archivo con el nombre del informe y el periodo, y traen lo mismo que la pantalla.
+- [ ] Con un rol sin «Ver costos», **Ganancias** dice que hace falta ese permiso; sin «Descargar informes» no salen
+      los botones de descarga.
+- [ ] Un periodo sin ventas (por ejemplo, un mes de hace dos años) dice «Sin movimientos en este periodo».
+- [ ] **Lo que tenían las pantallas viejas está en el centro**: Inventario → *Movimientos del periodo*; Compras → *Compras
+      una por una*; Caja → *Por quien contó* e *Ingresos y retiros*; Gastos → *Gastos fijos*; Comparativo con *Otro
+      rango* de 12 meses → *Mes a mes contra el periodo anterior* (cada mes contra el mismo del año pasado).
+- [ ] En *Configuración → Animaciones reducidas*, los números de las tarjetas salen sin contar y nada se mueve.
+- [ ] El menú *Informes* tiene Centro de informes, Inventario, Compras, Caja, Gastos y Comparativo, y cada uno abre su
+      página nueva. Un enlace viejo (por ejemplo `#/informes/caja`) lleva a la nueva.
+- [ ] **Caja** trae arriba lo entregado al administrador, lo que falta recibir, lo de fuera de la caja e ingresos y
+      retiros; en *Turnos*, quién abrió, cuánto entregó y quién lo recibió. **Comparativo** abre con los últimos 12 meses.
+- [ ] Se ve bien en celular, tablet y computador, en claro y en noche.
+
+## 14.3 Tienda en línea: administración (Fase 24)
+
+- [ ] **Inventarios → Productos → Editar**: activa **«Mostrar en la tienda»** y agrega características (por ejemplo
+      «Memoria: 128 GB»); súbelas y bájalas. Guarda y vuelve a abrir: siguen en ese orden.
+- [ ] Un nombre repetido o una fila con nombre y sin valor avisa en la misma fila y no deja guardar.
+- [ ] En la lista sale la etiqueta verde **«En tienda»**; **Filtrar por tienda** muestra los de la tienda o los de afuera.
+- [ ] **Configuración → Datos del negocio → WhatsApp de la tienda**: escribe tu número con el 57; uno incompleto avisa.
+
+## 14.4 Tienda en línea: lo que ven los clientes (Fase 24)
+
+- [ ] Marca 3 o 4 productos con «Mostrar en la tienda» y pon el WhatsApp de la tienda. Abre **Tienda en línea** del menú
+      (o la dirección de Configuración) en tu celular **sin iniciar sesión**.
+- [ ] Salen solo los marcados, con precio y «Disponible», «Últimas unidades» o «Agotado»; uno agotado no deja agregar.
+- [ ] Buscar, las categorías y ordenar por precio funcionan; al compartir el enlace se ve lo mismo.
+- [ ] Entra a un producto: se ven la descripción y las características; **Pedir este por WhatsApp** abre tu chat.
+- [ ] Agrega varios al carrito, cambia cantidades, pon un nombre y **Pedir por WhatsApp**: llega el pedido escrito con
+      cantidades, valores y total. Cierra y vuelve a abrir la tienda: el carrito sigue ahí.
+- [ ] Se ve bien en celular, tablet y computador, en claro y en noche (el botón de la luna en la tienda).
+- [ ] **Productos → Subir a la tienda (N)**: sube de una vez los que ves en la lista (filtra por categoría si quieres solo
+      unos); **Quitar de la tienda (N)** los quita. Pide confirmación.
+- [ ] La portada cambia sola cada pocos segundos; las filas por categoría se deslizan con el dedo; al agregar sale el aviso
+      «Agregado al carrito» y el número del carrito salta; el buscador de arriba busca mientras escribes.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 13). Además:

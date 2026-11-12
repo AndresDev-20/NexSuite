@@ -147,3 +147,19 @@
     transition-duration: 1ms;
   }
 }
+
+/* Enlace que se abre en otra pestaña (Tienda en línea, Fase 24) */
+.menu__external {
+  margin-left: auto;
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+.menu__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

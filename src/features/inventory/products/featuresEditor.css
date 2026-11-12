@@ -1,0 +1,79 @@
+/* Características del producto (Fase 24). Se acomoda al ancho del formulario (va dentro de un modal):
+   angosto, una debajo de otra; mediano, nombre y valor lado a lado con los botones debajo; ancho,
+   todo en una fila. */
+.features-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  container: features-editor / inline-size;
+}
+
+.features-editor__title {
+  padding: 0 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.features-editor__hint {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.features-editor__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.features-editor__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.features-editor__row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.features-editor__row .row-actions {
+  justify-content: flex-end;
+}
+
+/* El primer botón sube: la flecha apunta hacia arriba */
+.features-editor__row .row-actions__button:first-child .row-actions__icon {
+  transform: rotate(180deg);
+}
+
+@container features-editor (min-width: 340px) {
+  .features-editor__row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  }
+
+  .features-editor__row .row-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+@container features-editor (min-width: 620px) {
+  .features-editor__row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) auto;
+    align-items: start;
+  }
+
+  /* Los botones quedan a la altura de los campos (debajo de su etiqueta) */
+  .features-editor__row .row-actions {
+    grid-column: auto;
+    margin-top: 26px;
+  }
+}

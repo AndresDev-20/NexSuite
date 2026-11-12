@@ -1,4 +1,10 @@
-/* Opciones de navegación. Una opción sin "permission" es visible para todos; con una lista, basta uno. */
+import REPORT_PERMISSIONS from "../../features/reports/center/reportPermissions";
+
+/*
+ * Opciones de navegación. Una opción sin "permission" es visible para todos; con una lista, basta uno.
+ * end: la opción se marca solo en su dirección exacta, no en las que empiezan igual.
+ * newTab: se abre en otra pestaña y el sistema queda abierto en esta.
+ */
 const NAV_ITEMS = [
   { label: "Inicio", to: "/welcome", icon: "home" },
   // Administrativo justo después de Inicio: usuarios, roles y sucursales se configuran primero
@@ -124,14 +130,18 @@ const NAV_ITEMS = [
     label: "Informes",
     icon: "text",
     children: [
-      { label: "Inventario", to: "/informes/inventario", permission: "branch-stock.read" },
-      { label: "Compras", to: "/informes/compras", permission: "orders.read" },
-      { label: "Caja", to: "/informes/caja", permission: "cash-sessions.read" },
-      { label: "Gastos", to: "/informes/gastos", permission: "expenses.read" },
-      { label: "Comparativo mensual", to: "/informes/comparativo", permission: "reports.balance" },
+      // Fase 23: el centro con todos los informes y, a la mano, los que antes tenían su pantalla
+      { label: "Centro de informes", to: "/informes", end: true, permission: REPORT_PERMISSIONS },
+      { label: "Inventario", to: "/informes/inventory", permission: "reports.inventory" },
+      { label: "Compras", to: "/informes/purchases", permission: "reports.purchases" },
+      { label: "Caja", to: "/informes/cash", permission: "reports.cash" },
+      { label: "Gastos", to: "/informes/expenses", permission: "reports.expenses" },
+      { label: "Comparativo", to: "/informes/comparison?periodo=12-meses&agrupar=month", permission: "reports.comparison" },
     ],
   },
   // Al final y para todos: tema (claro / noche), animaciones y tamaño del texto de este equipo
+  // Fase 24: NexStore, la tienda que ven los clientes (pública), a la mano de quien la administra
+  { label: "NexStore", to: "/tienda", icon: "store", newTab: true, permission: ["products.update", "settings.manage"] },
   { label: "Configuración", to: "/configuracion", icon: "settings" },
 ];
 

@@ -13,7 +13,7 @@ import AssignBranchesModal from "../../../features/inventory/products/AssignBran
 import ProductDetailModal from "../../../features/inventory/products/ProductDetailModal";
 import ProductFormModal from "../../../features/inventory/products/ProductFormModal";
 import ProductsTable from "../../../features/inventory/products/ProductsTable";
-import { STATUS_FILTERS } from "../../../features/inventory/products/productOptions";
+import { SHOP_FILTERS, STATUS_FILTERS } from "../../../features/inventory/products/productOptions";
 import useProducts, { normalizeProduct } from "../../../features/inventory/products/useProducts";
 import useSuppliers from "../../../features/purchases/suppliers/useSuppliers";
 import getErrorMessage from "../../../utils/getErrorMessage";
@@ -23,7 +23,7 @@ const SKELETON_ITEMS = 5;
 const SEARCH_DELAY_MS = 300;
 
 const ProductsPage = () => {
-  const { products, loading, error, getAllProducts, createProduct, updateProduct, deleteProduct, restoreProduct, assignInitialStock } =
+  const { products, loading, error, getAllProducts, createProduct, updateProduct, deleteProduct, restoreProduct, assignInitialStock, setShopVisibility } =
     useProducts();
   const {
     categories,
@@ -60,6 +60,7 @@ const ProductsPage = () => {
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [shopFilter, setShopFilter] = useState(""); // "" = en la tienda o no
   const [branchFilter, setBranchFilter] = useState(""); // "" = todas las sucursales
   const [form, setForm] = useState({ open: false, product: null }); // product null = crear
   const [viewing, setViewing] = useState(null);
@@ -67,6 +68,7 @@ const ProductsPage = () => {
   const [deleting, setDeleting] = useState(null);
   const [assigning, setAssigning] = useState(null); // { product, fromCreate, stocked }
   const [pendingOnly, setPendingOnly] = useState(false);
+  const [shopAction, setShopAction] = useState(null); // "add" | "remove": subir o quitar de la tienda los de la lista
 
   // Búsqueda en el servidor (nombre, SKU o código de barras): espera a que dejes de escribir o escanear
   useEffect(() => {
@@ -76,10 +78,11 @@ const ProductsPage = () => {
       // "Archivados" pide solo los archivados; Activos/Inactivos filtran los demás
       ...(statusFilter === "archived" ? { archived: "true" } : statusFilter && { isactive: statusFilter }),
       ...(branchFilter && { idbranch: branchFilter }),
+      ...(shopFilter && { showinshop: shopFilter }),
     };
     const timer = setTimeout(() => getAllProducts({ params }), SEARCH_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [query, categoryFilter, statusFilter, branchFilter, getAllProducts]);
+  }, [query, categoryFilter, statusFilter, branchFilter, shopFilter, getAllProducts]);
 
   // Las categorías alimentan el filtro y el formulario: sin permiso de consultarlas no se piden
   const canReadCategories = can("categories.read");
@@ -132,12 +135,25 @@ const ProductsPage = () => {
   const branchOptions = useMemo(() => branches.map((branch) => ({ value: String(branch.id), label: branch.name })), [branches]);
   const filteredBranchName = branches.find((branch) => String(branch.id) === branchFilter)?.name;
 
-  const hasFilters = Boolean(query.trim() || categoryFilter || statusFilter || branchFilter || pendingOnly);
+  // Tienda en línea (Fase 24.4): de los que se ven en la lista, los que se pueden subir (activos) o quitar
+  const shopTargets = {
+    add: visibleProducts.filter((product) => product.isActive && !product.isArchived && !product.showInShop),
+    remove: visibleProducts.filter((product) => product.showInShop && !product.isArchived),
+  };
+  const handleShopAction = async () => {
+    const ids = shopTargets[shopAction].map((product) => product.id);
+    const response = await setShopVisibility(ids, shopAction === "add");
+    toast.success(response?.message ?? "Listo.");
+    setShopAction(null);
+  };
+
+  const hasFilters = Boolean(query.trim() || categoryFilter || statusFilter || branchFilter || shopFilter || pendingOnly);
   const clearFilters = () => {
     setQuery("");
     setCategoryFilter("");
     setStatusFilter("");
     setBranchFilter("");
+    setShopFilter("");
     setPendingOnly(false);
   };
 
@@ -312,63 +328,91 @@ const ProductsPage = () => {
       </header>
 
       <div className="list-page__card">
-        <div className="list-page__bar">
-          <div className="list-page__search">
-            <SearchInput
-              label="Buscar productos"
-              placeholder="Nombre, SKU o código de barras"
-              value={query}
-              onChange={setQuery}
+        {/* Arriba la búsqueda y los filtros; debajo el conteo y las acciones (se acomodan a cualquier pantalla) */}
+        <div className="list-page__bar products-toolbar">
+          <div className="products-toolbar__filters">
+            <div className="list-page__search">
+              <SearchInput
+                label="Buscar productos"
+                placeholder="Nombre, SKU o código de barras"
+                value={query}
+                onChange={setQuery}
+              />
+            </div>
+
+            {categories.length > 0 && (
+              <Select
+                className="list-page__filter"
+                label="Filtrar por categoría"
+                placeholder="Todas las categorías"
+                options={categoryOptions}
+                value={categoryFilter}
+                onChange={(event) => setCategoryFilter(event.target.value)}
+              />
+            )}
+
+            {canFilterBranch && (
+              <Select
+                className="list-page__filter"
+                label="Filtrar por sucursal"
+                placeholder="Todas las sucursales"
+                options={branchOptions}
+                value={branchFilter}
+                onChange={(event) => setBranchFilter(event.target.value)}
+              />
+            )}
+
+            <Select
+              className="list-page__filter"
+              label="Filtrar por estado"
+              placeholder="Activos e inactivos"
+              options={STATUS_FILTERS}
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+            />
+
+            <Select
+              className="list-page__filter"
+              label="Filtrar por tienda"
+              placeholder="En la tienda o no"
+              options={SHOP_FILTERS}
+              value={shopFilter}
+              onChange={(event) => setShopFilter(event.target.value)}
             />
           </div>
 
-          {categories.length > 0 && (
-            <Select
-              className="list-page__filter"
-              label="Filtrar por categoría"
-              placeholder="Todas las categorías"
-              options={categoryOptions}
-              value={categoryFilter}
-              onChange={(event) => setCategoryFilter(event.target.value)}
-            />
-          )}
+          <div className="products-toolbar__summary">
+            {!loading && !error && (
+              <span className="list-page__count products-toolbar__count">
+                {countLabel} · <strong>{unitsLabel}</strong>
+              </span>
+            )}
 
-          {canFilterBranch && (
-            <Select
-              className="list-page__filter"
-              label="Filtrar por sucursal"
-              placeholder="Todas las sucursales"
-              options={branchOptions}
-              value={branchFilter}
-              onChange={(event) => setBranchFilter(event.target.value)}
-            />
-          )}
+            <div className="products-toolbar__actions">
+              {(pendingCount > 0 || pendingOnly) && (
+                <Button
+                  variant={pendingOnly ? "primary" : "outline"}
+                  icon="store"
+                  aria-pressed={pendingOnly}
+                  onClick={() => setPendingOnly((current) => !current)}
+                >
+                  Pendientes de asignar ({pendingCount})
+                </Button>
+              )}
 
-          <Select
-            className="list-page__filter"
-            label="Filtrar por estado"
-            placeholder="Activos e inactivos"
-            options={STATUS_FILTERS}
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
-          />
-
-          {(pendingCount > 0 || pendingOnly) && (
-            <Button
-              variant={pendingOnly ? "primary" : "outline"}
-              icon="store"
-              aria-pressed={pendingOnly}
-              onClick={() => setPendingOnly((current) => !current)}
-            >
-              Pendientes de asignar ({pendingCount})
-            </Button>
-          )}
-
-          {!loading && !error && (
-            <span className="list-page__count">
-              {countLabel} · <strong>{unitsLabel}</strong>
-            </span>
-          )}
+              {/* Tienda en línea (Fase 24.4): sobre los que se ven en la lista */}
+              {canEdit && !loading && !error && shopTargets.add.length > 0 && (
+                <Button icon="store" title="Sube a la tienda los productos activos que ves en la lista" onClick={() => setShopAction("add")}>
+                  Subir a tienda ({shopTargets.add.length})
+                </Button>
+              )}
+              {canEdit && !loading && !error && shopTargets.remove.length > 0 && (
+                <Button variant="outline" icon="x" title="Quita de la tienda los productos que ves en la lista" onClick={() => setShopAction("remove")}>
+                  Quitar de tienda ({shopTargets.remove.length})
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
 
         {renderContent()}
@@ -430,6 +474,31 @@ const ProductsPage = () => {
         errorFallback="No se pudo desactivar el producto."
         onConfirm={handleDeactivate}
         onClose={() => setDeactivating(null)}
+      />
+
+      <ConfirmDialog
+        open={Boolean(shopAction)}
+        title={shopAction === "add" ? "Subir a la tienda" : "Quitar de la tienda"}
+        message={
+          shopAction && (
+            <>
+              ¿{shopAction === "add" ? "Subir" : "Quitar"} <strong>{shopTargets[shopAction].length} {shopTargets[shopAction].length === 1 ? "producto" : "productos"}</strong>{" "}
+              {shopAction === "add" ? "a" : "de"} la tienda en línea? Son los que ves en la lista con los filtros de ahora
+              {hasFilters ? "" : " (todos los productos)"}.
+            </>
+          )
+        }
+        detail={
+          shopAction === "add"
+            ? "Los clientes los verán con su precio y características. Los que no tengan existencias salen como «Agotado». Los inactivos no se suben."
+            : "Dejan de verse en la tienda; no se borra nada y los puedes volver a subir."
+        }
+        confirmLabel={shopAction === "add" ? "Subir a la tienda" : "Quitar de la tienda"}
+        confirmIcon={shopAction === "add" ? "store" : "x"}
+        confirmVariant={shopAction === "add" ? "primary" : "danger"}
+        errorFallback="No se pudo cambiar la tienda. Inténtalo de nuevo."
+        onConfirm={handleShopAction}
+        onClose={() => setShopAction(null)}
       />
 
       <ConfirmDialog

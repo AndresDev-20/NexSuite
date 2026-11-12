@@ -147,6 +147,12 @@
     border-bottom: 1px solid var(--gray-100);
   }
 
+  /* Columnas de números (align: "end"): encabezado y celda a la derecha */
+  .data-table__element th.data-table__head--end,
+  .data-table__cell.data-table__cell--end {
+    text-align: right;
+  }
+
   .data-table__cell:last-child {
     padding-bottom: 14px;
   }

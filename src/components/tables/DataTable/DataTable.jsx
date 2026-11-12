@@ -3,8 +3,9 @@ import "./dataTable.css";
 /**
  * Tabla reutilizable: en móvil cada fila es una tarjeta; desde 768px es una tabla.
  *
- * columns: [{ key, header, render(row), primary? }]
+ * columns: [{ key, header, render(row), primary?, align? }]
  *   · primary marca la celda principal (el nombre), que en móvil va arriba sin etiqueta.
+ *   · align: "end" alinea a la derecha el encabezado y la celda (números; Fase 23).
  * renderActions(row): opcional. Contenido de la última columna (usa <RowActions>).
  */
 const DataTable = ({ caption, columns, rows, getRowKey, renderActions, actionsLabel = "Acciones" }) => (
@@ -15,7 +16,9 @@ const DataTable = ({ caption, columns, rows, getRowKey, renderActions, actionsLa
       <thead>
         <tr>
           {columns.map((column) => (
-            <th key={column.key}>{column.header}</th>
+            <th key={column.key} className={column.align === "end" ? "data-table__head--end" : undefined}>
+              {column.header}
+            </th>
           ))}
           {renderActions && (
             <th>
@@ -31,7 +34,7 @@ const DataTable = ({ caption, columns, rows, getRowKey, renderActions, actionsLa
             {columns.map((column) => (
               <td
                 key={column.key}
-                className={`data-table__cell ${column.primary ? "data-table__cell--primary" : ""}`.trim()}
+                className={`data-table__cell ${column.primary ? "data-table__cell--primary" : ""} ${column.align === "end" ? "data-table__cell--end" : ""}`.replace(/\s+/g, " ").trim()}
                 data-label={column.header}
               >
                 {column.render(row)}

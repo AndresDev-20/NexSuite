@@ -18,6 +18,9 @@ export const normalizeProduct = (product) => ({
   hasSerial: Boolean(product.hasserial),
   warrantyMonths: Number(product.warrantymonths ?? 0),
   isActive: product.isactive !== false,
+  // Tienda en línea (Fase 24): si sale en la tienda y sus características [{ name, value }]
+  showInShop: Boolean(product.showinshop),
+  features: Array.isArray(product.features) ? product.features : [],
   categoryId: product.idcategory ?? product.category?.id ?? null,
   categoryName: product.category?.nameCategory ?? "",
   // Existencias totales en todas las sucursales (null si el backend no las envía)
@@ -81,6 +84,16 @@ const useProducts = () => {
     [getAll]
   );
 
+  /** Tienda en línea (Fase 24.4): sube o quita de la tienda varios a la vez. Devuelve { data, message }. */
+  const setShopVisibility = useCallback(
+    async (ids, showinshop) => {
+      const { data } = await api.put(`${PRODUCTS_PATH}/shop`, { ids, showinshop });
+      await getAll({ silent: true });
+      return data;
+    },
+    [getAll]
+  );
+
   return {
     products: items,
     loading,
@@ -91,6 +104,7 @@ const useProducts = () => {
     deleteProduct,
     restoreProduct,
     assignInitialStock,
+    setShopVisibility,
   };
 };
 

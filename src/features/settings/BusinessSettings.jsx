@@ -10,7 +10,9 @@ import { formatDateTime } from "../administration/audit/auditOptions";
 import { unwrap } from "../../utils/apiResponse";
 import getErrorMessage from "../../utils/getErrorMessage";
 
-const FIELDS = ["name", "nit", "phone", "email", "address", "city", "receiptfooter"];
+const FIELDS = ["name", "nit", "phone", "email", "address", "city", "receiptfooter", "shopwhatsapp"];
+// WhatsApp de la tienda (Fase 24): el servidor guarda solo los dígitos, con el indicativo del país
+const whatsappDigits = (value) => value.replace(/[\s()+-]/g, "");
 const EMPTY = Object.fromEntries(FIELDS.map((field) => [field, ""]));
 const toForm = (data) => Object.fromEntries(FIELDS.map((field) => [field, data?.[field] ?? ""]));
 
@@ -26,6 +28,9 @@ const headerLines = (values) =>
 const RULES = {
   name: { validate: (value) => !value.trim() || value.trim().length >= 2 || "Mínimo 2 letras." },
   phone: { validate: (value) => !value.trim() || /^\+?[\d\s()-]{7,20}$/.test(value.trim()) || "Teléfono no válido." },
+  shopwhatsapp: {
+    validate: (value) => !value.trim() || /^\d{10,15}$/.test(whatsappDigits(value.trim())) || "Escribe el número con el indicativo del país, por ejemplo 57 300 123 4567.",
+  },
   email: { validate: (value) => !value.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) || "Correo no válido." },
 };
 
@@ -51,6 +56,34 @@ const ReceiptPreview = ({ values }) => {
         </p>
         {values.receiptfooter.trim() && <p className="business-preview__line">{values.receiptfooter.trim()}</p>}
         <p className="business-preview__line">Documento de venta interno. No es factura electrónica.</p>
+      </div>
+    </div>
+  );
+};
+
+/** Dirección pública de la tienda en línea (Fase 24), para copiarla y compartirla. */
+const ShopAddress = () => {
+  const toast = useToast();
+  const url = `${window.location.origin}${window.location.pathname}#/tienda`;
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Dirección de NexStore copiada.");
+    } catch {
+      toast.error("No se pudo copiar: selecciónala y cópiala a mano.");
+    }
+  };
+  return (
+    <div className="shop-address">
+      <p className="shop-address__label">Dirección de NexStore, tu tienda en línea (para compartir con los clientes)</p>
+      <code className="shop-address__url">{url}</code>
+      <div className="shop-address__actions">
+        <Button variant="outline" icon="edit" onClick={copy}>
+          Copiar
+        </Button>
+        <a className="btn btn--outline" href={url} target="_blank" rel="noopener noreferrer">
+          Abrir NexStore
+        </a>
       </div>
     </div>
   );
@@ -131,6 +164,16 @@ const BusinessSettings = () => {
           error={errors.receiptfooter?.message}
           {...register("receiptfooter")}
         />
+        <Field
+          label="WhatsApp de la tienda"
+          inputMode="tel"
+          maxLength={20}
+          placeholder="Ej: 57 300 123 4567"
+          hint="Aquí llegan los pedidos de NexStore. Con el indicativo del país (57 en Colombia). Vacío: la tienda no deja pedir por WhatsApp."
+          error={errors.shopwhatsapp?.message}
+          {...register("shopwhatsapp", RULES.shopwhatsapp)}
+        />
+        <ShopAddress />
         <ReceiptPreview values={values} />
         <p className="settings-section__subtitle">
           Salen en la tirilla y la carta de venta, el documento de garantía, el balance y los Excel. Un dato vacío usa el del servidor.
