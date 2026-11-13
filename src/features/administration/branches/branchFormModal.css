@@ -39,3 +39,198 @@
     gap: 12px;
   }
 }
+/* ==========================================================================
+   Nueva sucursal renovada (2026-11-13): los datos a la izquierda y, a la derecha (fija en pantallas
+   anchas), la tirilla del comprobante que se va llenando mientras se escribe.
+   ========================================================================== */
+.branch-form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.branch-form-grid__main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .branch-form-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 22px;
+    align-items: start;
+  }
+
+  .branch-receipt {
+    position: sticky;
+    top: 0;
+  }
+}
+
+.branch-receipt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  background:
+    radial-gradient(120% 60% at 0% 0%, color-mix(in srgb, var(--red-600) 14%, transparent), transparent 70%),
+    linear-gradient(160deg, #1f1f24, #2b1a1e);
+  border-radius: 18px;
+  box-shadow: 0 20px 40px -26px rgba(15, 23, 42, 0.9);
+  animation: branch-in 520ms 120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.branch-receipt__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* El papel de la tirilla, con borde dentado abajo; sale de la impresora al abrir */
+.branch-receipt__paper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  padding: 18px 16px 26px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  color: #1f1f24;
+  text-align: center;
+  background: #fffdf8;
+  border-radius: 6px 6px 0 0;
+  box-shadow: 0 10px 22px -14px rgba(0, 0, 0, 0.7);
+  transform-origin: top center;
+  animation: branch-print 900ms 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.branch-receipt__paper::after {
+  position: absolute;
+  right: 0;
+  bottom: -8px;
+  left: 0;
+  height: 8px;
+  content: "";
+  background:
+    linear-gradient(-45deg, transparent 6px, #fffdf8 6px) 0 0 / 12px 8px repeat-x,
+    linear-gradient(45deg, transparent 6px, #fffdf8 6px) 0 0 / 12px 8px repeat-x;
+}
+
+.branch-receipt__logo {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  margin-bottom: 4px;
+}
+
+.branch-receipt__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.branch-receipt__name {
+  font-family: var(--font-body, inherit);
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+  animation: branch-type 260ms ease both;
+}
+
+.branch-receipt__name--empty {
+  color: #a1a1aa;
+  font-weight: 600;
+}
+
+.branch-receipt__line {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: #52525b;
+  animation: branch-type 260ms ease both;
+}
+
+.branch-receipt__cut {
+  width: 100%;
+  margin: 8px 0 6px;
+  border-top: 1px dashed #c4c4cc;
+}
+
+.branch-receipt__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.branch-receipt__row--muted {
+  color: #8a8a94;
+}
+
+.branch-receipt__number {
+  padding: 1px 6px;
+  color: #b3121f;
+  background: #fde8ea;
+  border-radius: 4px;
+  animation: branch-pop 340ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+/* Código de barras de mentira, hecho con rayas */
+.branch-receipt__barcode {
+  width: 80%;
+  height: 26px;
+  margin-top: 10px;
+  background: repeating-linear-gradient(90deg, #1f1f24 0 2px, transparent 2px 4px, #1f1f24 4px 5px, transparent 5px 8px);
+  opacity: 0.85;
+}
+
+.branch-receipt__hint {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.branch-receipt__hint .icon {
+  width: 15px;
+  height: 15px;
+}
+
+@keyframes branch-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes branch-print {
+  from { opacity: 0; clip-path: inset(0 0 100% 0); transform: translateY(-10px); }
+  to { opacity: 1; clip-path: inset(0 0 -20px 0); transform: none; }
+}
+
+@keyframes branch-type {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes branch-pop {
+  0% { transform: scale(0.85); }
+  60% { transform: scale(1.08); }
+  100% { transform: none; }
+}
+
+:root[data-motion="reduced"] .branch-receipt,
+:root[data-motion="reduced"] .branch-receipt * {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .branch-receipt,
+  .branch-receipt * {
+    animation: none !important;
+  }
+}

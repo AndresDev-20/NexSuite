@@ -86,7 +86,7 @@ const ReceiveHandoverModal = ({ session, onClose, onSubmit }) => {
     }
   };
   return (
-    <Modal open={Boolean(session)} title="Recibir el dinero de la caja" onClose={onClose} busy={busy}>
+    <Modal icon="wallet" open={Boolean(session)} title="Recibir el dinero de la caja" onClose={onClose} busy={busy}>
       {session && <ReceiveForm key={session.id} session={session} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

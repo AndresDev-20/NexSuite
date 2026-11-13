@@ -40,3 +40,183 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ---------- Mejoras 2026-11-13 ---------- */
+.form-layout__error {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.form-layout__error::before {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #fff;
+  content: "!";
+  background: var(--danger);
+  border-radius: 50%;
+}
+
+/* Secciones de los formularios largos */
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  animation: form-section-in 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.form-section:nth-of-type(2) { animation-delay: 40ms; }
+.form-section:nth-of-type(3) { animation-delay: 80ms; }
+.form-section:nth-of-type(4) { animation-delay: 120ms; }
+.form-section:nth-of-type(5) { animation-delay: 160ms; }
+
+.form-section__head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.form-section__icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--red-600);
+  background: var(--red-50);
+  border-radius: 11px;
+}
+
+.form-section__icon .icon {
+  width: 19px;
+  height: 19px;
+}
+
+.form-section__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.form-section__title {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.form-section__description {
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--color-text-muted);
+}
+
+.form-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@keyframes form-section-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+:root[data-motion="reduced"] .form-section {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form-section {
+    animation: none;
+  }
+}
+
+/* Dentro de una ventana, los botones quedan fijos abajo: Guardar siempre a la vista */
+.modal__body .form-layout__actions {
+  position: sticky;
+  bottom: calc(var(--modal-pad-bottom) * -1);
+  z-index: 5;
+  margin: 4px calc(var(--modal-pad-x) * -1) calc(var(--modal-pad-bottom) * -1);
+  padding: 14px var(--modal-pad-x) var(--modal-pad-bottom);
+  background: var(--white);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -10px 24px -18px rgba(15, 23, 42, 0.35);
+}
+
+/* En celular, Cancelar y Guardar van lado a lado (ocupan la mitad de alto) */
+@media (max-width: 767px) {
+  .modal__body .form-layout__actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  /* Si hay tres botones, el tercero pasa a otra línea en vez de apretarse */
+  .modal__body .form-layout__actions > * {
+    flex: 1 1 140px;
+    min-width: 0;
+  }
+}
+
+/* ---------- Al abrir una ventana, los campos entran uno tras otro (2026-11-13) ---------- */
+.modal__body > .form-layout > :not(.form-layout__actions):not(.form-layout__error) {
+  animation: form-item-in 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.modal__body > .form-layout > :nth-child(2) { animation-delay: 35ms; }
+.modal__body > .form-layout > :nth-child(3) { animation-delay: 70ms; }
+.modal__body > .form-layout > :nth-child(4) { animation-delay: 105ms; }
+.modal__body > .form-layout > :nth-child(5) { animation-delay: 140ms; }
+.modal__body > .form-layout > :nth-child(6) { animation-delay: 175ms; }
+.modal__body > .form-layout > :nth-child(n + 7) { animation-delay: 210ms; }
+
+/* Los botones de abajo suben un poco después */
+.modal__body > .form-layout > .form-layout__actions {
+  animation: form-actions-in 420ms 160ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* El mensaje de error llega con un pequeño sacudón */
+.form-layout__error {
+  animation: form-error-in 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes form-item-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes form-actions-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes form-error-in {
+  0% { opacity: 0; transform: translateX(0); }
+  20% { opacity: 1; transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+  100% { transform: none; }
+}
+
+:root[data-motion="reduced"] .modal__body > .form-layout > *,
+:root[data-motion="reduced"] .form-layout__error {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal__body > .form-layout > *,
+  .form-layout__error {
+    animation: none !important;
+  }
+}

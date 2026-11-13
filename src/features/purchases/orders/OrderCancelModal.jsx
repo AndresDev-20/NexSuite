@@ -66,7 +66,7 @@ const OrderCancelModal = ({ order, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={Boolean(order)} title="Anular compra" onClose={onClose} busy={busy}>
+    <Modal icon="alert" open={Boolean(order)} title="Anular compra" onClose={onClose} busy={busy}>
       {order && <CancelForm order={order} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

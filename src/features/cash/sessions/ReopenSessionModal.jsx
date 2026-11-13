@@ -68,7 +68,7 @@ const ReopenSessionModal = ({ session, onClose, onSubmit }) => {
     }
   };
   return (
-    <Modal open={Boolean(session)} title="Reabrir el conteo" onClose={onClose} busy={busy}>
+    <Modal icon="refresh" open={Boolean(session)} title="Reabrir el conteo" onClose={onClose} busy={busy}>
       {session && <ReopenForm key={session.id} session={session} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

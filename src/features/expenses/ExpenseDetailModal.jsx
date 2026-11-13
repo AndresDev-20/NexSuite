@@ -120,7 +120,7 @@ const ExpenseSheet = ({ id, getExpense, canCancel, onCancelExpense, onClose }) =
 
 /** Detalle de un gasto y, con «Anular gastos», anularlo con motivo. id null = cerrado. */
 const ExpenseDetailModal = ({ id, onClose, ...props }) => (
-  <Modal open={Boolean(id)} title="Gasto" onClose={onClose}>
+  <Modal icon="wallet" open={Boolean(id)} title="Gasto" onClose={onClose}>
     {id && <ExpenseSheet key={id} id={id} onClose={onClose} {...props} />}
   </Modal>
 );

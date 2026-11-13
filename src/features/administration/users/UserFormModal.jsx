@@ -1,13 +1,57 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import Button from "../../../components/ui/Button/Button";
 import Field from "../../../components/forms/Field/Field";
 import PasswordField from "../../../components/forms/PasswordField/PasswordField";
 import Select from "../../../components/forms/Select/Select";
-import { FormActions, FormLayout } from "../../../components/forms/FormLayout/FormLayout";
+import { FormSection } from "../../../components/forms/FormLayout/FormLayout";
+import WizardForm from "../../../components/forms/WizardForm/WizardForm";
 import Modal from "../../../components/feadback/Modal/Modal";
 import getErrorMessage from "../../../utils/getErrorMessage";
+import Icon from "../../../components/ui/Icon/Icon";
 import "./userFormModal.css";
+
+/** Carné del usuario: se arma mientras se escribe (vista previa, solo adorno). */
+const UserBadge = ({ firstNames, lastNames, cc, email, phone, roleName, hasPassword, isEdit }) => {
+  const name = `${firstNames} ${lastNames}`.trim();
+  const initials = `${firstNames.charAt(0)}${lastNames.charAt(0)}`.toUpperCase() || "?";
+  return (
+    <div className="user-badge" aria-hidden="true">
+      <span className="user-badge__label">Así queda su carné</span>
+      <div className="user-badge__card">
+        <span className="user-badge__hole" />
+        <span className="user-badge__brand">
+          <img src="/nexsuite-logo-icono.png" alt="" />
+          Nex<strong>Suite</strong>
+        </span>
+        <span className="user-badge__avatar" key={initials}>
+          {initials}
+        </span>
+        <strong className={`user-badge__name ${name ? "" : "user-badge__name--empty"}`.trim()}>{name || "Nombre del usuario"}</strong>
+        <span className={`user-badge__role ${roleName ? "" : "user-badge__role--empty"}`.trim()} key={roleName || "sin-rol"}>
+          {roleName || "Sin rol"}
+        </span>
+        <dl className="user-badge__list">
+          <div>
+            <dt>Cédula</dt>
+            <dd>{cc || "—"}</dd>
+          </div>
+          <div>
+            <dt>Correo</dt>
+            <dd>{email || "—"}</dd>
+          </div>
+          <div>
+            <dt>Teléfono</dt>
+            <dd>{phone || "—"}</dd>
+          </div>
+        </dl>
+        <span className={`user-badge__access ${hasPassword || isEdit ? "user-badge__access--ok" : ""}`.trim()}>
+          <Icon name={hasPassword || isEdit ? "lock" : "key"} />
+          {hasPassword ? "Contraseña lista" : isEdit ? "Conserva su contraseña" : "Falta la contraseña"}
+        </span>
+      </div>
+    </div>
+  );
+};
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^\+?[\d\s()-]{7,20}$/;
@@ -107,6 +151,12 @@ const passwordRule = (isEdit) => ({
   },
 });
 
+// Formulario por pasos (2026-11-13): los campos que revisa cada paso antes de seguir
+const USER_STEPS = [
+  ["firstNames", "lastNames", "cc", "phone", "email", "age"],
+  ["roleId", "password"],
+];
+
 /* ---------- Formulario (solo existe mientras el modal está abierto) ---------- */
 const UserForm = ({ user, roles, rolesHint, roleLocked, isSelf, busy, onCancel, onSubmit }) => {
   const isEdit = Boolean(user);
@@ -115,24 +165,25 @@ const UserForm = ({ user, roles, rolesHint, roleLocked, isSelf, busy, onCancel, 
   const {
     register,
     handleSubmit,
+    trigger,
+    watch,
     formState: { errors },
   } = useForm({ defaultValues: toFormValues(user) });
+  const [firstNames, lastNames, cc, email, phone, roleId, password] = watch(["firstNames", "lastNames", "cc", "email", "phone", "roleId", "password"]);
+  const wizard = useRef(null);
 
-  const submit = handleSubmit(async (values) => {
-    setServerError("");
-    try {
-      await onSubmit(buildPayload(values, isEdit));
-    } catch (error) {
-      setServerError(
-        getErrorMessage(
-          error,
-          isEdit
-            ? "No se pudo guardar el usuario. Inténtalo de nuevo."
-            : "No se pudo crear el usuario. Inténtalo de nuevo."
-        )
-      );
-    }
-  });
+  const submit = handleSubmit(
+    async (values) => {
+      setServerError("");
+      try {
+        await onSubmit(buildPayload(values, isEdit));
+      } catch (error) {
+        setServerError(getErrorMessage(error, isEdit ? "No se pudo guardar el usuario. Inténtalo de nuevo." : "No se pudo crear el usuario. Inténtalo de nuevo."));
+      }
+    },
+    // Si falta algo, lleva al paso del primer error
+    (invalid) => wizard.current?.goToField(Object.keys(invalid)[0] ?? "")
+  );
 
   const roleOptions = roles.map((role) => ({ value: String(role.id), label: role.nameRole }));
 
@@ -143,94 +194,126 @@ const UserForm = ({ user, roles, rolesHint, roleLocked, isSelf, busy, onCancel, 
   else if (roles.length === 0) roleHint = "No hay roles disponibles. Crea uno primero en Roles y permisos.";
 
   return (
-    <FormLayout onSubmit={submit} error={serverError}>
-      <div className="user-form__row">
-        <Field
-          label="Nombres"
-          required
-          autoComplete="off"
-          data-autofocus
-          error={errors.firstNames?.message}
-          {...register("firstNames", RULES.firstNames)}
+    <WizardForm
+      ref={wizard}
+      isEdit={isEdit}
+      busy={busy}
+      error={serverError}
+      validateStep={(index) => trigger(USER_STEPS[index])}
+      onSubmit={submit}
+      onCancel={onCancel}
+      submitLabel={isEdit ? "Guardar cambios" : "Crear usuario"}
+      aside={
+        <UserBadge
+          firstNames={String(firstNames ?? "").trim()}
+          lastNames={String(lastNames ?? "").trim()}
+          cc={String(cc ?? "").trim()}
+          email={String(email ?? "").trim()}
+          phone={String(phone ?? "").trim()}
+          roleName={roles.find((role) => String(role.id) === String(roleId))?.nameRole ?? ""}
+          hasPassword={String(password ?? "").length > 0}
+          isEdit={isEdit}
         />
-        <Field
-          label="Apellidos"
-          required
-          autoComplete="off"
-          error={errors.lastNames?.message}
-          {...register("lastNames", RULES.lastNames)}
-        />
-      </div>
+      }
+      steps={[
+        {
+          key: "persona",
+          label: "Persona",
+          description: "Nombres, cédula y contacto",
+          fields: USER_STEPS[0],
+          content: (
+            <FormSection icon="users" title="Datos de la persona" description="Quién va a usar el sistema.">
+              <div className="user-form__row">
+                <Field
+                  label="Nombres"
+                  required
+                  autoComplete="off"
+                  data-autofocus
+                  error={errors.firstNames?.message}
+                  {...register("firstNames", RULES.firstNames)}
+                />
+                <Field
+                  label="Apellidos"
+                  required
+                  autoComplete="off"
+                  error={errors.lastNames?.message}
+                  {...register("lastNames", RULES.lastNames)}
+                />
+              </div>
 
-      <div className="user-form__row">
-        <Field
-          label="Cédula"
-          required
-          inputMode="numeric"
-          autoComplete="off"
-          maxLength={10}
-          error={errors.cc?.message}
-          {...register("cc", RULES.cc)}
-        />
-        <Field
-          label="Teléfono"
-          type="tel"
-          inputMode="tel"
-          autoComplete="off"
-          placeholder="3001234567"
-          error={errors.phone?.message}
-          {...register("phone", RULES.phone)}
-        />
-      </div>
+              <div className="user-form__row">
+                <Field
+                  label="Cédula"
+                  required
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={10}
+                  error={errors.cc?.message}
+                  {...register("cc", RULES.cc)}
+                />
+                <Field
+                  label="Teléfono"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="off"
+                  placeholder="3001234567"
+                  error={errors.phone?.message}
+                  {...register("phone", RULES.phone)}
+                />
+              </div>
 
-      <div className="user-form__row">
-        <Field
-          label="Correo"
-          required
-          type="email"
-          autoComplete="off"
-          placeholder="usuario@empresa.com"
-          error={errors.email?.message}
-          {...register("email", RULES.email)}
-        />
-        <Field
-          label="Edad"
-          inputMode="numeric"
-          autoComplete="off"
-          maxLength={3}
-          error={errors.age?.message}
-          {...register("age", RULES.age)}
-        />
-      </div>
+              <div className="user-form__row">
+                <Field
+                  label="Correo"
+                  required
+                  type="email"
+                  autoComplete="off"
+                  placeholder="usuario@empresa.com"
+                  error={errors.email?.message}
+                  {...register("email", RULES.email)}
+                />
+                <Field
+                  label="Edad"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={3}
+                  error={errors.age?.message}
+                  {...register("age", RULES.age)}
+                />
+              </div>
+            </FormSection>
+          ),
+        },
+        {
+          key: "acceso",
+          label: "Acceso",
+          description: "Rol y contraseña",
+          fields: USER_STEPS[1],
+          content: (
+            <FormSection icon="key" title="Acceso al sistema" description="Qué puede hacer (su rol) y con qué contraseña entra.">
+              <Select
+                label="Rol"
+                required
+                placeholder="Selecciona un rol"
+                options={roleOptions}
+                disabled={isSelf || roleLocked}
+                hint={roleHint}
+                error={errors.roleId?.message}
+                {...register("roleId", RULES.roleId)}
+              />
 
-      <Select
-        label="Rol"
-        required
-        placeholder="Selecciona un rol"
-        options={roleOptions}
-        disabled={isSelf || roleLocked}
-        hint={roleHint}
-        error={errors.roleId?.message}
-        {...register("roleId", RULES.roleId)}
-      />
-
-      <PasswordField
-        label={isEdit ? "Nueva contraseña" : "Contraseña"}
-        required={!isEdit}
-        hint={isEdit ? "Déjala vacía para conservar la actual." : `Mínimo ${MIN_PASSWORD} caracteres.`}
-        error={errors.password?.message}
-        {...register("password", passwordRule(isEdit))}
-      />
-
-      <FormActions>
-        <Button variant="outline" onClick={onCancel} disabled={busy}>
-          Cancelar
-        </Button>
-        <Button type="submit" icon={isEdit ? "check" : "plus"} disabled={busy}>
-          {busy ? "Guardando…" : isEdit ? "Guardar cambios" : "Crear usuario"}
-        </Button>
-      </FormActions>
-    </FormLayout>
+              <PasswordField
+                label={isEdit ? "Nueva contraseña" : "Contraseña"}
+                required={!isEdit}
+                hint={isEdit ? "Déjala vacía para conservar la actual." : `Mínimo ${MIN_PASSWORD} caracteres.`}
+                error={errors.password?.message}
+                {...register("password", passwordRule(isEdit))}
+              />
+            </FormSection>
+          ),
+        },
+      ]}
+    />
   );
 };
 
@@ -255,7 +338,15 @@ const UserFormModal = ({ open, user = null, roles, rolesHint, roleLocked = false
   };
 
   return (
-    <Modal open={open} title={user ? "Editar usuario" : "Nuevo usuario"} onClose={onClose} busy={busy}>
+    <Modal
+      open={open}
+      size="wide"
+      icon="users"
+      title={user ? "Editar usuario" : "Nuevo usuario"}
+      subtitle={user ? `${user.firstNames ?? ""} ${user.lastNames ?? ""}`.trim() || undefined : "Los campos con * son obligatorios."}
+      onClose={onClose}
+      busy={busy}
+    >
       <UserForm user={user} roles={roles} rolesHint={rolesHint} roleLocked={roleLocked} isSelf={isSelf} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />
     </Modal>
   );

@@ -2,7 +2,7 @@ import { useState } from "react";
 import Button from "../../../components/ui/Button/Button";
 import Field from "../../../components/forms/Field/Field";
 import Select from "../../../components/forms/Select/Select";
-import { FormActions, FormLayout } from "../../../components/forms/FormLayout/FormLayout";
+import { FormActions, FormLayout, FormSection } from "../../../components/forms/FormLayout/FormLayout";
 import Modal from "../../../components/feadback/Modal/Modal";
 import Icon from "../../../components/ui/Icon/Icon";
 import ProductFormModal from "../../inventory/products/ProductFormModal";
@@ -34,7 +34,7 @@ const toOptions = (list, getLabel) => list.map((item) => ({ value: String(item.i
 const unitsText = (count) => `${count} ${count === 1 ? "unidad" : "unidades"}`;
 
 /* ---------- Un producto de la compra: costo, reparto por sucursal e IMEIs ---------- */
-const ProductLine = ({ line, branches, errors, onChange, onRemove }) => {
+const ProductLine = ({ line, index, leaving = false, branches, errors, onChange, onRemove }) => {
   const quantity = lineQuantity(line);
   const set = (changes) => onChange({ ...line, ...changes });
   const setQuantity = (branchId, value) => set({ quantities: { ...line.quantities, [branchId]: value } });
@@ -42,8 +42,11 @@ const ProductLine = ({ line, branches, errors, onChange, onRemove }) => {
   const serialLabel = line.serialType === "imei" ? "IMEI" : "Seriales";
 
   return (
-    <li className="purchase-line">
+    <li className={`purchase-line ${leaving ? "purchase-line--leaving" : ""}`.trim()}>
       <header className="purchase-line__head">
+        <span className={`purchase-line__index ${line.hasSerial ? "purchase-line__index--serial" : ""}`.trim()} aria-hidden="true">
+          {index + 1}
+        </span>
         <div className="purchase-line__name">
           <strong>{line.name}</strong>
           <span className="purchase-line__sku">
@@ -93,6 +96,7 @@ const ProductLine = ({ line, branches, errors, onChange, onRemove }) => {
         <Field
           label="Costo unitario"
           required
+          prefix="$"
           inputMode="decimal"
           autoComplete="off"
           maxLength={MAX_COST_LENGTH}
@@ -195,8 +199,10 @@ const ProductLine = ({ line, branches, errors, onChange, onRemove }) => {
       )}
 
       <footer className="purchase-line__foot">
-        <span>{unitsText(quantity)}</span>
-        <strong>{formatCurrency(itemsTotal([{ quantity, unitCost: line.unitCost }]))}</strong>
+        <span className="purchase-line__units">{unitsText(quantity)}</span>
+        <strong className="purchase-line__total" key={itemsTotal([{ quantity, unitCost: line.unitCost }])}>
+          {formatCurrency(itemsTotal([{ quantity, unitCost: line.unitCost }]))}
+        </strong>
       </footer>
 
       {errors?.length > 0 && (
@@ -217,17 +223,30 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
   const [serverError, setServerError] = useState("");
   const [creating, setCreating] = useState(null); // "product" | "supplier"
   const [extraProducts, setExtraProducts] = useState([]); // creados aquí (la lista de la página aún no los trae)
+  const [supplierNote, setSupplierNote] = useState(""); // «Proveedor de este producto» cuando se elige solo
   const today = todayInColombia();
   const { header } = state;
 
   const setHeader = (changes) => setState((current) => ({ ...current, header: { ...current.header, ...changes } }));
   const setLine = (line) =>
     setState((current) => ({ ...current, products: current.products.map((item) => (item.productId === line.productId ? line : item)) }));
-  const removeLine = (productId) =>
-    setState((current) => ({ ...current, products: current.products.filter((item) => item.productId !== productId) }));
+  // Quitar: primero sale con su animación y luego se borra de la compra
+  const [leaving, setLeaving] = useState([]);
+  const removeLine = (productId) => {
+    setLeaving((current) => [...current, productId]);
+    setTimeout(() => {
+      setState((current) => ({ ...current, products: current.products.filter((item) => item.productId !== productId) }));
+      setLeaving((current) => current.filter((id) => id !== productId));
+    }, 220);
+  };
   // Si el producto ya tiene existencias cargadas sin compra, la línea se autocompleta con ellas
   const addLine = async (product) => {
     if (state.products.some((item) => item.productId === product.id)) return;
+    // Fase 27: sin proveedor todavía, la compra toma el habitual del producto (si se puede elegir)
+    if (!state.header.idsupplier && product.supplierId && suppliers.some((supplier) => supplier.id === product.supplierId)) {
+      setHeader({ idsupplier: String(product.supplierId) });
+      setSupplierNote(`Proveedor de ${product.name}. Puedes cambiarlo.`);
+    }
     let loadedStock = null;
     try {
       loadedStock = await fetchLoadedStock(product.id, order?.id);
@@ -243,7 +262,12 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
 
   const catalog = [...products, ...extraProducts.filter((extra) => !products.some((product) => product.id === extra.id))];
   const chosen = new Set(state.products.map((line) => line.productId));
-  const available = catalog.filter((product) => !chosen.has(product.id));
+  // Los productos del proveedor elegido salen primero (Fase 27)
+  const supplierId = Number(header.idsupplier) || null;
+  const ofSupplier = (product) => supplierId !== null && product.supplierId === supplierId;
+  const available = catalog
+    .filter((product) => !chosen.has(product.id))
+    .sort((a, b) => Number(ofSupplier(b)) - Number(ofSupplier(a)));
 
   // "Creados hoy": los productos que se crearon hoy (en Colombia) y aún no están en la compra
   const createdToday = available.filter((product) => dayInColombia(product.createdAt) === today);
@@ -266,6 +290,7 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
 
   const handleCreateSupplier = async (payload) => {
     const supplier = await creation.createSupplier(payload);
+    setSupplierNote("");
     setHeader({ idsupplier: String(supplier.id) });
     setCreating(null);
   };
@@ -284,148 +309,221 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
     }
   };
 
+  // Resumen: unidades, total y cuándo vence si es a crédito
+  const units = state.products.reduce((sum, line) => sum + lineQuantity(line), 0);
+  const total = purchaseTotal(state.products);
+  const creditDays = Number(header.creditdays);
+  const dueText =
+    header.paymentterm === "credito" && creditDays > 0 && header.orderdate
+      ? new Intl.DateTimeFormat("es-CO", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(
+          new Date(Date.parse(`${header.orderdate}T00:00:00Z`) + creditDays * 86400000)
+        )
+      : "";
+  const supplierName = suppliers.find((supplier) => String(supplier.id) === header.idsupplier)?.companyname ?? "";
+
   return (
     <>
       <FormLayout onSubmit={submit} error={serverError}>
-        <div className="purchase-form__supplier">
-          <Select
-            label="Proveedor"
-            required
-            placeholder="Selecciona el proveedor"
-            options={toOptions(suppliers, (supplier) => supplier.companyname)}
-            value={header.idsupplier}
-            data-autofocus
-            error={errors.header.idsupplier}
-            onChange={(event) => setHeader({ idsupplier: event.target.value })}
-          />
-          {creation.canCreateSupplier && (
-            <Button variant="outline" icon="plus" className="purchase-form__inline" onClick={() => setCreating("supplier")}>
-              Nuevo proveedor
-            </Button>
-          )}
-        </div>
+        <div className="purchase-form">
+          {/* Productos: lo principal de la compra */}
+          <section className="purchase-form__main order-items" aria-labelledby="purchase-products-title">
+            <header className="order-items__head">
+              <span className="order-items__icon" aria-hidden="true">
+                <Icon name="box" />
+              </span>
+              <div className="order-items__heading">
+                <h3 className="order-items__title" id="purchase-products-title">
+                  Productos
+                </h3>
+                <span className="order-items__subtitle">Lo que llegó, cuánto costó y a qué sucursal va.</span>
+              </div>
+              <span className="order-items__count" key={state.products.length}>
+                {state.products.length}
+              </span>
+            </header>
 
-        <div className="form-layout__row">
-          <Field
-            label="Fecha de la compra"
-            type="date"
-            required
-            max={today}
-            value={header.orderdate}
-            error={errors.header.orderdate}
-            onChange={(event) => setHeader({ orderdate: event.target.value })}
-          />
-          <Field
-            label="Factura del proveedor"
-            maxLength={50}
-            placeholder="Opcional"
-            value={header.invoicenumber}
-            onChange={(event) => setHeader({ invoicenumber: event.target.value })}
-          />
-        </div>
-
-        <div className="form-layout__row">
-          <Select
-            label="Forma de pago"
-            required
-            options={PAYMENT_TERMS}
-            value={header.paymentterm}
-            onChange={(event) => setHeader({ paymentterm: event.target.value })}
-          />
-          {header.paymentterm === "credito" && (
-            <Field
-              label="Días de crédito"
-              required
-              inputMode="numeric"
-              maxLength={3}
-              placeholder="30"
-              value={header.creditdays}
-              error={errors.header.creditdays}
-              onInput={stripNonDigits}
-              onChange={(event) => setHeader({ creditdays: event.target.value })}
-            />
-          )}
-        </div>
-
-        <section className="order-items" aria-labelledby="purchase-products-title">
-          <header className="order-items__head">
-            <h3 className="order-items__title" id="purchase-products-title">
-              Productos
-            </h3>
-            <span className="order-items__count">{state.products.length}</span>
-          </header>
-
-          <div className="purchase-form__supplier">
-            <Select
-              label="Agregar producto"
-              placeholder={
-                shown.length
-                  ? "Elige un producto para agregarlo"
-                  : onlyToday
-                    ? "No quedan productos creados hoy"
-                    : "No quedan productos por agregar"
-              }
-              options={toOptions(shown, (product) => `${product.name} · ${product.sku}`)}
-              disabled={shown.length === 0}
-              hint={hint}
-              defaultValue=""
-              onChange={handleAddProduct}
-            />
-            {creation.canCreateProduct && (
-              <Button variant="outline" icon="plus" className="purchase-form__inline" onClick={() => setCreating("product")}>
-                Producto nuevo
-              </Button>
-            )}
-          </div>
-
-          <div className="purchase-form__today">
-            <label className="purchase-form__today-filter">
-              <input type="checkbox" checked={onlyToday} onChange={(event) => setOnlyToday(event.target.checked)} />
-              <span>Solo los creados hoy ({createdToday.length})</span>
-            </label>
-            {createdToday.length > 0 && (
-              <Button variant="outline" icon="plus" onClick={addAllToday}>
-                Agregar los {createdToday.length} creados hoy
-              </Button>
-            )}
-          </div>
-
-          {state.products.length > 0 && (
-            <ul className="purchase-form__lines">
-              {state.products.map((line) => (
-                <ProductLine
-                  key={line.productId}
-                  line={line}
-                  branches={branches}
-                  errors={errors.products[line.productId]}
-                  onChange={setLine}
-                  onRemove={() => removeLine(line.productId)}
+            <div className="purchase-form__picker">
+              <div className="purchase-form__supplier">
+                <Select
+                  label="Agregar producto"
+                  placeholder={
+                    shown.length ? "Elige un producto para agregarlo" : onlyToday ? "No quedan productos creados hoy" : "No quedan productos por agregar"
+                  }
+                  options={toOptions(shown, (product) => `${product.name} · ${product.sku}${ofSupplier(product) ? " · de este proveedor" : ""}`)}
+                  disabled={shown.length === 0}
+                  hint={hint}
+                  defaultValue=""
+                  onChange={handleAddProduct}
                 />
-              ))}
-            </ul>
-          )}
+                {creation.canCreateProduct && (
+                  <Button variant="outline" icon="plus" className="purchase-form__inline" onClick={() => setCreating("product")}>
+                    Producto nuevo
+                  </Button>
+                )}
+              </div>
 
-          {errors.form && (
-            <p className="order-items__error" role="alert">
-              {errors.form}
-            </p>
-          )}
+              <div className="purchase-form__today">
+                <label className="purchase-form__today-filter">
+                  <input type="checkbox" checked={onlyToday} onChange={(event) => setOnlyToday(event.target.checked)} />
+                  <span>Solo los creados hoy ({createdToday.length})</span>
+                </label>
+                {createdToday.length > 0 && (
+                  <Button variant="outline" icon="plus" onClick={addAllToday}>
+                    Agregar los {createdToday.length} creados hoy
+                  </Button>
+                )}
+              </div>
+            </div>
 
-          <p className="order-items__total">
-            Total de la compra <strong>{formatCurrency(purchaseTotal(state.products))}</strong>
-          </p>
-        </section>
+            {state.products.length > 0 ? (
+              <ul className="purchase-form__lines">
+                {state.products.map((line, index) => (
+                  <ProductLine
+                    key={line.productId}
+                    line={line}
+                    index={index}
+                    leaving={leaving.includes(line.productId)}
+                    branches={branches}
+                    errors={errors.products[line.productId]}
+                    onChange={setLine}
+                    onRemove={() => removeLine(line.productId)}
+                  />
+                ))}
+              </ul>
+            ) : (
+              <div className="purchase-form__empty">
+                <span className="purchase-form__empty-art" aria-hidden="true">
+                  <Icon name="cart" />
+                </span>
+                <strong>Todavía no hay productos</strong>
+                <span>Elige arriba lo que llegó. Si no existe, créalo con «Producto nuevo».</span>
+              </div>
+            )}
 
-        <Field
-          label="Notas"
-          multiline
-          maxLength={500}
-          placeholder="Ej: llegó en el carro el sábado"
-          value={header.notes}
-          onChange={(event) => setHeader({ notes: event.target.value })}
-        />
+            {errors.form && (
+              <p className="order-items__error" role="alert">
+                {errors.form}
+              </p>
+            )}
+          </section>
+
+          {/* Columna derecha: datos de la compra y resumen */}
+          <aside className="purchase-form__side">
+            <FormSection icon="users" title="Datos de la compra" description="A quién se le compró y cómo se paga.">
+              <div className="purchase-form__supplier purchase-form__supplier--stack">
+                <Select
+                  label="Proveedor"
+                  required
+                  placeholder="Selecciona el proveedor"
+                  options={toOptions(suppliers, (supplier) => supplier.companyname)}
+                  value={header.idsupplier}
+                  data-autofocus
+                  hint={supplierNote || undefined}
+                  error={errors.header.idsupplier}
+                  onChange={(event) => {
+                    setSupplierNote("");
+                    setHeader({ idsupplier: event.target.value });
+                  }}
+                />
+                {creation.canCreateSupplier && (
+                  <Button variant="outline" icon="plus" className="purchase-form__inline" onClick={() => setCreating("supplier")}>
+                    Nuevo proveedor
+                  </Button>
+                )}
+              </div>
+
+              <div className="form-layout__row">
+                <Field
+                  label="Fecha de la compra"
+                  type="date"
+                  required
+                  max={today}
+                  value={header.orderdate}
+                  error={errors.header.orderdate}
+                  onChange={(event) => setHeader({ orderdate: event.target.value })}
+                />
+                <Field
+                  label="Factura del proveedor"
+                  maxLength={50}
+                  placeholder="Opcional"
+                  value={header.invoicenumber}
+                  onChange={(event) => setHeader({ invoicenumber: event.target.value })}
+                />
+              </div>
+
+              <div className="purchase-form__terms" role="radiogroup" aria-label="Forma de pago">
+                {PAYMENT_TERMS.map((term) => (
+                  <button
+                    key={term.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={header.paymentterm === term.value}
+                    className={`purchase-form__term ${header.paymentterm === term.value ? "purchase-form__term--on" : ""}`.trim()}
+                    onClick={() => setHeader({ paymentterm: term.value })}
+                  >
+                    <Icon name={term.value === "credito" ? "refresh" : "wallet"} />
+                    {term.label}
+                  </button>
+                ))}
+              </div>
+              {header.paymentterm === "credito" && (
+                <Field
+                  label="Días de crédito"
+                  required
+                  inputMode="numeric"
+                  maxLength={3}
+                  placeholder="30"
+                  value={header.creditdays}
+                  error={errors.header.creditdays}
+                  hint={dueText ? `Vence el ${dueText}.` : undefined}
+                  onInput={stripNonDigits}
+                  onChange={(event) => setHeader({ creditdays: event.target.value })}
+                />
+              )}
+
+              <Field
+                label="Notas"
+                multiline
+                maxLength={500}
+                placeholder="Ej: llegó en el carro el sábado"
+                value={header.notes}
+                onChange={(event) => setHeader({ notes: event.target.value })}
+              />
+            </FormSection>
+
+            <div className="purchase-summary" aria-live="polite">
+              <span className="purchase-summary__label">Resumen</span>
+              <dl className="purchase-summary__list">
+                <div>
+                  <dt>Proveedor</dt>
+                  <dd>{supplierName || "—"}</dd>
+                </div>
+                <div>
+                  <dt>Productos</dt>
+                  <dd>{state.products.length}</dd>
+                </div>
+                <div>
+                  <dt>Unidades</dt>
+                  <dd>{units.toLocaleString("es-CO")}</dd>
+                </div>
+                <div>
+                  <dt>Pago</dt>
+                  <dd>{header.paymentterm === "credito" ? (dueText ? `Crédito · vence ${dueText}` : "Crédito") : "Contado"}</dd>
+                </div>
+              </dl>
+              <div className="purchase-summary__total">
+                <span>Total de la compra</span>
+                <strong key={total}>{formatCurrency(total)}</strong>
+              </div>
+            </div>
+          </aside>
+        </div>
 
         <FormActions>
+          <span className="purchase-form__footer-total" aria-hidden="true">
+            <span>Total</span>
+            <strong key={total}>{formatCurrency(total)}</strong>
+          </span>
           <Button variant="outline" onClick={onCancel} disabled={busy}>
             Cancelar
           </Button>
@@ -469,7 +567,15 @@ const OrderFormModal = ({ open, order = null, onClose, onSubmit, ...formProps })
   };
 
   return (
-    <Modal open={open} size="wide" title={order ? `Editar ${order.number}` : "Nueva compra"} onClose={onClose} busy={busy}>
+    <Modal
+      icon="cart"
+      open={open}
+      size="xl"
+      title={order ? `Editar ${order.number}` : "Nueva compra"}
+      subtitle={order ? "Borrador: cámbialo hasta que confirmes la compra." : "Lo que llegó del proveedor, repartido entre tus sucursales."}
+      onClose={onClose}
+      busy={busy}
+    >
       <OrderForm order={order} busy={busy} onCancel={onClose} onSubmit={handleSubmit} {...formProps} />
     </Modal>
   );

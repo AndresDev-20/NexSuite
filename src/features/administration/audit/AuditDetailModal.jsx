@@ -65,7 +65,7 @@ const DetailBody = ({ details }) => {
 
 /** Ficha de un evento de auditoría: quién, cuándo, sobre qué y qué cambió. Solo lectura. */
 const AuditDetailModal = ({ log, onClose }) => (
-  <Modal open={Boolean(log)} title="Detalle del evento" onClose={onClose}>
+  <Modal icon="shield" open={Boolean(log)} title="Detalle del evento" onClose={onClose}>
     {log && (
       <div className="audit-detail">
         <header className="audit-detail__head">

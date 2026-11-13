@@ -88,7 +88,7 @@ const StockMinimumModal = ({ row, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={Boolean(row)} title="Existencias mínimas" onClose={onClose} busy={busy}>
+    <Modal icon="bell" open={Boolean(row)} title="Existencias mínimas" onClose={onClose} busy={busy}>
       {row && <MinimumForm row={row} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

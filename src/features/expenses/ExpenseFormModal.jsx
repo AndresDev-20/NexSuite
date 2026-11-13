@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import Button from "../../components/ui/Button/Button";
 import Field from "../../components/forms/Field/Field";
 import Select from "../../components/forms/Select/Select";
-import { FormActions, FormLayout } from "../../components/forms/FormLayout/FormLayout";
+import { FormActions, FormLayout, FormSection } from "../../components/forms/FormLayout/FormLayout";
 import Modal from "../../components/feadback/Modal/Modal";
+import Icon from "../../components/ui/Icon/Icon";
 import useOpenRegisters, { sessionOptions } from "../sales/sales/useOpenRegisters";
 import { todayInColombia } from "../../utils/dates";
 import getErrorMessage from "../../utils/getErrorMessage";
@@ -15,6 +16,8 @@ import "./expenses.css";
 
 const GENERAL = "general";
 const ELECTRONIC = ["transferencia", "nequi", "daviplata", "tarjeta"];
+// Ícono de cada medio de pago (2026-11-13)
+const METHOD_ICONS = { efectivo_caja: "wallet", efectivo: "home", transferencia: "refresh", nequi: "phone", daviplata: "phone", tarjeta: "key" };
 
 /**
  * Registrar un gasto: fecha, monto, categoría, sucursal (o general del negocio), descripción, medio
@@ -116,122 +119,190 @@ const ExpenseForm = ({ branches, defaultBranchId, canGeneral, categories, suppli
     }
   };
 
+  // Resumen de la columna derecha
+  const amount = Number(values.amount) || 0;
+  const categoryName = categories.find((category) => String(category.id) === values.idcategory)?.name ?? "";
+  const branchName = branchOptions.find((option) => option.value === values.idbranch)?.label ?? "";
+  const methodLabel = EXPENSE_METHODS.find((method) => method.value === values.method)?.label ?? "";
+  const sessionLabel = fromRegister ? sessionOptions(registerSessions).find((option) => option.value === chosenSession)?.label ?? "" : "";
+  const paidTo = values.idsupplier ? suppliers.find((supplier) => String(supplier.id) === values.idsupplier)?.companyname ?? "" : values.payee.trim();
+
   return (
     <FormLayout onSubmit={submit} error={serverError}>
-      {fixed && (
-        <p className="expense-fixed-note">
-          Pago de <strong>{fixed.name}</strong> de {monthLabel(fixed.period)} (vence el {formatDay(fixed.dueDate)}). Confirma el monto real y cómo se pagó.
-        </p>
-      )}
-      <div className="form-layout__row">
-        <Field label="Fecha" type="date" required max={today} value={values.date} error={errors.date} onChange={(event) => set("date", event.target.value)} />
-        <Field
-          label="Monto"
-          required
-          inputMode="decimal"
-          autoComplete="off"
-          maxLength={15}
-          placeholder="0"
-          data-autofocus
-          onInput={sanitizeDecimal}
-          hint={Number(values.amount) > 0 ? formatCurrency(Number(values.amount)) : undefined}
-          value={values.amount}
-          error={errors.amount}
-          onChange={(event) => set("amount", event.target.value)}
-        />
-      </div>
-      <div className="form-layout__row">
-        <Select
-          label="Categoría"
-          required
-          placeholder="Elige la categoría"
-          options={categories.filter((category) => category.isActive).map((category) => ({ value: String(category.id), label: category.name }))}
-          value={values.idcategory}
-          error={errors.idcategory}
-          onChange={(event) => set("idcategory", event.target.value)}
-        />
-        <Select
-          label="Sucursal"
-          required
-          placeholder="Elige la sucursal"
-          options={branchOptions}
-          disabled={Boolean(fixed)}
-          value={values.idbranch}
-          error={errors.idbranch}
-          onChange={(event) => set("idbranch", event.target.value)}
-        />
-      </div>
-      <Field
-        label="Descripción"
-        required
-        maxLength={255}
-        placeholder="Ej: arriendo de octubre, recibo de la luz, domicilio a Ibagué"
-        value={values.description}
-        error={errors.description}
-        onChange={(event) => set("description", event.target.value)}
-      />
+      <div className="expense-form">
+        <div className="expense-form__main">
+          {fixed && (
+            <p className="expense-fixed-note">
+              Pago de <strong>{fixed.name}</strong> de {monthLabel(fixed.period)} (vence el {formatDay(fixed.dueDate)}). Confirma el monto real y cómo se pagó.
+            </p>
+          )}
+          <FormSection icon="wallet" title="El gasto" description="Cuándo, cuánto, de qué y de qué sucursal.">
+            <div className="form-layout__row">
+              <Field label="Fecha" type="date" required max={today} value={values.date} error={errors.date} onChange={(event) => set("date", event.target.value)} />
+              <Field
+                className="expense-form__amount"
+                label="Monto"
+                required
+                prefix="$"
+                inputMode="decimal"
+                autoComplete="off"
+                maxLength={15}
+                placeholder="0"
+                data-autofocus
+                onInput={sanitizeDecimal}
+                hint={Number(values.amount) > 0 ? formatCurrency(Number(values.amount)) : undefined}
+                value={values.amount}
+                error={errors.amount}
+                onChange={(event) => set("amount", event.target.value)}
+              />
+            </div>
+            <div className="form-layout__row">
+              <Select
+                label="Categoría"
+                required
+                placeholder="Elige la categoría"
+                options={categories.filter((category) => category.isActive).map((category) => ({ value: String(category.id), label: category.name }))}
+                value={values.idcategory}
+                error={errors.idcategory}
+                onChange={(event) => set("idcategory", event.target.value)}
+              />
+              <Select
+                label="Sucursal"
+                required
+                placeholder="Elige la sucursal"
+                options={branchOptions}
+                disabled={Boolean(fixed)}
+                value={values.idbranch}
+                error={errors.idbranch}
+                onChange={(event) => set("idbranch", event.target.value)}
+              />
+            </div>
+            <Field
+              label="Descripción"
+              required
+              maxLength={255}
+              placeholder="Ej: arriendo de octubre, recibo de la luz, domicilio a Ibagué"
+              value={values.description}
+              error={errors.description}
+              onChange={(event) => set("description", event.target.value)}
+            />
+          </FormSection>
 
-      <fieldset className="expense-methods">
-        <legend className="expense-methods__legend">¿Cómo se pagó?</legend>
-        <div className="expense-methods__grid" role="radiogroup" aria-label="Medio de pago">
-          {EXPENSE_METHODS.map((method) => (
-            <button
-              key={method.value}
-              type="button"
-              role="radio"
-              aria-checked={values.method === method.value}
-              className={`expense-method ${values.method === method.value ? "expense-method--on" : ""}`.trim()}
-              onClick={() => set("method", method.value)}
-            >
-              <span className="expense-method__title">{method.label}</span>
-              <span className="expense-method__hint">{method.hint}</span>
-            </button>
-          ))}
+          <FormSection icon="cart" title="El pago" description="Cómo se pagó, a quién y con qué soporte.">
+            <fieldset className="expense-methods">
+              <legend className="expense-methods__legend">¿Cómo se pagó?</legend>
+              <div className="expense-methods__grid" role="radiogroup" aria-label="Medio de pago">
+                {EXPENSE_METHODS.map((method) => (
+                  <button
+                    key={method.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={values.method === method.value}
+                    className={`expense-method ${values.method === method.value ? "expense-method--on" : ""}`.trim()}
+                    onClick={() => set("method", method.value)}
+                  >
+                    <span className="expense-method__icon" aria-hidden="true">
+                      <Icon name={METHOD_ICONS[method.value] ?? "wallet"} />
+                    </span>
+                    <span className="expense-method__title">{method.label}</span>
+                    <span className="expense-method__hint">{method.hint}</span>
+                    <span className="expense-method__check" aria-hidden="true">
+                      <Icon name="check" />
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            {fromRegister &&
+              (registersError ? (
+                <p className="expense-form__error" role="alert">
+                  {registersError}
+                </p>
+              ) : registersLoading ? (
+                <p className="expense-form__note">Buscando cajas abiertas…</p>
+              ) : registerSessions.length === 0 ? (
+                <p className="expense-form__error" role="alert">
+                  No hay cajas con turno abierto en esa sucursal: elige «Efectivo fuera de caja» o abre una caja.
+                </p>
+              ) : (
+                <Select
+                  label="Caja de donde sale el efectivo"
+                  required
+                  placeholder="Elige la caja"
+                  options={sessionOptions(registerSessions)}
+                  value={chosenSession}
+                  error={errors.idsession}
+                  onChange={(event) => set("idsession", event.target.value)}
+                />
+              ))}
+
+            {ELECTRONIC.includes(values.method) && (
+              <Field label="Referencia del pago" maxLength={100} placeholder="Opcional: número de la transferencia o voucher" value={values.reference} onChange={(event) => set("reference", event.target.value)} />
+            )}
+
+            <div className="form-layout__row">
+              {suppliers.length > 0 && (
+                <Select
+                  label="Proveedor"
+                  placeholder="No es un proveedor registrado"
+                  options={suppliers.map((supplier) => ({ value: String(supplier.id), label: supplier.companyname }))}
+                  value={values.idsupplier}
+                  onChange={(event) => set("idsupplier", event.target.value)}
+                />
+              )}
+              {!values.idsupplier && (
+                <Field label="A quién se le pagó" maxLength={120} placeholder="Opcional. Ej: Don Pedro (arrendador)" value={values.payee} onChange={(event) => set("payee", event.target.value)} />
+              )}
+            </div>
+            <Field label="Factura o recibo" maxLength={50} placeholder="Opcional: número del soporte" value={values.invoicenumber} onChange={(event) => set("invoicenumber", event.target.value)} />
+          </FormSection>
         </div>
-      </fieldset>
 
-      {fromRegister &&
-        (registersError ? (
-          <p className="expense-form__error" role="alert">
-            {registersError}
-          </p>
-        ) : registersLoading ? (
-          <p className="expense-form__note">Buscando cajas abiertas…</p>
-        ) : registerSessions.length === 0 ? (
-          <p className="expense-form__error" role="alert">
-            No hay cajas con turno abierto en esa sucursal: elige «Efectivo fuera de caja» o abre una caja.
-          </p>
-        ) : (
-          <Select
-            label="Caja de donde sale el efectivo"
-            required
-            placeholder="Elige la caja"
-            options={sessionOptions(registerSessions)}
-            value={chosenSession}
-            error={errors.idsession}
-            onChange={(event) => set("idsession", event.target.value)}
-          />
-        ))}
-
-      {ELECTRONIC.includes(values.method) && (
-        <Field label="Referencia del pago" maxLength={100} placeholder="Opcional: número de la transferencia o voucher" value={values.reference} onChange={(event) => set("reference", event.target.value)} />
-      )}
-
-      <div className="form-layout__row">
-        {suppliers.length > 0 && (
-          <Select
-            label="Proveedor"
-            placeholder="No es un proveedor registrado"
-            options={suppliers.map((supplier) => ({ value: String(supplier.id), label: supplier.companyname }))}
-            value={values.idsupplier}
-            onChange={(event) => set("idsupplier", event.target.value)}
-          />
-        )}
-        {!values.idsupplier && (
-          <Field label="A quién se le pagó" maxLength={120} placeholder="Opcional. Ej: Don Pedro (arrendador)" value={values.payee} onChange={(event) => set("payee", event.target.value)} />
-        )}
+        <aside className="expense-summary" aria-live="polite">
+          <span className="expense-summary__label">Resumen del gasto</span>
+          <strong className="expense-summary__amount" key={amount}>
+            {formatCurrency(amount)}
+          </strong>
+          <span className={`expense-summary__description ${values.description.trim() ? "" : "expense-summary__description--empty"}`.trim()}>
+            {values.description.trim() || "Escribe en qué se gastó"}
+          </span>
+          <dl className="expense-summary__list">
+            <div>
+              <dt>Fecha</dt>
+              <dd>{values.date ? formatDay(values.date) : "—"}</dd>
+            </div>
+            <div>
+              <dt>Categoría</dt>
+              <dd>{categoryName || "—"}</dd>
+            </div>
+            <div>
+              <dt>Sucursal</dt>
+              <dd>{branchName || "—"}</dd>
+            </div>
+            <div>
+              <dt>Pago</dt>
+              <dd>{methodLabel}</dd>
+            </div>
+            {sessionLabel && (
+              <div>
+                <dt>Sale de</dt>
+                <dd>{sessionLabel}</dd>
+              </div>
+            )}
+            {paidTo && (
+              <div>
+                <dt>A quién</dt>
+                <dd>{paidTo}</dd>
+              </div>
+            )}
+          </dl>
+          <span className={`expense-summary__badge ${fromRegister ? "expense-summary__badge--cash" : ""}`.trim()}>
+            <Icon name={fromRegister ? "wallet" : "check"} />
+            {fromRegister ? "Sale del efectivo de la caja" : "No toca ninguna caja"}
+          </span>
+        </aside>
       </div>
-      <Field label="Factura o recibo" maxLength={50} placeholder="Opcional: número del soporte" value={values.invoicenumber} onChange={(event) => set("invoicenumber", event.target.value)} />
 
       <FormActions>
         <Button variant="outline" onClick={onCancel} disabled={busy}>
@@ -257,7 +328,15 @@ const ExpenseFormModal = ({ open, fixed = null, onClose, onSubmit, ...formProps 
     }
   };
   return (
-    <Modal open={open} title={fixed ? `Pagar ${fixed.name}` : "Registrar gasto"} onClose={onClose} busy={busy}>
+    <Modal
+      open={open}
+      size="wide"
+      icon="wallet"
+      title={fixed ? `Pagar ${fixed.name}` : "Registrar gasto"}
+      subtitle={fixed ? "Confirma el monto real y cómo se pagó." : "Arriendo, servicios, domicilios… todo lo que sale del negocio."}
+      onClose={onClose}
+      busy={busy}
+    >
       {open && <ExpenseForm key={fixed ? `${fixed.id}-${fixed.period}` : "nuevo"} fixed={fixed} busy={busy} onCancel={onClose} onSubmit={handleSubmit} {...formProps} />}
     </Modal>
   );

@@ -72,7 +72,7 @@ const BranchesPanel = ({ user, branches, initialIds, onToggle, onClose }) => {
  * assignedIds: ids de las sucursales que ya tiene el usuario al abrir.
  */
 const UserBranchesModal = ({ open, user, branches, assignedIds, onToggle, onClose }) => (
-  <Modal open={open} title="Sucursales del usuario" onClose={onClose}>
+  <Modal icon="home" open={open} title="Sucursales del usuario" onClose={onClose}>
     {user && (
       <BranchesPanel
         user={user}

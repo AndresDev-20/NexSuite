@@ -324,7 +324,7 @@ const TransferFormModal = ({ open, onClose, onSubmit, ...formProps }) => {
   };
 
   return (
-    <Modal open={open} size="wide" title="Nuevo traslado" onClose={onClose} busy={busy}>
+    <Modal icon="refresh" open={open} size="wide" title="Nuevo traslado" onClose={onClose} busy={busy}>
       <TransferForm busy={busy} onCancel={onClose} onSubmit={handleSubmit} {...formProps} />
     </Modal>
   );

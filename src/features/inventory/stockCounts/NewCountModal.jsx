@@ -80,7 +80,7 @@ const NewCountModal = ({ open, onClose, onSubmit, ...formProps }) => {
   };
 
   return (
-    <Modal open={open} title="Nuevo conteo" onClose={onClose} busy={busy}>
+    <Modal icon="inbox" open={open} title="Nuevo conteo" onClose={onClose} busy={busy}>
       <NewCountForm busy={busy} onCancel={onClose} onSubmit={handleSubmit} {...formProps} />
     </Modal>
   );

@@ -298,7 +298,7 @@ const OrderDetailModal = ({
   };
 
   return (
-    <Modal open={open} size="wide" title="Compra" onClose={onClose}>
+    <Modal icon="cart" open={open} size="wide" title="Compra" onClose={onClose}>
       {renderBody()}
     </Modal>
   );

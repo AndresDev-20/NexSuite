@@ -67,7 +67,7 @@ const CategoriesModal = ({ open, categories, onClose, createCategory, updateCate
   };
 
   return (
-    <Modal open={open} title="Categorías de gastos" onClose={onClose}>
+    <Modal icon="bag" open={open} title="Categorías de gastos" onClose={onClose}>
       <div className="expense-categories">
         <form
           className="expense-categories__add"

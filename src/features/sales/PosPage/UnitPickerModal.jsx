@@ -103,7 +103,7 @@ const Picker = ({ line, branchId, verb, onCancel, onConfirm }) => {
  * onConfirm(units) recibe las unidades elegidas. verb: el botón ("Vender", o "Apartar" en un pedido a caja).
  */
 const UnitPickerModal = ({ line, branchId, verb = "Vender", onClose, onConfirm }) => (
-  <Modal open={Boolean(line)} title="Elegir IMEI o seriales" onClose={onClose}>
+  <Modal icon="barcode" open={Boolean(line)} title="Elegir IMEI o seriales" onClose={onClose}>
     {line && <Picker key={line.productId} line={line} branchId={branchId} verb={verb} onCancel={onClose} onConfirm={onConfirm} />}
   </Modal>
 );

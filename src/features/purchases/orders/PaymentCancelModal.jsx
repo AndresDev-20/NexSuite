@@ -69,7 +69,7 @@ const PaymentCancelModal = ({ payment, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={Boolean(payment)} title="Anular abono" onClose={onClose} busy={busy}>
+    <Modal icon="alert" open={Boolean(payment)} title="Anular abono" onClose={onClose} busy={busy}>
       {payment && <CancelForm payment={payment} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

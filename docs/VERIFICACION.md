@@ -274,6 +274,38 @@ Usa los roles **Vendedor** (tablet: arma y envía pedidos) y **Cajero** (abre la
 - [ ] Hoy no hay auditoría de más de 12 meses, así que dice que todo es del último año (es lo correcto). Cuando
       haya, **Descargar Excel** baja el archivo y solo entonces se puede escribir ARCHIVAR y archivar.
 
+## 14.7 Proveedor habitual y formularios nuevos (Fase 27)
+
+- [ ] **Productos → Nuevo producto**: está en secciones; en «Clasificación y proveedor» elige un proveedor o usa
+      **Nuevo proveedor** (al guardarlo queda elegido). Guarda y vuelve a abrir: el proveedor sigue ahí.
+- [ ] Con un usuario sin «Consultar proveedores» el campo no aparece y el producto se guarda igual.
+- [ ] Ya no sale «Unidad de medida». Con **Nueva categoría** creas una ahí mismo y queda elegida.
+- [ ] **Nuevo producto** va por pasos (Producto → Precios → Tienda → Sucursales) en una ventana ancha, con la tarjeta
+      del producto armándose a la izquierda. No deja seguir sin lo obligatorio; «Atrás» y los círculos conservan lo
+      escrito. En **Sucursales** asigna (con serial, los IMEI) y «Crear y asignar N unidades» lo deja listo; sin
+      elegir sucursales queda pendiente. Al editar son 3 pasos y guarda desde cualquiera.
+- [ ] **Compras → Nueva compra**: agrega primero ese producto: el proveedor se elige solo («Proveedor de …»).
+      Confirma una compra con un producto sin proveedor: queda con el de la compra.
+- [ ] Existencias iniciales de un producto con serial: el proveedor sale ya elegido.
+- [ ] **Productos**: ya no hay filtro de sucursal; al cambiar la sucursal del encabezado, la lista y las unidades cambian.
+      «Filtrar por proveedor» deja solo los productos de ese proveedor habitual.
+- [ ] **Nuevo proveedor** (Identificación → Contacto → Ubicación) y **Nuevo usuario** (Persona → Acceso) van por pasos;
+      cliente, gasto, caja y sucursal van por secciones con ícono. Todas las ventanas tienen ícono y los campos
+      entran con animación.
+- [ ] **Nueva compra** (sin pasos): productos a la izquierda en tarjetas numeradas que entran y salen animadas; a la
+      derecha los datos de la compra y el resumen con el total; el total también junto a «Guardar borrador». A crédito
+      dice cuándo vence. En celular: datos, productos y resumen, en ese orden.
+- [ ] **Vender**: buscador tipo escáner, resultados en tarjetas con existencias de colores, carrito numerado que entra
+      y sale animado, total grande en tarjeta oscura, «Cambios» en verde y «Cobrar» que brilla cuando ya está pagado.
+- [ ] **Caja → Mi caja de hoy**: cada caja tiene su caja registradora animada (roja «VENTA» si está vendiendo, ámbar
+      «CONTAR» con el cajón abierto si está por contar).
+- [ ] **Registrar gasto**: el resumen de la derecha se llena mientras escribes; el monto se ve grande; los medios de
+      pago son tarjetas con ícono que se marcan con ✓.
+- [ ] **Nueva sucursal**: la tirilla de la derecha muestra cómo sale el comprobante y el número de la primera venta.
+      **Nuevo usuario**: el carné de la derecha se arma con el nombre, el rol y la contraseña.
+- [ ] En cualquier ventana con formulario, Guardar y Cancelar quedan siempre a la vista abajo (en celular, lado a
+      lado). Precios con «$», la tarjeta de ganancia en verde o rojo; en claro y en noche.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 13). Además:

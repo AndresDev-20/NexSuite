@@ -79,7 +79,7 @@ const CancelReasonModal = ({ request, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={Boolean(request)} title={request?.title ?? "Anular"} onClose={onClose} busy={busy}>
+    <Modal icon="alert" open={Boolean(request)} title={request?.title ?? "Anular"} onClose={onClose} busy={busy}>
       {request && <ReasonForm key={request.key} request={request} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

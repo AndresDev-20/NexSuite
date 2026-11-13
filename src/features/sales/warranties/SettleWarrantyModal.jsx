@@ -225,7 +225,7 @@ const SettleForm = ({ item, getSettleOptions, act, onDone, onClose }) => {
  * onDone({ item, message }) con el caso ya entregado.
  */
 const SettleWarrantyModal = ({ item, getSettleOptions, act, onDone, onClose }) => (
-  <Modal open={Boolean(item)} title="Cambiar o devolver el dinero" onClose={onClose}>
+  <Modal icon="shield" open={Boolean(item)} title="Cambiar o devolver el dinero" onClose={onClose}>
     {item && <SettleForm key={item.id} item={item} getSettleOptions={getSettleOptions} act={act} onDone={onDone} onClose={onClose} />}
   </Modal>
 );

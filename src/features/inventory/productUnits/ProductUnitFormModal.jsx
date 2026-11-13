@@ -167,7 +167,7 @@ const ProductUnitFormModal = ({ unit, suppliers, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={Boolean(unit)} title="Editar unidad" onClose={onClose} busy={busy}>
+    <Modal icon="barcode" open={Boolean(unit)} title="Editar unidad" onClose={onClose} busy={busy}>
       {unit && <UnitForm unit={unit} suppliers={suppliers} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

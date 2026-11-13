@@ -365,7 +365,7 @@ const SupplierSheet = ({ listed, onClose, onEdit, onViewOrders, onViewPayables }
  * onViewPayables(supplier) son opcionales.
  */
 const SupplierDetailModal = ({ supplier, onClose, onEdit, onViewOrders, onViewPayables }) => (
-  <Modal open={Boolean(supplier)} title="Ficha del proveedor" size="wide" onClose={onClose}>
+  <Modal icon="users" open={Boolean(supplier)} title="Ficha del proveedor" size="wide" onClose={onClose}>
     {supplier && (
       <SupplierSheet
         key={supplier.id}

@@ -355,7 +355,7 @@ const CaseSheet = ({ id, getWarranty, act, getSettleOptions, onChanged, onClose 
  * id null = cerrado.
  */
 const WarrantyDetailModal = ({ id, getWarranty, act, getSettleOptions, onChanged, onClose }) => (
-  <Modal open={Boolean(id)} title="Caso de garantía" size="wide" onClose={onClose}>
+  <Modal icon="shield" open={Boolean(id)} title="Caso de garantía" size="wide" onClose={onClose}>
     {id && <CaseSheet key={id} id={id} getWarranty={getWarranty} act={act} getSettleOptions={getSettleOptions} onChanged={onChanged} onClose={onClose} />}
   </Modal>
 );

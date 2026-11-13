@@ -144,3 +144,87 @@
     animation-duration: 1ms;
   }
 }
+
+/* ==========================================================================
+   Mejoras 2026-11-13: franja de la marca arriba, ícono y subtítulo, encabezado con relieve.
+   --modal-pad-*: los usan los botones fijos al pie (formLayout.css).
+   ========================================================================== */
+.modal__body {
+  --modal-pad-x: 20px;
+  --modal-pad-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+}
+
+.modal__panel {
+  position: relative;
+}
+
+.modal__panel::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  height: 4px;
+  content: "";
+  background: linear-gradient(90deg, var(--red-600), #f0647a, var(--red-600));
+}
+
+.modal__header {
+  justify-content: flex-start;
+  padding-top: 20px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--red-50) 55%, transparent), transparent);
+}
+
+.modal__heading {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.modal__title {
+  letter-spacing: -0.01em;
+}
+
+.modal__subtitle {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  color: var(--color-text-muted);
+}
+
+.modal__icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: var(--on-accent);
+  background: linear-gradient(135deg, var(--red-500, #e53a4e), var(--red-700, #a3101f));
+  border-radius: 13px;
+  box-shadow: 0 8px 18px -10px rgba(214, 24, 46, 0.8);
+}
+
+.modal__icon .icon {
+  width: 22px;
+  height: 22px;
+}
+
+@media (min-width: 768px) {
+  .modal__body {
+    --modal-pad-x: 28px;
+    --modal-pad-bottom: 28px;
+  }
+
+  .modal__header {
+    padding-top: 24px;
+  }
+}
+
+/* La más ancha: formularios por pasos con columna lateral */
+@media (min-width: 768px) {
+  .modal--xl {
+    width: min(1120px, calc(100% - 48px));
+  }
+}

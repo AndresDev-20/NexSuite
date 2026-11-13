@@ -305,3 +305,443 @@
     animation: none;
   }
 }
+
+/* ==========================================================================
+   Compra renovada (2026-11-13), todo en una vista: a la izquierda los productos; a la derecha (fija en
+   pantallas anchas) los datos de la compra y el resumen. El total también va junto a Guardar.
+   ========================================================================== */
+.purchase-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.purchase-form__side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* En celular primero los datos de la compra, luego los productos */
+.purchase-form__main {
+  order: 2;
+}
+
+.purchase-form__side {
+  order: 1;
+}
+
+@media (min-width: 1000px) {
+  .purchase-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .purchase-form__main,
+  .purchase-form__side {
+    order: 0;
+  }
+
+  .purchase-form__side {
+    position: sticky;
+    top: 0;
+  }
+}
+
+/* Encabezado de la sección de productos */
+.order-items {
+  gap: 14px;
+  padding: 16px;
+  background:
+    radial-gradient(90% 50% at 100% 0%, color-mix(in srgb, var(--red-600) 7%, transparent), transparent 70%),
+    var(--gray-50);
+  border-radius: 18px;
+}
+
+.order-items__head {
+  gap: 12px;
+}
+
+.order-items__icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  color: var(--on-accent);
+  background: linear-gradient(135deg, var(--red-500), var(--red-700));
+  border-radius: 12px;
+  box-shadow: 0 8px 16px -10px rgba(214, 24, 46, 0.8);
+}
+
+.order-items__icon .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.order-items__heading {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.order-items__subtitle {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.order-items__count {
+  animation: purchase-pop 360ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+/* Barra para agregar productos */
+.purchase-form__picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--white);
+  border: 1px dashed color-mix(in srgb, var(--red-600) 35%, var(--color-border));
+  border-radius: 14px;
+}
+
+.purchase-form__supplier--stack {
+  grid-template-columns: 1fr !important;
+}
+
+.purchase-form__supplier--stack .purchase-form__inline {
+  margin-top: 0 !important;
+}
+
+/* Sin productos todavía */
+.purchase-form__empty {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-text-muted);
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  animation: purchase-line-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.purchase-form__empty strong {
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.purchase-form__empty-art {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 6px;
+  color: var(--red-600);
+  background: var(--red-50);
+  border-radius: 20px;
+  animation: purchase-float 3s ease-in-out infinite;
+}
+
+.purchase-form__empty-art .icon {
+  width: 30px;
+  height: 30px;
+}
+
+/* Cada producto: número, entrada y salida animadas */
+.purchase-line {
+  position: relative;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+  animation: purchase-line-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.purchase-line:hover,
+.purchase-line:focus-within {
+  border-color: color-mix(in srgb, var(--red-600) 30%, var(--color-border));
+  box-shadow: 0 12px 26px -20px rgba(15, 23, 42, 0.5);
+}
+
+.purchase-line--leaving {
+  pointer-events: none;
+  animation: purchase-line-out 220ms ease-in both;
+}
+
+.purchase-line__head {
+  align-items: center;
+}
+
+.purchase-line__index {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--red-700);
+  background: var(--red-50);
+  border-radius: 10px;
+}
+
+.purchase-line__index--serial {
+  color: #1d3f9a;
+  background: color-mix(in srgb, #2f6fd6 14%, var(--white));
+}
+
+:root[data-theme="dark"] .purchase-line__index--serial {
+  color: #9cc0ff;
+}
+
+.purchase-line__name {
+  flex: 1;
+}
+
+.purchase-line__foot {
+  align-items: center;
+  padding-top: 12px;
+  border-top-style: dashed;
+}
+
+.purchase-line__units {
+  color: var(--color-text-muted);
+}
+
+.purchase-line__total {
+  padding: 4px 12px;
+  font-size: 1rem;
+  color: var(--red-700);
+  background: var(--red-50);
+  border-radius: 999px;
+  animation: purchase-pop 320ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+:root[data-theme="dark"] .purchase-line__total {
+  color: var(--color-text);
+}
+
+/* Forma de pago: dos tarjetas en vez de una lista */
+.purchase-form__terms {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.purchase-form__term {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 10px 12px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  background: var(--gray-50);
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  transition: border-color 180ms ease, background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.purchase-form__term .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.purchase-form__term:hover {
+  border-color: var(--gray-300);
+}
+
+.purchase-form__term:active {
+  transform: scale(0.97);
+}
+
+.purchase-form__term--on {
+  color: var(--red-700);
+  background: color-mix(in srgb, var(--red-50) 75%, var(--white));
+  border-color: var(--red-600);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--red-600) 15%, transparent);
+}
+
+:root[data-theme="dark"] .purchase-form__term--on {
+  color: var(--color-text);
+}
+
+/* Resumen */
+.purchase-summary {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  overflow: hidden;
+  color: #fff;
+  background: linear-gradient(140deg, #1f1f24, #3a1218 60%, var(--red-700));
+  border-radius: 18px;
+  box-shadow: 0 20px 40px -26px rgba(15, 23, 42, 0.9);
+  animation: purchase-line-in 520ms 120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Brillo que cruza el resumen cada tanto */
+.purchase-summary::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.12) 50%, transparent 60%);
+  transform: translateX(-120%);
+  animation: purchase-shine 7s ease-in-out 1.5s infinite;
+  pointer-events: none;
+}
+
+.purchase-summary__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.purchase-summary__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+
+.purchase-summary__list > div {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  font-size: 0.88rem;
+}
+
+.purchase-summary__list dt {
+  opacity: 0.7;
+}
+
+.purchase-summary__list dd {
+  margin: 0;
+  overflow: hidden;
+  font-weight: 600;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.purchase-summary__total {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.25);
+}
+
+.purchase-summary__total span {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.purchase-summary__total strong {
+  font-size: 1.7rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  animation: purchase-pop 360ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+/* El total junto a Guardar (siempre a la vista) */
+.purchase-form__footer-total {
+  display: flex;
+  flex: 1 1 100%;
+  gap: 8px;
+  align-items: baseline;
+  margin-right: auto;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.purchase-form__footer-total strong {
+  font-size: 1.2rem;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  animation: purchase-pop 320ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+@media (min-width: 768px) {
+  .purchase-form__footer-total {
+    flex: 1 1 auto;
+    align-self: center;
+  }
+}
+
+@keyframes purchase-line-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes purchase-line-out {
+  to { opacity: 0; transform: translateX(24px) scale(0.96); }
+}
+
+@keyframes purchase-pop {
+  0% { transform: scale(0.85); }
+  60% { transform: scale(1.06); }
+  100% { transform: none; }
+}
+
+@keyframes purchase-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes purchase-shine {
+  0%, 75% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+:root[data-motion="reduced"] .purchase-form *,
+:root[data-motion="reduced"] .purchase-form *::after {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .purchase-form *,
+  .purchase-form *::after {
+    animation: none !important;
+  }
+}
+
+/* Celular: datos de la compra → productos → resumen; el total del pie va a lo ancho, arriba de los botones */
+@media (max-width: 999px) {
+  .purchase-form__side {
+    display: contents;
+  }
+
+  .purchase-form__side > .form-section {
+    order: 1;
+  }
+
+  .purchase-form__main {
+    order: 2;
+  }
+
+  .purchase-summary {
+    order: 3;
+  }
+}
+
+@media (max-width: 767px) {
+  .modal__body .form-layout__actions > .purchase-form__footer-total {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+}

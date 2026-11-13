@@ -228,7 +228,7 @@ const AccountSheet = ({ account, canPay, canManage, onPay, onAddBalance, onCance
  * canPay: registrar abonos · canManage: anular abonos y cargar o anular saldos iniciales.
  */
 const CustomerAccountModal = ({ state, onRetry, onClose, ...actions }) => (
-  <Modal open={state.open} title="Estado de cuenta" size="wide" onClose={onClose}>
+  <Modal icon="wallet" open={state.open} title="Estado de cuenta" size="wide" onClose={onClose}>
     {state.loading && <p className="sheet__loading">Cargando la cuenta…</p>}
     {!state.loading && state.error && (
       <div className="sheet">

@@ -88,7 +88,7 @@ const CategoryFormModal = ({ open, category = null, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={open} title={category ? "Editar categoría" : "Nueva categoría"} onClose={onClose} busy={busy}>
+    <Modal icon="bag" open={open} title={category ? "Editar categoría" : "Nueva categoría"} onClose={onClose} busy={busy}>
       <CategoryForm category={category} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />
     </Modal>
   );

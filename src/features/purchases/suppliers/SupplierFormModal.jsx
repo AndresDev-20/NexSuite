@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import Button from "../../../components/ui/Button/Button";
 import Field from "../../../components/forms/Field/Field";
 import Select from "../../../components/forms/Select/Select";
-import { FormActions, FormLayout } from "../../../components/forms/FormLayout/FormLayout";
+import { FormSection } from "../../../components/forms/FormLayout/FormLayout";
+import WizardForm from "../../../components/forms/WizardForm/WizardForm";
 import Modal from "../../../components/feadback/Modal/Modal";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { calculateNitDv } from "../../../utils/nit";
@@ -88,6 +88,13 @@ const RULES = {
   city: requiredText("Escribe la ciudad."),
 };
 
+// Formulario por pasos (2026-11-13): los campos que revisa cada paso antes de seguir
+const SUPPLIER_STEPS = [
+  ["typeorganization", "companyname", "typeidentification", "nitcc"],
+  ["phone", "email", "contact"],
+  ["address", "department", "city"],
+];
+
 /* ---------- Formulario (solo existe mientras el modal está abierto) ---------- */
 const SupplierForm = ({ supplier, busy, onCancel, onSubmit }) => {
   const isEdit = Boolean(supplier);
@@ -97,151 +104,179 @@ const SupplierForm = ({ supplier, busy, onCancel, onSubmit }) => {
     register,
     handleSubmit,
     watch,
+    trigger,
     formState: { errors },
   } = useForm({ defaultValues: toFormValues(supplier) });
+  const wizard = useRef(null);
 
   // El dígito de verificación se calcula solo cuando el tipo es NIT
   const isNit = watch("typeidentification") === NIT_TYPE;
   const dv = isNit ? calculateNitDv(watch("nitcc")) : null;
 
-  const submit = handleSubmit(async (values) => {
-    setServerError("");
-    try {
-      await onSubmit(buildPayload(values, isEdit, dv));
-    } catch (error) {
-      setServerError(
-        getErrorMessage(
-          error,
-          isEdit
-            ? "No se pudo guardar el proveedor. Inténtalo de nuevo."
-            : "No se pudo crear el proveedor. Inténtalo de nuevo."
-        )
-      );
-    }
-  });
+  const submit = handleSubmit(
+    async (values) => {
+      setServerError("");
+      try {
+        await onSubmit(buildPayload(values, isEdit, dv));
+      } catch (error) {
+        setServerError(getErrorMessage(error, isEdit ? "No se pudo guardar el proveedor. Inténtalo de nuevo." : "No se pudo crear el proveedor. Inténtalo de nuevo."));
+      }
+    },
+    // Si falta algo, lleva al paso del primer error
+    (invalid) => wizard.current?.goToField(Object.keys(invalid)[0] ?? "")
+  );
 
   return (
-    <FormLayout onSubmit={submit} error={serverError}>
-      <div className="supplier-form__row">
-        <Select
-          label="Tipo de organización"
-          required
-          placeholder="Selecciona"
-          options={ORGANIZATION_TYPES}
-          error={errors.typeorganization?.message}
-          {...register("typeorganization", RULES.typeorganization)}
-        />
-        <Field
-          label="Nombre o razón social"
-          required
-          autoComplete="off"
-          maxLength={100}
-          data-autofocus
-          error={errors.companyname?.message}
-          {...register("companyname", RULES.companyname)}
-        />
-      </div>
+    <WizardForm
+      ref={wizard}
+      isEdit={isEdit}
+      busy={busy}
+      error={serverError}
+      validateStep={(index) => trigger(SUPPLIER_STEPS[index])}
+      onSubmit={submit}
+      onCancel={onCancel}
+      submitLabel={isEdit ? "Guardar cambios" : "Crear proveedor"}
+      steps={[
+        {
+          key: "identificacion",
+          label: "Identificación",
+          description: "Persona o empresa y su documento",
+          fields: ["typeorganization", "companyname", "typeidentification", "nitcc"],
+          content: (
+            <FormSection icon="shield" title="Identificación" description="Quién es el proveedor (persona natural o empresa).">
+              <div className="supplier-form__row">
+                <Select
+                  label="Tipo de organización"
+                  required
+                  placeholder="Selecciona"
+                  options={ORGANIZATION_TYPES}
+                  error={errors.typeorganization?.message}
+                  {...register("typeorganization", RULES.typeorganization)}
+                />
+                <Field
+                  label="Nombre o razón social"
+                  required
+                  autoComplete="off"
+                  maxLength={100}
+                  data-autofocus
+                  error={errors.companyname?.message}
+                  {...register("companyname", RULES.companyname)}
+                />
+              </div>
 
-      <div className="supplier-form__row supplier-form__row--identification">
-        <Select
-          label="Tipo de identificación"
-          required
-          placeholder="Selecciona"
-          options={IDENTIFICATION_TYPES}
-          error={errors.typeidentification?.message}
-          {...register("typeidentification", RULES.typeidentification)}
-        />
-        <Field
-          label={isNit ? "NIT (sin dígito de verificación)" : "Número de identificación"}
-          required
-          inputMode="numeric"
-          autoComplete="off"
-          maxLength={MAX_ID_DIGITS}
-          onInput={stripNonDigits}
-          error={errors.nitcc?.message}
-          {...register("nitcc", RULES.nitcc)}
-        />
-        {isNit && (
-          <Field
-            label="DV"
-            readOnly
-            tabIndex={-1}
-            value={dv ?? ""}
-            placeholder="—"
-            hint="Se calcula solo"
-          />
-        )}
-      </div>
+              <div className="supplier-form__row supplier-form__row--identification">
+                <Select
+                  label="Tipo de identificación"
+                  required
+                  placeholder="Selecciona"
+                  options={IDENTIFICATION_TYPES}
+                  error={errors.typeidentification?.message}
+                  {...register("typeidentification", RULES.typeidentification)}
+                />
+                <Field
+                  label={isNit ? "NIT (sin dígito de verificación)" : "Número de identificación"}
+                  required
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={MAX_ID_DIGITS}
+                  onInput={stripNonDigits}
+                  error={errors.nitcc?.message}
+                  {...register("nitcc", RULES.nitcc)}
+                />
+                {isNit && (
+                  <Field
+                    label="DV"
+                    readOnly
+                    tabIndex={-1}
+                    value={dv ?? ""}
+                    placeholder="—"
+                    hint="Se calcula solo"
+                  />
+                )}
+              </div>
+            </FormSection>
+          ),
+        },
+        {
+          key: "contacto",
+          label: "Contacto",
+          description: "Teléfono, correo y contacto",
+          fields: ["phone", "email", "contact"],
+          content: (
+            <FormSection icon="phone" title="Contacto" description="Por dónde se le pide la mercancía.">
+              <div className="supplier-form__row">
+                <Field
+                  label="Teléfono"
+                  required
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="off"
+                  maxLength={20}
+                  error={errors.phone?.message}
+                  {...register("phone", RULES.phone)}
+                />
+                <Field
+                  label="Correo"
+                  required
+                  type="email"
+                  autoComplete="off"
+                  maxLength={100}
+                  placeholder="proveedor@empresa.com"
+                  error={errors.email?.message}
+                  {...register("email", RULES.email)}
+                />
+              </div>
 
-      <div className="supplier-form__row">
-        <Field
-          label="Teléfono"
-          required
-          type="tel"
-          inputMode="tel"
-          autoComplete="off"
-          maxLength={20}
-          error={errors.phone?.message}
-          {...register("phone", RULES.phone)}
-        />
-        <Field
-          label="Correo"
-          required
-          type="email"
-          autoComplete="off"
-          maxLength={100}
-          placeholder="proveedor@empresa.com"
-          error={errors.email?.message}
-          {...register("email", RULES.email)}
-        />
-      </div>
+              <Field
+                label="Contacto"
+                autoComplete="off"
+                maxLength={20}
+                hint="Opcional. Persona o teléfono de contacto."
+                error={errors.contact?.message}
+                {...register("contact")}
+              />
+            </FormSection>
+          ),
+        },
+        {
+          key: "ubicacion",
+          label: "Ubicación",
+          description: "Dirección, departamento y ciudad",
+          fields: ["address", "department", "city"],
+          content: (
+            <FormSection icon="pin" title="Ubicación" description="Dónde queda el proveedor.">
+              <Field
+                label="Dirección"
+                required
+                autoComplete="off"
+                maxLength={100}
+                error={errors.address?.message}
+                {...register("address", RULES.address)}
+              />
 
-      <Field
-        label="Dirección"
-        required
-        autoComplete="off"
-        maxLength={100}
-        error={errors.address?.message}
-        {...register("address", RULES.address)}
-      />
-
-      <div className="supplier-form__row">
-        <Field
-          label="Departamento"
-          required
-          autoComplete="off"
-          maxLength={100}
-          error={errors.department?.message}
-          {...register("department", RULES.department)}
-        />
-        <Field
-          label="Ciudad"
-          required
-          autoComplete="off"
-          maxLength={100}
-          error={errors.city?.message}
-          {...register("city", RULES.city)}
-        />
-      </div>
-
-      <Field
-        label="Contacto"
-        autoComplete="off"
-        maxLength={20}
-        hint="Opcional. Persona o teléfono de contacto."
-        error={errors.contact?.message}
-        {...register("contact")}
-      />
-
-      <FormActions>
-        <Button variant="outline" onClick={onCancel} disabled={busy}>
-          Cancelar
-        </Button>
-        <Button type="submit" icon={isEdit ? "check" : "plus"} disabled={busy}>
-          {busy ? "Guardando…" : isEdit ? "Guardar cambios" : "Crear proveedor"}
-        </Button>
-      </FormActions>
-    </FormLayout>
+              <div className="supplier-form__row">
+                <Field
+                  label="Departamento"
+                  required
+                  autoComplete="off"
+                  maxLength={100}
+                  error={errors.department?.message}
+                  {...register("department", RULES.department)}
+                />
+                <Field
+                  label="Ciudad"
+                  required
+                  autoComplete="off"
+                  maxLength={100}
+                  error={errors.city?.message}
+                  {...register("city", RULES.city)}
+                />
+              </div>
+            </FormSection>
+          ),
+        },
+      ]}
+    />
   );
 };
 
@@ -262,7 +297,14 @@ const SupplierFormModal = ({ open, supplier = null, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={open} title={supplier ? "Editar proveedor" : "Nuevo proveedor"} onClose={onClose} busy={busy}>
+    <Modal
+      open={open}
+      icon="users"
+      title={supplier ? "Editar proveedor" : "Nuevo proveedor"}
+      subtitle={supplier ? supplier.companyname : "Los campos con * son obligatorios."}
+      onClose={onClose}
+      busy={busy}
+    >
       <SupplierForm supplier={supplier} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />
     </Modal>
   );

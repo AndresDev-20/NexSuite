@@ -1,0 +1,261 @@
+/* Formulario del producto (2026-11-13): la tarjeta de ganancia en vivo de la sección Precios */
+.product-form__margin {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+  margin: 0;
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  background: var(--gray-50);
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+}
+
+.product-form__margin--good,
+.product-form__margin--bad {
+  border-style: solid;
+}
+
+.product-form__margin--good {
+  color: #13693a;
+  background: color-mix(in srgb, #1f9d55 10%, var(--white));
+  border-color: color-mix(in srgb, #1f9d55 35%, var(--color-border));
+}
+
+.product-form__margin--bad {
+  color: var(--danger);
+  background: var(--red-50);
+  border-color: color-mix(in srgb, var(--danger) 40%, var(--color-border));
+}
+
+:root[data-theme="dark"] .product-form__margin--good {
+  color: #6fdc9b;
+}
+
+.product-form__margin-label {
+  flex: 1 1 auto;
+  font-weight: 600;
+}
+
+.product-form__margin-value {
+  font-size: 1.15rem;
+}
+
+.product-form__margin-chip {
+  padding: 2px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  border-radius: 999px;
+}
+
+/* Botones de los pasos: «‹ Atrás» y «Siguiente ›» (el ícono chevron apunta hacia abajo) */
+.product-form__back .btn__icon {
+  transform: rotate(90deg);
+}
+
+.product-form__next .btn__icon {
+  order: 2;
+  transform: rotate(-90deg);
+}
+
+/* ==========================================================================
+   «Nuevo producto» por pasos (2026-11-13): en pantallas anchas, columna con los pasos y una tarjeta que
+   muestra el producto mientras se escribe; a la derecha, el paso actual. En celular, los pasos arriba.
+   ========================================================================== */
+.product-wizard {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.product-wizard__rail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.product-wizard__main {
+  min-width: 0;
+}
+
+.product-wizard__main .step-panel:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.product-wizard__preview {
+  display: none;
+}
+
+.product-wizard__note {
+  margin: 0;
+  padding: 14px 16px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+  background: var(--gray-50);
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+}
+
+/* El paso entra desde la derecha al avanzar y desde la izquierda al volver */
+.product-wizard[data-direction="back"] .step-panel {
+  animation-name: step-in-back;
+}
+
+@keyframes step-in-back {
+  from { opacity: 0; transform: translateX(-14px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Las secciones del paso aparecen una tras otra */
+.product-wizard .step-panel:not([hidden]) .form-section {
+  animation: wizard-section-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.product-wizard .step-panel:not([hidden]) .form-section:nth-child(2) {
+  animation-delay: 80ms;
+}
+
+@keyframes wizard-section-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (min-width: 900px) {
+  .product-wizard {
+    display: grid;
+    grid-template-columns: 264px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  .product-wizard__rail {
+    position: sticky;
+    top: 0;
+    gap: 22px;
+    padding: 22px 20px;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 60% at 0% 0%, color-mix(in srgb, var(--red-600) 12%, transparent), transparent 70%),
+      var(--gray-50);
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+  }
+
+  /* Tarjeta del producto que se va armando */
+  .product-wizard__preview {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px;
+    overflow: hidden;
+    background: var(--white);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    box-shadow: 0 14px 30px -22px rgba(15, 23, 42, 0.55);
+    animation: wizard-section-in 520ms 200ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  /* Brillo que cruza la tarjeta cada tanto */
+  .product-wizard__preview::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.35) 50%, transparent 60%);
+    transform: translateX(-120%);
+    animation: wizard-shine 6s ease-in-out 1.2s infinite;
+    pointer-events: none;
+  }
+
+  .product-wizard__preview-icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 4px;
+    color: var(--on-accent);
+    background: linear-gradient(135deg, var(--red-500), var(--red-700));
+    border-radius: 12px;
+  }
+
+  .product-wizard__preview-icon .icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .product-wizard__preview-name {
+    overflow-wrap: anywhere;
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+
+  .product-wizard__preview-name--empty {
+    color: var(--color-text-muted);
+    font-weight: 600;
+  }
+
+  .product-wizard__preview-meta {
+    min-height: 1.1em;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+  }
+
+  .product-wizard__preview-price {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--red-600);
+  }
+
+  .product-wizard__preview-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .product-wizard__tag {
+    padding: 3px 9px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--gray-700);
+    background: var(--gray-100);
+    border-radius: 999px;
+    animation: stepper-pop 320ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  }
+
+  .product-wizard__tag--serial {
+    color: #1d3f9a;
+    background: color-mix(in srgb, #2f6fd6 14%, var(--white));
+  }
+
+  .product-wizard__tag--shop {
+    color: #13693a;
+    background: color-mix(in srgb, #1f9d55 14%, var(--white));
+  }
+
+  :root[data-theme="dark"] .product-wizard__tag--serial { color: #9cc0ff; }
+  :root[data-theme="dark"] .product-wizard__tag--shop { color: #6fdc9b; }
+}
+
+@keyframes wizard-shine {
+  0%, 70% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+:root[data-motion="reduced"] .product-wizard *,
+:root[data-motion="reduced"] .product-wizard *::after {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-wizard *,
+  .product-wizard *::after {
+    animation: none !important;
+  }
+}

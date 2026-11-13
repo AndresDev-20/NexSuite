@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import Button from "../../../components/ui/Button/Button";
 import Field from "../../../components/forms/Field/Field";
 import Select from "../../../components/forms/Select/Select";
-import { FormActions, FormLayout } from "../../../components/forms/FormLayout/FormLayout";
+import { FormActions, FormLayout, FormSection } from "../../../components/forms/FormLayout/FormLayout";
 import Modal from "../../../components/feadback/Modal/Modal";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { formatCurrency } from "../../../utils/money";
@@ -123,105 +123,111 @@ const CustomerForm = ({ customer, canCredit, busy, onCancel, onSubmit }) => {
 
   return (
     <FormLayout onSubmit={submit} error={serverError}>
-      <div className="customer-form__row">
-        <Field
-          label="Nombre o razón social"
-          required
-          autoComplete="off"
-          maxLength={100}
-          data-autofocus
-          error={errors.name?.message}
-          {...register("name", rules.name)}
-        />
-        <Field
-          label="Teléfono"
-          required={hasCredit}
-          type="tel"
-          inputMode="tel"
-          autoComplete="off"
-          maxLength={20}
-          error={errors.phone?.message}
-          {...register("phone", rules.phone)}
-        />
-      </div>
-
-      <div className="customer-form__row customer-form__row--identification">
-        <Select
-          label="Tipo de documento"
-          required={hasCredit}
-          placeholder="Sin documento"
-          options={IDENTIFICATION_TYPES}
-          hint={hasCredit ? undefined : "Opcional: para atender rápido basta el nombre."}
-          error={errors.typeidentification?.message}
-          {...register("typeidentification", rules.typeidentification)}
-        />
-        <Field
-          label={isNit ? "NIT (sin dígito de verificación)" : "Número de documento"}
-          required={Boolean(rule)}
-          disabled={!rule}
-          inputMode={rule?.numeric ? "numeric" : "text"}
-          autoComplete="off"
-          maxLength={20}
-          onInput={rule?.numeric ? stripNonDigits : undefined}
-          hint={rule?.hint}
-          error={errors.document?.message}
-          {...register("document", rules.document)}
-        />
-        {isNit && <Field label="DV" readOnly tabIndex={-1} value={dv ?? ""} placeholder="—" hint="Se calcula solo" />}
-      </div>
-
-      <div className="customer-form__row">
-        <Field
-          label="Correo"
-          type="email"
-          autoComplete="off"
-          maxLength={100}
-          placeholder="Opcional"
-          error={errors.email?.message}
-          {...register("email", rules.email)}
-        />
-        <Field label="Ciudad" autoComplete="off" maxLength={100} placeholder="Opcional" {...register("city")} />
-      </div>
-
-      <Field label="Dirección" autoComplete="off" maxLength={150} placeholder="Opcional" {...register("address")} />
-
-      {canCredit ? (
+      <FormSection icon="users" title="Datos del cliente" description="Para atender rápido basta el nombre.">
         <div className="customer-form__row">
           <Field
-            label="Cupo de crédito"
-            inputMode="decimal"
+            label="Nombre o razón social"
+            required
             autoComplete="off"
-            maxLength={15}
-            placeholder="0 = solo contado"
-            onInput={sanitizeDecimal}
-            hint="Lo máximo que puede deber. Para fiarle necesita documento y teléfono."
-            error={errors.creditlimit?.message}
-            {...register("creditlimit", rules.creditlimit)}
+            maxLength={100}
+            data-autofocus
+            error={errors.name?.message}
+            {...register("name", rules.name)}
           />
           <Field
-            label="Plazo (días)"
+            label="Teléfono"
             required={hasCredit}
-            inputMode="numeric"
+            type="tel"
+            inputMode="tel"
             autoComplete="off"
-            maxLength={3}
-            placeholder="Ej: 30"
-            onInput={stripNonDigits}
-            error={errors.creditdays?.message}
-            {...register("creditdays", rules.creditdays)}
+            maxLength={20}
+            error={errors.phone?.message}
+            {...register("phone", rules.phone)}
           />
         </div>
-      ) : (
-        isEdit && (
-          <p className="customer-form__note">
-            {customer.creditLimit > 0
-              ? `Cupo de crédito: ${formatCurrency(customer.creditLimit)} a ${customer.creditDays} días.`
-              : "Solo de contado."}{" "}
-            El cupo lo asigna quien tiene el permiso "Asignar cupo de crédito".
-          </p>
-        )
-      )}
 
-      <Field label="Notas" multiline maxLength={255} placeholder="Opcional" {...register("notes")} />
+        <div className="customer-form__row customer-form__row--identification">
+          <Select
+            label="Tipo de documento"
+            required={hasCredit}
+            placeholder="Sin documento"
+            options={IDENTIFICATION_TYPES}
+            hint={hasCredit ? undefined : "Opcional: para atender rápido basta el nombre."}
+            error={errors.typeidentification?.message}
+            {...register("typeidentification", rules.typeidentification)}
+          />
+          <Field
+            label={isNit ? "NIT (sin dígito de verificación)" : "Número de documento"}
+            required={Boolean(rule)}
+            disabled={!rule}
+            inputMode={rule?.numeric ? "numeric" : "text"}
+            autoComplete="off"
+            maxLength={20}
+            onInput={rule?.numeric ? stripNonDigits : undefined}
+            hint={rule?.hint}
+            error={errors.document?.message}
+            {...register("document", rules.document)}
+          />
+          {isNit && <Field label="DV" readOnly tabIndex={-1} value={dv ?? ""} placeholder="—" hint="Se calcula solo" />}
+        </div>
+      </FormSection>
+
+      <FormSection icon="mail" title="Contacto y ubicación" description="Opcional: para enviarle comprobantes y ubicarlo.">
+        <div className="customer-form__row">
+          <Field
+            label="Correo"
+            type="email"
+            autoComplete="off"
+            maxLength={100}
+            placeholder="Opcional"
+            error={errors.email?.message}
+            {...register("email", rules.email)}
+          />
+          <Field label="Ciudad" autoComplete="off" maxLength={100} placeholder="Opcional" {...register("city")} />
+        </div>
+
+        <Field label="Dirección" autoComplete="off" maxLength={150} placeholder="Opcional" {...register("address")} />
+      </FormSection>
+
+      <FormSection icon="wallet" title="Crédito y notas" description="Cuánto se le puede fiar y lo que conviene recordar.">
+        {canCredit ? (
+          <div className="customer-form__row">
+            <Field
+              label="Cupo de crédito"
+              inputMode="decimal"
+              autoComplete="off"
+              maxLength={15}
+              placeholder="0 = solo contado"
+              onInput={sanitizeDecimal}
+              hint="Lo máximo que puede deber. Para fiarle necesita documento y teléfono."
+              error={errors.creditlimit?.message}
+              {...register("creditlimit", rules.creditlimit)}
+            />
+            <Field
+              label="Plazo (días)"
+              required={hasCredit}
+              inputMode="numeric"
+              autoComplete="off"
+              maxLength={3}
+              placeholder="Ej: 30"
+              onInput={stripNonDigits}
+              error={errors.creditdays?.message}
+              {...register("creditdays", rules.creditdays)}
+            />
+          </div>
+        ) : (
+          isEdit && (
+            <p className="customer-form__note">
+              {customer.creditLimit > 0
+                ? `Cupo de crédito: ${formatCurrency(customer.creditLimit)} a ${customer.creditDays} días.`
+                : "Solo de contado."}{" "}
+              El cupo lo asigna quien tiene el permiso "Asignar cupo de crédito".
+            </p>
+          )
+        )}
+
+        <Field label="Notas" multiline maxLength={255} placeholder="Opcional" {...register("notes")} />
+      </FormSection>
 
       <FormActions>
         <Button variant="outline" onClick={onCancel} disabled={busy}>
@@ -253,7 +259,14 @@ const CustomerFormModal = ({ open, customer = null, canCredit, onClose, onSubmit
   };
 
   return (
-    <Modal open={open} title={customer ? "Editar cliente" : "Nuevo cliente"} onClose={onClose} busy={busy}>
+    <Modal
+      open={open}
+      icon="users"
+      title={customer ? "Editar cliente" : "Nuevo cliente"}
+      subtitle={customer ? customer.name : "Los campos con * son obligatorios."}
+      onClose={onClose}
+      busy={busy}
+    >
       <CustomerForm customer={customer} canCredit={canCredit} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />
     </Modal>
   );

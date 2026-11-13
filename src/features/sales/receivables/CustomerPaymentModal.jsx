@@ -190,7 +190,7 @@ const CustomerPaymentModal = ({ target, registers, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={Boolean(target)} title="Registrar abono" onClose={onClose} busy={busy}>
+    <Modal icon="wallet" open={Boolean(target)} title="Registrar abono" onClose={onClose} busy={busy}>
       {target && <PaymentForm key={target.id} target={target} registers={registers} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

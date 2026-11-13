@@ -132,7 +132,7 @@ const PaymentFormModal = ({ order, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={Boolean(order)} title="Registrar abono" onClose={onClose} busy={busy}>
+    <Modal icon="wallet" open={Boolean(order)} title="Registrar abono" onClose={onClose} busy={busy}>
       {order && <PaymentForm order={order} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

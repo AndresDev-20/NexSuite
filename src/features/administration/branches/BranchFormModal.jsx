@@ -2,9 +2,59 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Button from "../../../components/ui/Button/Button";
 import Field from "../../../components/forms/Field/Field";
+import { FormActions, FormLayout, FormSection } from "../../../components/forms/FormLayout/FormLayout";
 import Modal from "../../../components/feadback/Modal/Modal";
 import getErrorMessage from "../../../utils/getErrorMessage";
+import Icon from "../../../components/ui/Icon/Icon";
 import "./branchFormModal.css";
+
+/*
+ * Prefijo que el servidor propone si se deja vacío (mismo criterio de BackEnd/src/utils/invoicePrefix.js):
+ * sin tildes, la última palabra del nombre o las 3 primeras letras (Rovira Centro → CEN). Si ya existe,
+ * el servidor le suma un número (CEN2): por eso la vista previa dice «aprox.».
+ */
+const suggestedPrefix = (name) => {
+  const words = String(name ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .split(/[^A-Z]+/)
+    .filter(Boolean);
+  const source = words.length > 1 ? words[words.length - 1] : words.join("");
+  return (source || "SUC").slice(0, 3).padEnd(3, "X");
+};
+
+/** Vista previa del encabezado del comprobante (la tirilla): se llena mientras se escribe. */
+const ReceiptPreview = ({ name, address, email, phone, web, prefix, guessed }) => (
+  <aside className="branch-receipt" aria-hidden="true">
+    <span className="branch-receipt__label">Así sale en el comprobante</span>
+    <div className="branch-receipt__paper">
+      <span className="branch-receipt__logo">
+        <img src="/nexsuite-logo-icono.png" alt="" />
+      </span>
+      <strong className={`branch-receipt__name ${name ? "" : "branch-receipt__name--empty"}`.trim()}>{name || "Nombre de la sucursal"}</strong>
+      {address && <span className="branch-receipt__line">{address}</span>}
+      {(phone || email) && <span className="branch-receipt__line">{[phone, email].filter(Boolean).join(" · ")}</span>}
+      {web && <span className="branch-receipt__line">{web}</span>}
+      <span className="branch-receipt__cut" />
+      <span className="branch-receipt__row">
+        <span>Venta</span>
+        <strong className="branch-receipt__number" key={prefix}>
+          {prefix}-000001
+        </strong>
+      </span>
+      <span className="branch-receipt__row branch-receipt__row--muted">
+        <span>Producto de ejemplo</span>
+        <span>$ 0</span>
+      </span>
+      <span className="branch-receipt__barcode" />
+    </div>
+    <span className="branch-receipt__hint">
+      <Icon name="printer" />
+      {guessed ? "El prefijo se genera del nombre (aprox.)." : "Prefijo elegido por ti."}
+    </span>
+  </aside>
+);
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^\+?[\d\s()-]{7,20}$/;
@@ -72,8 +122,11 @@ const BranchForm = ({ branch, busy, onCancel, onSubmit }) => {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({ defaultValues: toFormValues(branch) });
+  const [name, address, email, phone, web, prefix] = watch(["nameBranch", "address", "email", "number", "web", "invoiceprefix"]);
+  const typedPrefix = String(prefix ?? "").replace(/\s+/g, "").toUpperCase();
 
   const submit = handleSubmit(async (values) => {
     setServerError("");
@@ -92,81 +145,95 @@ const BranchForm = ({ branch, busy, onCancel, onSubmit }) => {
   });
 
   return (
-    <form className="branch-form" onSubmit={submit} noValidate>
-      {serverError && (
-        <p className="branch-form__error" role="alert">
-          {serverError}
-        </p>
-      )}
+    <FormLayout onSubmit={submit} error={serverError}>
+      <div className="branch-form-grid">
+        <div className="branch-form-grid__main">
+          <FormSection icon="home" title="La sucursal" description="Cómo se llama y dónde queda.">
+            <Field
+              label="Nombre de la sucursal"
+              required
+              placeholder="Ej: Sucursal Centro"
+              autoComplete="off"
+              data-autofocus
+              error={errors.nameBranch?.message}
+              {...register("nameBranch", RULES.nameBranch)}
+            />
 
-      <Field
-        label="Nombre de la sucursal"
-        required
-        placeholder="Ej: Sucursal Centro"
-        autoComplete="off"
-        data-autofocus
-        error={errors.nameBranch?.message}
-        {...register("nameBranch", RULES.nameBranch)}
-      />
+            <Field
+              label="Dirección"
+              placeholder="Ej: Calle 10 # 20-30"
+              autoComplete="off"
+              error={errors.address?.message}
+              {...register("address")}
+            />
+          </FormSection>
 
-      <Field
-        label="Dirección"
-        placeholder="Ej: Calle 10 # 20-30"
-        autoComplete="off"
-        error={errors.address?.message}
-        {...register("address")}
-      />
+          <FormSection icon="phone" title="Contacto" description="Salen en los comprobantes de esta sucursal.">
+            <div className="branch-form__row">
+              <Field
+                label="Correo"
+                type="email"
+                placeholder="sucursal@empresa.com"
+                autoComplete="off"
+                error={errors.email?.message}
+                {...register("email", RULES.email)}
+              />
+              <Field
+                label="Teléfono"
+                type="tel"
+                inputMode="tel"
+                placeholder="3001234567"
+                autoComplete="off"
+                error={errors.number?.message}
+                {...register("number", RULES.number)}
+              />
+            </div>
 
-      <div className="branch-form__row">
-        <Field
-          label="Correo"
-          type="email"
-          placeholder="sucursal@empresa.com"
-          autoComplete="off"
-          error={errors.email?.message}
-          {...register("email", RULES.email)}
-        />
-        <Field
-          label="Teléfono"
-          type="tel"
-          inputMode="tel"
-          placeholder="3001234567"
-          autoComplete="off"
-          error={errors.number?.message}
-          {...register("number", RULES.number)}
+            <Field
+              label="Sitio web"
+              type="url"
+              inputMode="url"
+              placeholder="https://empresa.com"
+              autoComplete="off"
+              hint="Opcional. Incluye https://"
+              error={errors.web?.message}
+              {...register("web", RULES.web)}
+            />
+          </FormSection>
+
+          <FormSection icon="printer" title="Comprobantes" description="Cómo empiezan los números de sus ventas.">
+            <Field
+              label="Prefijo de los comprobantes de venta"
+              autoComplete="off"
+              maxLength={6}
+              placeholder={isEdit ? "" : "Se genera del nombre (ej. CEN)"}
+              hint={`Así empiezan los números de sus ventas: ${(branch?.invoicePrefix || "CEN")}-000001. Opcional al crear.`}
+              error={errors.invoiceprefix?.message}
+              {...register("invoiceprefix", RULES.invoiceprefix)}
+            />
+          </FormSection>
+        </div>
+
+        <ReceiptPreview
+          name={name.trim()}
+          address={address.trim()}
+          email={email.trim()}
+          phone={phone.trim()}
+          web={web.trim()}
+          prefix={typedPrefix || (isEdit && branch?.invoicePrefix) || suggestedPrefix(name)}
+          guessed={!typedPrefix && !(isEdit && branch?.invoicePrefix)}
         />
       </div>
 
-      <Field
-        label="Sitio web"
-        type="url"
-        inputMode="url"
-        placeholder="https://empresa.com"
-        autoComplete="off"
-        hint="Opcional. Incluye https://"
-        error={errors.web?.message}
-        {...register("web", RULES.web)}
-      />
-
-      <Field
-        label="Prefijo de los comprobantes de venta"
-        autoComplete="off"
-        maxLength={6}
-        placeholder={isEdit ? "" : "Se genera del nombre (ej. CEN)"}
-        hint={`Así empiezan los números de sus ventas: ${(branch?.invoicePrefix || "CEN")}-000001. Opcional al crear.`}
-        error={errors.invoiceprefix?.message}
-        {...register("invoiceprefix", RULES.invoiceprefix)}
-      />
-
-      <div className="branch-form__actions">
+      <FormActions>
         <Button variant="outline" onClick={onCancel} disabled={busy}>
           Cancelar
         </Button>
         <Button type="submit" icon={isEdit ? "check" : "plus"} disabled={busy}>
           {busy ? "Guardando…" : isEdit ? "Guardar cambios" : "Crear sucursal"}
         </Button>
-      </div>
-    </form>
+      </FormActions>
+    </FormLayout>
   );
 };
 
@@ -187,7 +254,15 @@ const BranchFormModal = ({ open, branch = null, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={open} title={branch ? "Editar sucursal" : "Nueva sucursal"} onClose={onClose} busy={busy}>
+    <Modal
+      open={open}
+      size="wide"
+      icon="home"
+      title={branch ? "Editar sucursal" : "Nueva sucursal"}
+      subtitle={branch ? branch.name : "Los campos con * son obligatorios."}
+      onClose={onClose}
+      busy={busy}
+    >
       <BranchForm branch={branch} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />
     </Modal>
   );

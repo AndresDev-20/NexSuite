@@ -80,7 +80,7 @@ const TransferDetailModal = ({ open, state, onClose, onRetry, onViewChanges }) =
   };
 
   return (
-    <Modal open={open} title="Traslado" onClose={onClose}>
+    <Modal icon="refresh" open={open} title="Traslado" onClose={onClose}>
       {renderBody()}
     </Modal>
   );

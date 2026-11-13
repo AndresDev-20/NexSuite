@@ -60,7 +60,7 @@ const MyOrder = ({ order, onCancel }) => {
 const SentModal = ({ order, onClose }) => {
   const left = useSecondsLeft(order?.expiresAt ?? 0);
   return (
-    <Modal open={Boolean(order)} title="Pedido enviado a caja" onClose={onClose}>
+    <Modal icon="check" open={Boolean(order)} title="Pedido enviado a caja" onClose={onClose}>
       {order && (
         <div className="orders-sent">
           <p className="orders-sent__label">Dile al cliente que pase a caja con el</p>

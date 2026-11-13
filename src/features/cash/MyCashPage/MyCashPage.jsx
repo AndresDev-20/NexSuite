@@ -18,6 +18,7 @@ import { formatCurrency } from "../../../utils/money";
 import { sanitizeDecimal } from "../../../utils/validators";
 import "../../../styles/listPage.css";
 import "../cash.css";
+import CashRegisterArt from "../CashRegisterArt";
 
 const timeOf = (iso) => new Intl.DateTimeFormat("es-CO", { timeZone: "America/Bogota", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
 
@@ -95,10 +96,14 @@ const OpenSessionForm = ({ registers, onOpen }) => {
 };
 
 /** Una caja de hoy: si está vendiendo o por contar, desde cuándo y (con permiso) cuánto debería haber. */
-const TodayCard = ({ session, canCount, canMove, onCount, onMovement }) => {
+const TodayCard = ({ session, index = 0, canCount, canMove, onCount, onMovement }) => {
   const selling = session.status === "abierta";
   return (
-    <article className={`today-cash ${selling ? "" : "today-cash--pending"}`.trim()}>
+    <article className={`today-cash ${selling ? "today-cash--open" : "today-cash--pending"}`} style={{ "--i": Math.min(index, 8) }}>
+      <div className="today-cash__art">
+        <CashRegisterArt state={selling ? "open" : "pending"} />
+      </div>
+      <div className="today-cash__body">
       <header className="today-cash__head">
         <div>
           <p className="my-cash__register">
@@ -158,6 +163,7 @@ const TodayCard = ({ session, canCount, canMove, onCount, onMovement }) => {
           )}
         </div>
       )}
+      </div>
     </article>
   );
 };
@@ -251,8 +257,9 @@ const MyCashPage = () => {
     }
     return (
       <div className="today-cash__grid">
-        {visible.map((session) => (
+        {visible.map((session, index) => (
           <TodayCard
+            index={index}
             key={session.id}
             session={session}
             canCount={canCountNow(session)}

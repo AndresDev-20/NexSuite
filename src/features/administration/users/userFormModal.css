@@ -9,3 +9,210 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+/* ==========================================================================
+   Carné del usuario (2026-11-13): vista previa que se arma mientras se escribe, al lado de los pasos.
+   ========================================================================== */
+.user-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: user-badge-in 520ms 120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.user-badge__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.user-badge__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  padding: 26px 18px 18px;
+  overflow: hidden;
+  color: #fff;
+  text-align: center;
+  background:
+    radial-gradient(110% 60% at 50% 0%, color-mix(in srgb, var(--red-500) 55%, transparent), transparent 70%),
+    linear-gradient(170deg, #1f1f24, #2b1a1e 60%, #3a1218);
+  border-radius: 20px;
+  box-shadow: 0 22px 44px -26px rgba(15, 23, 42, 0.95);
+  transform-origin: 50% 0;
+  animation: user-badge-swing 4s ease-in-out 600ms infinite;
+}
+
+/* Brillo que cruza el carné */
+.user-badge__card::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.14) 50%, transparent 60%);
+  transform: translateX(-120%);
+  animation: user-badge-shine 6s ease-in-out 1.5s infinite;
+  pointer-events: none;
+}
+
+/* Hueco del cordón */
+.user-badge__hole {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 42px;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 999px;
+  transform: translateX(-50%);
+}
+
+.user-badge__brand {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-family: var(--font-brand, inherit);
+  font-size: 0.85rem;
+  font-style: italic;
+  opacity: 0.9;
+}
+
+.user-badge__brand img {
+  width: 20px;
+  height: 20px;
+}
+
+.user-badge__brand strong {
+  color: #ff8a9a;
+}
+
+.user-badge__avatar {
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  margin: 6px 0 2px;
+  font-size: 1.6rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--red-500), var(--red-700));
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  box-shadow: 0 12px 24px -12px rgba(214, 24, 46, 0.9);
+  animation: user-badge-pop 380ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.user-badge__name {
+  overflow-wrap: anywhere;
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.user-badge__name--empty {
+  opacity: 0.55;
+  font-weight: 600;
+}
+
+.user-badge__role {
+  padding: 3px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffd1d8;
+  background: rgba(214, 24, 46, 0.35);
+  border-radius: 999px;
+  animation: user-badge-pop 320ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.user-badge__role--empty {
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.user-badge__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin: 6px 0 0;
+  padding-top: 10px;
+  text-align: left;
+  border-top: 1px dashed rgba(255, 255, 255, 0.25);
+}
+
+.user-badge__list > div {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+.user-badge__list dt {
+  flex-shrink: 0;
+  opacity: 0.65;
+}
+
+.user-badge__list dd {
+  margin: 0;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-badge__access {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 4px;
+  padding: 5px 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #ffe6a6;
+  background: rgba(245, 197, 66, 0.22);
+  border-radius: 999px;
+}
+
+.user-badge__access--ok {
+  color: #b9f5cf;
+  background: rgba(31, 157, 85, 0.25);
+}
+
+.user-badge__access .icon {
+  width: 14px;
+  height: 14px;
+}
+
+@keyframes user-badge-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* El carné se mece colgado de su cordón */
+@keyframes user-badge-swing {
+  0%, 100% { transform: rotate(-1.2deg); }
+  50% { transform: rotate(1.2deg); }
+}
+
+@keyframes user-badge-shine {
+  0%, 75% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+@keyframes user-badge-pop {
+  0% { transform: scale(0.8); }
+  60% { transform: scale(1.08); }
+  100% { transform: none; }
+}
+
+:root[data-motion="reduced"] .user-badge,
+:root[data-motion="reduced"] .user-badge * {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .user-badge,
+  .user-badge * {
+    animation: none !important;
+  }
+}

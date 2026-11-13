@@ -1,0 +1,336 @@
+/* ==========================================================================
+   Pasos de un formulario (Stepper.jsx): círculos unidos por una línea que se llena con el avance.
+   Celular: círculos pequeños sin nombres y «Paso 2 de 4 · Precios» debajo.
+   ========================================================================== */
+.stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stepper__list {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* La línea va del centro del primer círculo al centro del último */
+.stepper__list::before,
+.stepper__list::after {
+  position: absolute;
+  top: 17px;
+  left: calc(100% / var(--count) / 2);
+  height: 3px;
+  content: "";
+  border-radius: 999px;
+}
+
+.stepper__list::before {
+  right: calc(100% / var(--count) / 2);
+  background: var(--color-border);
+}
+
+.stepper__list::after {
+  width: calc((100% - 100% / var(--count)) * var(--progress));
+  background: linear-gradient(90deg, var(--red-600), var(--red-500));
+  transition: width 380ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.stepper__step {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.stepper__button {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+  padding: 0 4px;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.stepper__button:disabled {
+  cursor: default;
+}
+
+.stepper__dot {
+  display: grid;
+  place-items: center;
+  width: 37px;
+  height: 37px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--white);
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  transition: background 220ms ease, border-color 220ms ease, color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+}
+
+.stepper__dot .icon {
+  width: 17px;
+  height: 17px;
+}
+
+.stepper__label {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stepper__step--done .stepper__dot {
+  color: var(--on-accent);
+  background: var(--red-600);
+  border-color: var(--red-600);
+}
+
+.stepper__step--current .stepper__dot {
+  color: var(--on-accent);
+  background: linear-gradient(135deg, var(--red-500), var(--red-700));
+  border-color: var(--red-600);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--red-600) 22%, transparent);
+}
+
+.stepper__step--current .stepper__label {
+  color: var(--color-text);
+}
+
+.stepper__button:not(:disabled):hover .stepper__dot {
+  border-color: var(--red-600);
+}
+
+.stepper__button:focus-visible {
+  outline: none;
+}
+
+.stepper__button:focus-visible .stepper__dot {
+  box-shadow: 0 0 0 4px rgba(214, 24, 46, 0.35);
+}
+
+.stepper__now {
+  display: none;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.stepper__now strong {
+  color: var(--color-text);
+}
+
+/* El contenido de cada paso entra suave */
+.step-panel {
+  animation: step-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.step-panel[hidden] {
+  display: none;
+}
+
+@keyframes step-in {
+  from { opacity: 0; transform: translateX(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 559px) {
+  .stepper__list::before,
+  .stepper__list::after {
+    top: 14px;
+  }
+
+  .stepper__dot {
+    width: 31px;
+    height: 31px;
+    font-size: 0.82rem;
+  }
+
+  .stepper__label {
+    display: none;
+  }
+
+  .stepper__now {
+    display: block;
+  }
+}
+
+:root[data-motion="reduced"] .step-panel,
+:root[data-motion="reduced"] .stepper__list::after {
+  animation: none;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step-panel,
+  .stepper__list::after {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* ---------- Texto del paso y versión vertical (2026-11-13) ---------- */
+.stepper__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.stepper__description {
+  display: none;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: var(--color-text-muted);
+}
+
+/* El ✓ entra con un pequeño salto */
+.stepper__step--done .stepper__dot .icon {
+  animation: stepper-pop 360ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+@keyframes stepper-pop {
+  from { opacity: 0; transform: scale(0.3) rotate(-30deg); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (min-width: 900px) {
+  .stepper--vertical .stepper__list {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .stepper--vertical .stepper__list::before,
+  .stepper--vertical .stepper__list::after {
+    top: 18px;
+    left: 17px;
+    width: 3px;
+    height: auto;
+  }
+
+  .stepper--vertical .stepper__list::before {
+    right: auto;
+    bottom: 18px;
+  }
+
+  .stepper--vertical .stepper__list::after {
+    width: 3px;
+    height: calc((100% - 36px) * var(--progress));
+    background: linear-gradient(180deg, var(--red-600), var(--red-500));
+    transition: height 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .stepper--vertical .stepper__step {
+    justify-content: flex-start;
+    animation: stepper-rise 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: calc(var(--i) * 70ms);
+  }
+
+  .stepper--vertical .stepper__button {
+    flex-direction: row;
+    gap: 14px;
+    align-items: flex-start;
+    width: 100%;
+    padding: 0;
+    text-align: left;
+  }
+
+  .stepper--vertical .stepper__text {
+    align-items: flex-start;
+    padding-top: 2px;
+  }
+
+  .stepper--vertical .stepper__label {
+    font-size: 0.92rem;
+    white-space: normal;
+  }
+
+  .stepper--vertical .stepper__description {
+    display: block;
+  }
+
+  .stepper--vertical .stepper__step--current .stepper__description {
+    color: var(--color-text);
+    opacity: 0.8;
+  }
+
+  .stepper--vertical .stepper__now {
+    display: none;
+  }
+}
+
+@keyframes stepper-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+:root[data-motion="reduced"] .stepper__step,
+:root[data-motion="reduced"] .stepper__dot .icon {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stepper__step,
+  .stepper__dot .icon {
+    animation: none !important;
+  }
+}
+
+/* ---------- Ajuste 2026-11-13: todos los círculos iguales y los textos alineados ---------- */
+@media (min-width: 900px) {
+  /* Columna fija para el círculo: el texto de cada paso empieza en el mismo sitio */
+  .stepper--vertical .stepper__button {
+    display: grid;
+    grid-template-columns: 37px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    padding: 8px 10px;
+    margin: -8px -10px;
+    border-radius: 14px;
+    transition: background 220ms ease;
+  }
+
+  .stepper--vertical .stepper__list::before,
+  .stepper--vertical .stepper__list::after {
+    left: 16.5px; /* el centro del círculo (36 px) */
+  }
+
+  .stepper--vertical .stepper__text {
+    padding-top: 0;
+  }
+
+  /* El paso actual: una franja suave detrás, sin agrandar el círculo */
+  .stepper--vertical .stepper__step--current .stepper__button {
+    background: color-mix(in srgb, var(--red-600) 10%, transparent);
+  }
+
+  .stepper--vertical .stepper__button:not(:disabled):hover {
+    background: color-mix(in srgb, var(--red-600) 6%, transparent);
+  }
+
+  .stepper--vertical .stepper__step--current .stepper__label {
+    color: var(--red-600);
+  }
+
+  :root[data-theme="dark"] .stepper--vertical .stepper__step--current .stepper__label {
+    color: var(--color-text);
+  }
+}

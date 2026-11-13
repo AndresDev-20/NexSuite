@@ -11,7 +11,7 @@ import { getMethodLabel } from "../sales/useSales";
  * result: { sale, change } o null (cerrado). nextLabel: el botón para seguir ("Nueva venta").
  */
 const SaleDoneModal = ({ result, onClose, nextLabel = "Nueva venta" }) => (
-  <Modal open={Boolean(result)} title="Venta registrada" onClose={onClose}>
+  <Modal icon="check" open={Boolean(result)} title="Venta registrada" onClose={onClose}>
     {result && (
       <div className="pos-done">
         <p className="pos-done__number">{result.sale.number}</p>

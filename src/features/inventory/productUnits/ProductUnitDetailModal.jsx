@@ -16,7 +16,7 @@ const Item = ({ label, wide = false, children }) => (
 
 /** Ficha de una unidad: de dónde vino y a quién reclamarle la garantía. */
 const ProductUnitDetailModal = ({ unit, canEdit, onClose, onEdit }) => (
-  <Modal open={Boolean(unit)} title="Detalle de la unidad" onClose={onClose}>
+  <Modal icon="barcode" open={Boolean(unit)} title="Detalle de la unidad" onClose={onClose}>
     {unit && (
       <div className="unit-detail">
         <header className="unit-detail__head">

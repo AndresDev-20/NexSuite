@@ -1,0 +1,78 @@
+/* Formulario por pasos reutilizable (WizardForm.jsx) */
+.wizard-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.wizard-form__main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* Con columna al lado (vista previa): fija a la derecha en pantallas anchas */
+@media (min-width: 900px) {
+  .wizard-form--with-aside {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 22px;
+    align-items: start;
+  }
+
+  .wizard-form__aside {
+    position: sticky;
+    top: 0;
+  }
+}
+
+.wizard-form__panel:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* El paso entra desde la derecha al avanzar y desde la izquierda al volver */
+.wizard-form[data-direction="back"] .step-panel {
+  animation-name: wizard-step-back;
+}
+
+@keyframes wizard-step-back {
+  from { opacity: 0; transform: translateX(-14px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Las secciones del paso aparecen una tras otra */
+.wizard-form .step-panel:not([hidden]) > .form-section {
+  animation: wizard-form-section 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.wizard-form .step-panel:not([hidden]) > .form-section:nth-child(2) {
+  animation-delay: 80ms;
+}
+
+@keyframes wizard-form-section {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+
+/* «‹ Atrás» y «Siguiente ›» (el ícono chevron apunta hacia abajo) */
+.wizard-form__back .btn__icon {
+  transform: rotate(90deg);
+}
+
+.wizard-form__next .btn__icon {
+  order: 2;
+  transform: rotate(-90deg);
+}
+
+:root[data-motion="reduced"] .wizard-form * {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wizard-form * {
+    animation: none !important;
+  }
+}

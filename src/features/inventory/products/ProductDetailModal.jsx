@@ -269,6 +269,9 @@ const ProductSheet = ({ listed, onChanged, canEdit, canDelete, showCost, onClose
       <Section title="Datos del producto">
         <dl className="product-detail__list">
           <Item label="Categoría">{product.categoryName}</Item>
+          {product.supplierName && (
+            <Item label="Proveedor habitual">{product.supplierActive ? product.supplierName : `${product.supplierName} (inactivo)`}</Item>
+          )}
           <Item label="Unidad de medida">{getUnitLabel(product.unit)}</Item>
           <Item label="Código de barras">{product.barcode}</Item>
           <Item label="Maneja serial">{product.hasSerial ? "Sí (IMEI o serial por unidad)" : "No"}</Item>
@@ -402,7 +405,7 @@ const ProductSheet = ({ listed, onChanged, canEdit, canDelete, showCost, onClose
  * onChanged(): opcional; se llama después de ajustar existencias desde la ficha (refrescar la lista).
  */
 const ProductDetailModal = ({ product, onViewMovements, onViewUnits, ...props }) => (
-  <Modal open={Boolean(product)} title="Ficha del producto" size="wide" onClose={props.onClose}>
+  <Modal icon="box" open={Boolean(product)} title="Ficha del producto" size="wide" onClose={props.onClose}>
     {product && (
       <ProductSheet
         key={product.id}

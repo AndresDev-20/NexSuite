@@ -142,7 +142,7 @@ const FixedExpensesModal = ({ open, branches, canGeneral, categories, onClose, o
   };
 
   return (
-    <Modal open={open} size="wide" title="Gastos fijos" onClose={onClose}>
+    <Modal icon="wallet" open={open} size="wide" title="Gastos fijos" onClose={onClose}>
       <div className="fixed-expenses">
         <p className="expense-form__note">
           Lo que se paga cada mes. Aparecen en «Por pagar este mes» con su fecha y se registran con un clic; nunca se descuentan solos.

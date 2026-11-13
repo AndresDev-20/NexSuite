@@ -320,7 +320,7 @@ const BranchSheet = ({ listed, onClose, onEdit, onViewMovements }) => {
  * branch: el de la lista (se muestra mientras carga). onEdit y onViewMovements(branch) son opcionales.
  */
 const BranchDetailModal = ({ branch, onClose, onEdit, onViewMovements }) => (
-  <Modal open={Boolean(branch)} title="Ficha de la sucursal" size="wide" onClose={onClose}>
+  <Modal icon="home" open={Boolean(branch)} title="Ficha de la sucursal" size="wide" onClose={onClose}>
     {branch && (
       <BranchSheet
         key={branch.id}

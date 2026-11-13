@@ -25,7 +25,7 @@ const getDeleteBlock = (user, isSelf) => {
  * lo que este usuario hizo, o con los cambios que otros le hicieron a su cuenta.
  */
 const UserDetailModal = ({ user, isSelf, branches, onClose, onEdit, onBranches, onDelete, onViewActivity, onViewChanges }) => (
-  <Modal open={Boolean(user)} title="Detalle del usuario" onClose={onClose}>
+  <Modal icon="users" open={Boolean(user)} title="Detalle del usuario" onClose={onClose}>
     {user && (
       <div className="user-detail">
         <header className="user-detail__head">

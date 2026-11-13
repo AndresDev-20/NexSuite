@@ -107,7 +107,7 @@ const StepForm = ({ request, onClose }) => {
 };
 
 const WarrantyStepModal = ({ request, onClose }) => (
-  <Modal open={Boolean(request)} title={request?.title ?? ""} onClose={onClose}>
+  <Modal icon="shield" open={Boolean(request)} title={request?.title ?? ""} onClose={onClose}>
     {request && <StepForm key={request.key} request={request} onClose={onClose} />}
   </Modal>
 );

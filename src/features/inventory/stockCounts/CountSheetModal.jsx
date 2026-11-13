@@ -398,7 +398,7 @@ const CountSheetModal = ({ open, state, canCount, canApprove, busy, onClose, onR
   };
 
   return (
-    <Modal open={open} size="wide" title="Toma física" onClose={onClose} busy={busy}>
+    <Modal icon="inbox" open={open} size="wide" title="Toma física" onClose={onClose} busy={busy}>
       {renderBody()}
     </Modal>
   );

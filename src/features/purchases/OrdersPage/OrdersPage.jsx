@@ -182,6 +182,8 @@ const OrdersPage = () => {
           costPrice: created.cost_price === undefined ? null : toNumber(created.cost_price),
           hasSerial: Boolean(created.hasserial),
           createdAt: created.createdat ?? new Date().toISOString(),
+          // Proveedor habitual (Fase 27): la compra lo toma si todavía no tiene proveedor
+          supplierId: created.idsupplier ?? null,
         };
       },
       createSupplier: async (payload) => {

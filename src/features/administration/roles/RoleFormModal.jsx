@@ -116,7 +116,7 @@ const RoleFormModal = ({ open, role = null, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={open} title={role ? "Editar rol" : "Nuevo rol"} onClose={onClose} busy={busy}>
+    <Modal icon="shield" open={open} title={role ? "Editar rol" : "Nuevo rol"} onClose={onClose} busy={busy}>
       <RoleForm role={role} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />
     </Modal>
   );

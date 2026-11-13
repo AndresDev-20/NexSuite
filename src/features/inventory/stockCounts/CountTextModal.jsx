@@ -68,7 +68,7 @@ const CountTextModal = ({ config, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={Boolean(config)} title={config?.title ?? ""} onClose={onClose} busy={busy}>
+    <Modal icon="inbox" open={Boolean(config)} title={config?.title ?? ""} onClose={onClose} busy={busy}>
       {config && <TextForm config={config} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

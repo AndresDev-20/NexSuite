@@ -80,3 +80,17 @@
     transition-duration: 1ms;
   }
 }
+
+/* Mejoras 2026-11-13: encendido se nota en toda la tarjeta */
+.switch:hover:not(.switch--disabled) {
+  border-color: var(--gray-300);
+}
+
+.switch:has(.switch__input:checked) {
+  background: color-mix(in srgb, var(--red-50) 70%, var(--white));
+  border-color: color-mix(in srgb, var(--red-600) 45%, var(--color-border));
+}
+
+.switch:has(.switch__input:focus-visible) {
+  box-shadow: 0 0 0 4px rgba(214, 24, 46, 0.12);
+}

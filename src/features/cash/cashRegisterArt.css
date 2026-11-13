@@ -1,0 +1,139 @@
+/* Caja registradora animada (CashRegisterArt.jsx) */
+.cash-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.cash-art * {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.cash-art__shadow { fill: rgba(15, 23, 42, 0.14); animation: cash-art-shadow 3s ease-in-out infinite; }
+.cash-art__top { fill: #2b2b33; }
+.cash-art__body { fill: var(--red-600); }
+.cash-art__screen { fill: #0f1a14; stroke: #3a3a44; stroke-width: 1.5; }
+.cash-art__screen-text { font: 700 9px ui-monospace, Menlo, Consolas, monospace; fill: #4ade80; }
+.cash-art__key { fill: rgba(255, 255, 255, 0.85); }
+.cash-art__enter { fill: #f5c542; }
+.cash-art__drawer-front { fill: #3a3a44; }
+.cash-art__handle { fill: #9a9aa6; }
+.cash-art__bill { fill: #34a853; stroke: #1e7a3a; stroke-width: 1; }
+.cash-art__coin { fill: #f5c542; stroke: #c9971a; stroke-width: 1; opacity: 0; }
+.cash-art__flying { opacity: 0; }
+.cash-art__receipt { opacity: 0; }
+
+/* Todo el aparato respira un poco */
+.cash-art {
+  animation: cash-art-bob 3s ease-in-out infinite;
+}
+
+/* ---------- Vendiendo ---------- */
+.cash-art--open .cash-art__receipt {
+  animation: cash-art-receipt 3.2s ease-in-out infinite;
+}
+
+.cash-art--open .cash-art__screen-text {
+  animation: cash-art-blink 1.6s steps(1) infinite;
+}
+
+.cash-art--open .cash-art__key {
+  animation: cash-art-key 2.4s ease-in-out infinite;
+  animation-delay: calc(var(--k) * 0.18s);
+}
+
+.cash-art--open .cash-art__coin {
+  animation: cash-art-coin 2.4s ease-out infinite;
+  animation-delay: calc(var(--c) * 0.5s + 0.4s);
+}
+
+/* El cajón se asoma de vez en cuando (alguien está cobrando) */
+.cash-art--open .cash-art__drawer {
+  animation: cash-art-peek 4.8s ease-in-out infinite;
+}
+
+/* ---------- Por contar ---------- */
+.cash-art--pending .cash-art__body { fill: #d48806; }
+.cash-art--pending .cash-art__screen-text { fill: #fbbf24; font-size: 7px; animation: cash-art-blink 1.2s steps(1) infinite; }
+
+.cash-art--pending .cash-art__drawer {
+  transform: translateY(8px);
+}
+
+.cash-art--pending .cash-art__bill {
+  animation: cash-art-count 2.4s ease-in-out infinite;
+  animation-delay: calc(var(--b) * 0.25s);
+}
+
+.cash-art--pending .cash-art__flying {
+  animation: cash-art-fly 2.4s ease-in-out infinite;
+}
+
+@keyframes cash-art-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes cash-art-shadow {
+  0%, 100% { transform: scaleX(1); opacity: 1; }
+  50% { transform: scaleX(0.92); opacity: 0.8; }
+}
+
+@keyframes cash-art-receipt {
+  0%, 15% { opacity: 0; transform: translateY(22px); }
+  35%, 75% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+
+@keyframes cash-art-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@keyframes cash-art-key {
+  0%, 80%, 100% { fill: rgba(255, 255, 255, 0.85); }
+  88% { fill: #fde68a; }
+}
+
+@keyframes cash-art-coin {
+  0% { opacity: 0; transform: translateY(14px) scale(0.6); }
+  30% { opacity: 1; transform: translateY(-6px) scale(1); }
+  60% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(4px); }
+}
+
+@keyframes cash-art-peek {
+  0%, 70%, 100% { transform: translateY(0); }
+  80%, 88% { transform: translateY(5px); }
+}
+
+@keyframes cash-art-count {
+  0%, 100% { transform: translateY(0); }
+  20% { transform: translateY(-5px); }
+  40% { transform: translateY(0); }
+}
+
+@keyframes cash-art-fly {
+  0% { opacity: 0; transform: translate(0, 18px) rotate(0deg) scale(0.8); }
+  25% { opacity: 1; }
+  60% { opacity: 1; transform: translate(26px, -34px) rotate(18deg) scale(1); }
+  100% { opacity: 0; transform: translate(34px, -44px) rotate(24deg) scale(0.9); }
+}
+
+:root[data-motion="reduced"] .cash-art,
+:root[data-motion="reduced"] .cash-art * {
+  animation: none !important;
+}
+
+:root[data-motion="reduced"] .cash-art--open .cash-art__receipt {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cash-art,
+  .cash-art * {
+    animation: none !important;
+  }
+}

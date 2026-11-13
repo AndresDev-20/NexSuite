@@ -445,3 +445,254 @@
     animation: none;
   }
 }
+
+/* ==========================================================================
+   Registrar gasto renovado (2026-11-13): el gasto y el pago a la izquierda, el resumen oscuro a la derecha
+   (fijo en pantallas anchas), el monto grande y los medios de pago como tarjetas con ícono.
+   ========================================================================== */
+.expense-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.expense-form__main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .expense-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 22px;
+    align-items: start;
+  }
+
+  .expense-summary {
+    position: sticky;
+    top: 0;
+  }
+}
+
+/* El monto, protagonista */
+.expense-form__amount .field__input {
+  height: 54px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.expense-form__amount .field__prefix {
+  font-size: 1.15rem;
+  color: var(--red-600);
+}
+
+/* Medios de pago: tarjetas con ícono y ✓ */
+.expense-method {
+  position: relative;
+  gap: 4px;
+  padding: 12px 12px 12px 12px;
+  border-radius: 14px;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, background 180ms ease;
+}
+
+.expense-method:hover {
+  transform: translateY(-1px);
+}
+
+.expense-method:active {
+  transform: scale(0.98);
+}
+
+.expense-method__icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 4px;
+  color: var(--red-600);
+  background: var(--red-50);
+  border-radius: 10px;
+  transition: background 180ms ease, color 180ms ease, transform 220ms cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.expense-method__icon .icon {
+  width: 17px;
+  height: 17px;
+}
+
+.expense-method__check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  color: var(--on-accent);
+  background: var(--red-600);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 180ms ease, transform 260ms cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.expense-method__check .icon {
+  width: 12px;
+  height: 12px;
+}
+
+.expense-method--on {
+  background: color-mix(in srgb, var(--red-50) 70%, var(--white));
+}
+
+.expense-method--on .expense-method__icon {
+  color: var(--on-accent);
+  background: linear-gradient(135deg, var(--red-500), var(--red-700));
+  transform: scale(1.06);
+}
+
+.expense-method--on .expense-method__check {
+  opacity: 1;
+  transform: none;
+}
+
+/* Resumen */
+.expense-summary {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  overflow: hidden;
+  color: #fff;
+  background: linear-gradient(150deg, #1f1f24, #3a1218 60%, var(--red-700));
+  border-radius: 18px;
+  box-shadow: 0 20px 40px -26px rgba(15, 23, 42, 0.9);
+  animation: expense-in 520ms 120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.expense-summary::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.12) 50%, transparent 60%);
+  transform: translateX(-120%);
+  animation: expense-shine 7s ease-in-out 1.5s infinite;
+  pointer-events: none;
+}
+
+.expense-summary__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.expense-summary__amount {
+  font-size: 2rem;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  animation: expense-pop 360ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.expense-summary__description {
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.expense-summary__description--empty {
+  opacity: 0.55;
+  font-style: italic;
+}
+
+.expense-summary__list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 4px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.25);
+}
+
+.expense-summary__list > div {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  font-size: 0.84rem;
+}
+
+.expense-summary__list dt {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.expense-summary__list dd {
+  margin: 0;
+  overflow: hidden;
+  font-weight: 600;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.expense-summary__badge {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 5px 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #b9f5cf;
+  background: rgba(31, 157, 85, 0.25);
+  border-radius: 999px;
+  animation: expense-pop 320ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.expense-summary__badge--cash {
+  color: #ffe6a6;
+  background: rgba(245, 197, 66, 0.25);
+}
+
+.expense-summary__badge .icon {
+  width: 14px;
+  height: 14px;
+}
+
+@keyframes expense-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes expense-pop {
+  0% { transform: scale(0.85); }
+  60% { transform: scale(1.06); }
+  100% { transform: none; }
+}
+
+@keyframes expense-shine {
+  0%, 75% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+:root[data-motion="reduced"] .expense-form *,
+:root[data-motion="reduced"] .expense-form *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expense-form *,
+  .expense-form *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

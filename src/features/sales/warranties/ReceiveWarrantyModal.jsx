@@ -206,7 +206,7 @@ const ReceiveForm = ({ lookup, receive, onReceived, onCancel }) => {
  * onReceived(caso, mensaje) al terminar.
  */
 const ReceiveWarrantyModal = ({ open, lookup, receive, onReceived, onClose }) => (
-  <Modal open={open} title="Recibir garantía" size="wide" onClose={onClose}>
+  <Modal icon="shield" open={open} title="Recibir garantía" size="wide" onClose={onClose}>
     {open && <ReceiveForm lookup={lookup} receive={receive} onReceived={onReceived} onCancel={onClose} />}
   </Modal>
 );

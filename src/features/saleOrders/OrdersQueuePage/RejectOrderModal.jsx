@@ -52,7 +52,7 @@ const RejectForm = ({ order, onCancel, onReject }) => {
 
 /** Rechazar un pedido a caja con motivo. order: el pedido o null (cerrado). onReject(reason) async. */
 const RejectOrderModal = ({ order, onClose, onReject }) => (
-  <Modal open={Boolean(order)} title="Rechazar pedido" onClose={onClose}>
+  <Modal icon="alert" open={Boolean(order)} title="Rechazar pedido" onClose={onClose}>
     {order && <RejectForm key={order.id} order={order} onCancel={onClose} onReject={onReject} />}
   </Modal>
 );

@@ -114,3 +114,86 @@
 .field__message--error {
   color: var(--danger);
 }
+/* ==========================================================================
+   Formularios más pulidos (2026-11-13): etiqueta más clara, campo con relieve suave, foco con
+   halo de la marca, prefijo ($) y error con su marca. Mismas clases de siempre.
+   ========================================================================== */
+.field__label {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+  color: var(--color-text);
+  opacity: 0.88;
+}
+
+.field__input {
+  height: 46px;
+  border-width: 1px;
+  border-color: color-mix(in srgb, var(--color-border) 85%, var(--gray-300));
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.field__input--multiline {
+  height: auto;
+}
+
+.field__input:hover:not(:focus):not(:disabled) {
+  border-color: var(--gray-300);
+}
+
+.field__input:focus {
+  border-color: var(--red-500, var(--red-600));
+  box-shadow: 0 0 0 4px rgba(214, 24, 46, 0.12), inset 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.field__input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.field__input--with-prefix {
+  padding-left: 32px;
+}
+
+.field__prefix {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  z-index: 1;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.field__control:focus-within .field__prefix {
+  color: var(--red-600);
+}
+
+.field__message {
+  line-height: 1.4;
+}
+
+.field__message--error {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-weight: 500;
+}
+
+.field__message--error::before {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #fff;
+  content: "!";
+  background: var(--danger);
+  border-radius: 50%;
+}

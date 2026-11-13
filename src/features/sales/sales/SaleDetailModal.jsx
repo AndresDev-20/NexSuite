@@ -194,7 +194,7 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onClose }) => {
  * voidSale(id, reason) y onVoided(venta) son opcionales: sin voidSale no aparece el botón.
  */
 const SaleDetailModal = ({ saleId, getSale, voidSale, onVoided, onClose }) => (
-  <Modal open={Boolean(saleId)} title="Detalle de la venta" size="wide" onClose={onClose}>
+  <Modal icon="cart" open={Boolean(saleId)} title="Detalle de la venta" size="wide" onClose={onClose}>
     {saleId && <SaleSheet key={saleId} saleId={saleId} getSale={getSale} voidSale={voidSale} onVoided={onVoided} onClose={onClose} />}
   </Modal>
 );

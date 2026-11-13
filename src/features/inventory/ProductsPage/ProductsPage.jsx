@@ -32,7 +32,7 @@ const ProductsPage = () => {
     getAllCategories,
   } = useCategories();
   // Sucursales del usuario (el servidor solo devuelve las suyas): a ellas puede asignar el producto
-  const { branches, hasBranches, reload: reloadBranches } = useActiveBranch();
+  const { branches, hasBranches, activeBranchId, reload: reloadBranches } = useActiveBranch();
   const { suppliers, loading: suppliersLoading, getAllSuppliers } = useSuppliers();
   const toast = useToast();
   const navigate = useNavigate();
@@ -61,13 +61,16 @@ const ProductsPage = () => {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [shopFilter, setShopFilter] = useState(""); // "" = en la tienda o no
-  const [branchFilter, setBranchFilter] = useState(""); // "" = todas las sucursales
+  const [supplierFilter, setSupplierFilter] = useState(""); // "" = todos los proveedores
   const [form, setForm] = useState({ open: false, product: null }); // product null = crear
   const [viewing, setViewing] = useState(null);
   const [deactivating, setDeactivating] = useState(null);
   const [deleting, setDeleting] = useState(null);
   const [assigning, setAssigning] = useState(null); // { product, fromCreate, stocked }
   const [pendingOnly, setPendingOnly] = useState(false);
+  // La sucursal la elige el selector del encabezado («Todas mis sucursales» = sin filtro). Los pendientes
+  // de asignar no están en ninguna sucursal: con «Pendientes» se ven todos
+  const branchFilter = canFilterBranch && activeBranchId && !pendingOnly ? String(activeBranchId) : "";
   const [shopAction, setShopAction] = useState(null); // "add" | "remove": subir o quitar de la tienda los de la lista
 
   // Búsqueda en el servidor (nombre, SKU o código de barras): espera a que dejes de escribir o escanear
@@ -79,10 +82,12 @@ const ProductsPage = () => {
       ...(statusFilter === "archived" ? { archived: "true" } : statusFilter && { isactive: statusFilter }),
       ...(branchFilter && { idbranch: branchFilter }),
       ...(shopFilter && { showinshop: shopFilter }),
+      // Fase 27: solo los de ese proveedor habitual
+      ...(supplierFilter && { idsupplier: supplierFilter }),
     };
     const timer = setTimeout(() => getAllProducts({ params }), SEARCH_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [query, categoryFilter, statusFilter, branchFilter, shopFilter, getAllProducts]);
+  }, [query, categoryFilter, statusFilter, branchFilter, shopFilter, supplierFilter, getAllProducts]);
 
   // Las categorías alimentan el filtro y el formulario: sin permiso de consultarlas no se piden
   const canReadCategories = can("categories.read");
@@ -94,8 +99,9 @@ const ProductsPage = () => {
   // Los proveedores solo hacen falta para asignar productos con serial (el ingreso de sus unidades)
   const canReadSuppliers = can("suppliers.read");
   useEffect(() => {
-    if (canReadSuppliers && canRegisterUnits) getAllSuppliers();
-  }, [getAllSuppliers, canReadSuppliers, canRegisterUnits]);
+    // Para el filtro por proveedor y para el ingreso de unidades con serial
+    if (canReadSuppliers) getAllSuppliers();
+  }, [getAllSuppliers, canReadSuppliers]);
 
   const activeSuppliers = useMemo(() => suppliers.filter((supplier) => supplier.isActive), [suppliers]);
   const suppliersHint = !canReadSuppliers
@@ -132,8 +138,14 @@ const ProductsPage = () => {
           ? "Aún no hay categorías. Crea una en Inventarios → Categorías."
           : undefined;
 
-  const branchOptions = useMemo(() => branches.map((branch) => ({ value: String(branch.id), label: branch.name })), [branches]);
   const filteredBranchName = branches.find((branch) => String(branch.id) === branchFilter)?.name;
+  const supplierOptions = useMemo(
+    () =>
+      [...suppliers]
+        .sort((a, b) => a.companyname.localeCompare(b.companyname, "es"))
+        .map((supplier) => ({ value: String(supplier.id), label: supplier.isActive ? supplier.companyname : `${supplier.companyname} (inactivo)` })),
+    [suppliers]
+  );
 
   // Tienda en línea (Fase 24.4): de los que se ven en la lista, los que se pueden subir (activos) o quitar
   const shopTargets = {
@@ -147,17 +159,20 @@ const ProductsPage = () => {
     setShopAction(null);
   };
 
-  const hasFilters = Boolean(query.trim() || categoryFilter || statusFilter || branchFilter || shopFilter || pendingOnly);
+  const hasFilters = Boolean(query.trim() || categoryFilter || statusFilter || supplierFilter || shopFilter || pendingOnly);
   const clearFilters = () => {
     setQuery("");
     setCategoryFilter("");
     setStatusFilter("");
-    setBranchFilter("");
+    setSupplierFilter("");
     setShopFilter("");
     setPendingOnly(false);
   };
 
-  const openCreate = () => setForm({ open: true, product: null });
+  const openCreate = () => {
+    reloadBranches(); // la lista de sucursales al día para el paso «Sucursales»
+    setForm({ open: true, product: null });
+  };
   const openEdit = (product) => setForm({ open: true, product });
   const closeForm = () => setForm((current) => ({ ...current, open: false }));
 
@@ -167,7 +182,7 @@ const ProductsPage = () => {
     action(product, ...rest);
   };
 
-  const handleSave = async (payload) => {
+  const handleSave = async (payload, assignment = null) => {
     if (form.product) {
       await updateProduct(form.product.id, payload);
       toast.success("Producto actualizado correctamente.");
@@ -176,11 +191,22 @@ const ProductsPage = () => {
     }
 
     const created = (await createProduct(payload))?.data;
-    toast.success(created?.sku ? `Producto creado con el SKU ${created.sku}.` : "Producto creado correctamente.");
-    closeForm();
-    // De una vez: a qué sucursales llega y cuánto. Si se deja para después, queda pendiente en la lista
     const product = created && normalizeProduct(created);
-    if (product && canAssign(product)) openAssign(product, true);
+    closeForm();
+    // Último paso del asistente: si eligió sucursales, se asigna de una vez
+    if (assignment && product) {
+      try {
+        await assignInitialStock(product.id, assignment);
+        toast.success(`Producto creado con el SKU ${created.sku} y asignado a sus sucursales.`);
+      } catch (err) {
+        // El producto ya quedó creado: se abre «Asignar a sucursales» para corregir y volver a intentar
+        toast.error(`${created.nameproduct} se creó, pero no se pudo asignar: ${getErrorMessage(err, "inténtalo de nuevo.")}`);
+        if (canAssign(product)) openAssign(product, true);
+      }
+      return;
+    }
+    // Sin sucursales: queda «pendiente de asignar» en la lista
+    toast.success(created?.sku ? `Producto creado con el SKU ${created.sku}.` : "Producto creado correctamente.");
   };
 
   const handleAssign = async (payload) => {
@@ -351,14 +377,14 @@ const ProductsPage = () => {
               />
             )}
 
-            {canFilterBranch && (
+            {canReadSuppliers && suppliers.length > 0 && (
               <Select
                 className="list-page__filter"
-                label="Filtrar por sucursal"
-                placeholder="Todas las sucursales"
-                options={branchOptions}
-                value={branchFilter}
-                onChange={(event) => setBranchFilter(event.target.value)}
+                label="Filtrar por proveedor"
+                placeholder="Todos los proveedores"
+                options={supplierOptions}
+                value={supplierFilter}
+                onChange={(event) => setSupplierFilter(event.target.value)}
               />
             )}
 
@@ -424,6 +450,11 @@ const ProductsPage = () => {
         categories={formCategories}
         categoryHint={categoryHint}
         showCost={showCost}
+        branchStep={
+          hasBranches
+            ? { branches: assignBranches, suppliers: activeSuppliers, suppliersHint, canStock: canRegisterStock, canUnits: canRegisterUnits }
+            : null
+        }
         onClose={closeForm}
         onSubmit={handleSave}
       />

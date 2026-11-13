@@ -399,7 +399,7 @@ const StockAdjustModal = ({ row, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={Boolean(row)} title="Ajustar existencias" onClose={onClose} busy={busy}>
+    <Modal icon="box" open={Boolean(row)} title="Ajustar existencias" onClose={onClose} busy={busy}>
       {row && <AdjustForm key={row.id} row={row} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

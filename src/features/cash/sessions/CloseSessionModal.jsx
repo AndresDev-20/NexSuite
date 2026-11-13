@@ -141,7 +141,7 @@ const CloseSessionModal = ({ session, base = null, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={Boolean(session)} title="Contar la caja" onClose={onClose} busy={busy}>
+    <Modal icon="wallet" open={Boolean(session)} title="Contar la caja" onClose={onClose} busy={busy}>
       {session && <CloseForm key={session.id} session={session} base={base} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

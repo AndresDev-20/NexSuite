@@ -269,7 +269,7 @@ const SessionsPage = () => {
         {renderContent()}
       </div>
 
-      <Modal open={detail.open} size="wide" title="Turno de caja" onClose={() => setDetail(CLOSED_DETAIL)}>
+      <Modal icon="wallet" open={detail.open} size="wide" title="Turno de caja" onClose={() => setDetail(CLOSED_DETAIL)}>
         {detail.loading && <p className="my-cash__since">Cargando turno…</p>}
         {detail.error && <StateMessage tone="error" icon="alert" title="No pudimos cargar el turno" text={detail.error} />}
         {detail.session && (

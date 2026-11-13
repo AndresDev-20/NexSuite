@@ -171,7 +171,14 @@ const PosPage = () => {
 
   const updateLine = (productId, changes) =>
     setLines((current) => current.map((line) => (line.productId === productId ? { ...line, ...changes } : line)));
-  const removeLine = (productId) => setLines((current) => current.filter((line) => line.productId !== productId));
+  const [leaving, setLeaving] = useState([]); // productos que salen del carrito con su animación
+  const removeLine = (productId) => {
+    setLeaving((current) => [...current, productId]);
+    setTimeout(() => {
+      setLines((current) => current.filter((line) => line.productId !== productId));
+      setLeaving((current) => current.filter((id) => id !== productId));
+    }, 200);
+  };
 
   /* ---------- Totales ---------- */
   const subtotal = lines.reduce((sum, line) => sum + lineGross(line), 0);
@@ -342,6 +349,9 @@ const PosPage = () => {
       </header>
 
       <div className="list-page__card pos__context">
+        <span className="pos__context-icon" aria-hidden="true">
+          <Icon name="wallet" />
+        </span>
         <Select
           label="Caja"
           options={sessionOptions(sessions)}
@@ -372,10 +382,19 @@ const PosPage = () => {
       <div className="pos__grid">
         {/* ---------- Productos ---------- */}
         <div className="list-page__card pos__search">
-          <label className="pos__label" htmlFor="pos-search">
-            Buscar o escanear
-          </label>
+          <header className="pos__panel-head">
+            <span className="pos__panel-icon" aria-hidden="true">
+              <Icon name="search" />
+            </span>
+            <span className="pos__panel-text">
+              <label className="pos__panel-title" htmlFor="pos-search">
+                Buscar o escanear
+              </label>
+              <span className="pos__panel-subtitle">Nombre, SKU, código de barras o IMEI.</span>
+            </span>
+          </header>
           <div className="pos__search-box">
+            <span className="pos__scanline" aria-hidden="true" />
             <Icon name="barcode" className="pos__search-icon" />
             <input
               id="pos-search"
@@ -402,40 +421,75 @@ const PosPage = () => {
               {results.map((product) => {
                 const stock = freeOf(product);
                 const held = reserved[product.id] ?? 0;
+                const tone = stock <= 0 ? "out" : stock <= 3 ? "low" : "ok";
                 return (
-                  <li key={product.id}>
+                  <li key={product.id} style={{ "--i": Math.min(results.indexOf(product), 8) }}>
                     <button type="button" className="pos__result" disabled={stock <= 0} onClick={() => addProduct(product)}>
+                      <span className={`pos__result-avatar ${product.hasSerial ? "pos__result-avatar--serial" : ""}`.trim()} aria-hidden="true">
+                        {product.name.trim().charAt(0).toUpperCase()}
+                      </span>
                       <span className="pos__result-main">
                         <span className="pos__result-name">{product.name}</span>
                         <span className="pos__hint">
                           {product.sku}
-                          {product.hasSerial && " · con serial"} · {stock > 0 ? `${stock} disponibles` : "Agotado"}
+                          {product.hasSerial && " · con serial"}
                           {held > 0 && ` · ${held} ${held === 1 ? "apartada" : "apartadas"} en pedidos`}
                         </span>
                       </span>
-                      <strong>{formatCurrency(product.salePrice)}</strong>
+                      <span className="pos__result-side">
+                        <strong>{formatCurrency(product.salePrice)}</strong>
+                        <span className={`pos__stock pos__stock--${tone}`}>{stock > 0 ? `${stock} disp.` : "Agotado"}</span>
+                      </span>
+                      <span className="pos__result-add" aria-hidden="true">
+                        <Icon name="plus" />
+                      </span>
                     </button>
                   </li>
                 );
               })}
             </ul>
           )}
-          {!query.trim() && <p className="pos__hint">Escribe para buscar o escanea el código de barras o el IMEI con el lector.</p>}
+          {!query.trim() && (
+            <div className="pos__scan-empty">
+              <span className="pos__scan-art" aria-hidden="true">
+                <Icon name="barcode" />
+              </span>
+              <strong>Listo para vender</strong>
+              <span>Escribe para buscar o escanea el código de barras o el IMEI con el lector.</span>
+            </div>
+          )}
         </div>
 
         {/* ---------- Venta ---------- */}
         <div className="list-page__card pos__sale">
-          <h2 className="pos__section-title">
-            Venta <span className="pos__count">{lines.length}</span>
-          </h2>
+          <header className="pos__panel-head">
+            <span className="pos__panel-icon" aria-hidden="true">
+              <Icon name="cart" />
+            </span>
+            <span className="pos__panel-text">
+              <h2 className="pos__panel-title">Venta</h2>
+              <span className="pos__panel-subtitle">{lines.length === 0 ? "Aún no hay productos." : "Revisa cantidades y descuentos."}</span>
+            </span>
+            <span className="pos__count" key={lines.length}>
+              {lines.length}
+            </span>
+          </header>
 
           {lines.length === 0 ? (
-            <p className="pos__hint">Aún no hay productos en la venta.</p>
+            <div className="pos__cart-empty">
+              <span className="pos__cart-art" aria-hidden="true">
+                <Icon name="cart" />
+              </span>
+              <span>Busca o escanea un producto para empezar la venta.</span>
+            </div>
           ) : (
             <ul className="pos__lines">
-              {lines.map((line) => (
-                <li className="pos__line" key={line.productId}>
+              {lines.map((line, index) => (
+                <li className={`pos__line ${leaving.includes(line.productId) ? "pos__line--leaving" : ""}`.trim()} key={line.productId}>
                   <div className="pos__line-head">
+                    <span className={`pos__line-index ${line.hasSerial ? "pos__line-index--serial" : ""}`.trim()} aria-hidden="true">
+                      {index + 1}
+                    </span>
                     <span className="pos__result-name">{line.name}</span>
                     <button type="button" className="pos__remove" aria-label={`Quitar ${line.name}`} onClick={() => removeLine(line.productId)}>
                       <Icon name="x" />
@@ -484,16 +538,18 @@ const PosPage = () => {
                     )}
                   </div>
                   <p className="pos__line-total">
-                    {lineQuantity(line)} × {formatCurrency(line.price)}
-                    {cents(line.discount) > 0 && ` − ${formatCurrency(Number(line.discount))}`} ={" "}
-                    <strong>{formatCurrency(pesos(lineTotal(line)))}</strong>
+                    <span>
+                      {lineQuantity(line)} × {formatCurrency(line.price)}
+                      {cents(line.discount) > 0 && ` − ${formatCurrency(Number(line.discount))}`}
+                    </span>
+                    <strong key={lineTotal(line)}>{formatCurrency(pesos(lineTotal(line)))}</strong>
                   </p>
                 </li>
               ))}
             </ul>
           )}
 
-          <div className="pos__row">
+          <div className="pos__row pos__customer">
             {canReadCustomers ? (
               <Select
                 label="Cliente"
@@ -546,13 +602,15 @@ const PosPage = () => {
               </div>
             )}
             <div className="pos__grand">
-              <dt>Total</dt>
-              <dd>{formatCurrency(pesos(total))}</dd>
+              <dt>Total a cobrar</dt>
+              <dd key={total}>{formatCurrency(pesos(total))}</dd>
             </div>
           </dl>
 
           {/* ---------- Pagos ---------- */}
-          <h2 className="pos__section-title">Pago</h2>
+          <h2 className="pos__section-title">
+            <Icon name="wallet" className="pos__section-icon" /> Pago
+          </h2>
           {creditOnly && customer ? (
             <CreditPanel
               customer={customer}
@@ -633,8 +691,9 @@ const PosPage = () => {
               Otro medio de pago
             </Button>
             {change > 0 && (
-              <p className="pos__change" role="status">
-                Cambios: <strong>{formatCurrency(pesos(change))}</strong>
+              <p className="pos__change" role="status" key={change}>
+                <span>Cambios</span>
+                <strong>{formatCurrency(pesos(change))}</strong>
               </p>
             )}
             {!singlePayment && pending !== 0 && (
@@ -656,7 +715,12 @@ const PosPage = () => {
             <Button variant="outline" onClick={resetSale} disabled={busy || lines.length === 0}>
               Cancelar venta
             </Button>
-            <Button icon="check" className="pos__charge-button" onClick={charge} disabled={busy || lines.length === 0}>
+            <Button
+              icon="check"
+              className={`pos__charge-button ${lines.length > 0 && !busy && pending <= 0 ? "pos__charge-button--ready" : ""}`.trim()}
+              onClick={charge}
+              disabled={busy || lines.length === 0}
+            >
               {busy ? "Registrando…" : `Cobrar ${formatCurrency(pesos(total))}`}
             </Button>
           </div>

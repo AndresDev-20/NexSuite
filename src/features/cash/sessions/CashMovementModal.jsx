@@ -92,7 +92,7 @@ const CashMovementModal = ({ type, expected, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={Boolean(type)} title={type ? COPY[type].title : ""} onClose={onClose} busy={busy}>
+    <Modal icon="wallet" open={Boolean(type)} title={type ? COPY[type].title : ""} onClose={onClose} busy={busy}>
       {type && <MovementForm type={type} expected={expected} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

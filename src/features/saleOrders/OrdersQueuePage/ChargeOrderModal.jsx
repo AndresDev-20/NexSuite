@@ -250,7 +250,7 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
  * order: el pedido o null (cerrado). onCharge(payload, change) async; lanza el error del servidor.
  */
 const ChargeOrderModal = ({ order, onClose, ...props }) => (
-  <Modal open={Boolean(order)} title="Cobrar pedido" onClose={onClose}>
+  <Modal icon="wallet" open={Boolean(order)} title="Cobrar pedido" onClose={onClose}>
     {order && <ChargeForm key={order.id} order={order} onCancel={onClose} {...props} />}
   </Modal>
 );

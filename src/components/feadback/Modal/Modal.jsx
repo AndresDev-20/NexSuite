@@ -6,9 +6,11 @@ import "./modal.css";
  * Ventana modal. En móvil se abre como hoja inferior; desde 768px, centrada.
  * Los hijos solo se montan mientras está abierta, así los formularios arrancan limpios.
  * Marca con data-autofocus el elemento que debe recibir el foco al abrir.
- * size="wide": más ancha desde tablet (formularios con tablas, como los ítems de un pedido).
+ * size="wide": más ancha desde tablet (formularios con tablas, como los ítems de un pedido) · size="xl": la más ancha
+ *   (formularios por pasos con columna lateral, como «Nuevo producto»).
+ * icon y subtitle (opcionales): ícono junto al título y una línea de ayuda debajo.
  */
-const Modal = ({ open, title, onClose, busy = false, size, children }) => {
+const Modal = ({ open, title, subtitle, icon, onClose, busy = false, size, children }) => {
   const dialogRef = useRef(null);
   const titleId = useId();
 
@@ -47,15 +49,23 @@ const Modal = ({ open, title, onClose, busy = false, size, children }) => {
   return (
     <dialog
       ref={dialogRef}
-      className={`modal ${size === "wide" ? "modal--wide" : ""}`.trim()}
+      className={`modal ${size === "wide" ? "modal--wide" : size === "xl" ? "modal--wide modal--xl" : ""}`.trim()}
       aria-labelledby={titleId}
       onCancel={handleCancel}
     >
       <div className="modal__panel">
         <header className="modal__header">
-          <h2 className="modal__title" id={titleId}>
-            {title}
-          </h2>
+          {icon && (
+            <span className="modal__icon" aria-hidden="true">
+              <Icon name={icon} />
+            </span>
+          )}
+          <div className="modal__heading">
+            <h2 className="modal__title" id={titleId}>
+              {title}
+            </h2>
+            {subtitle && <p className="modal__subtitle">{subtitle}</p>}
+          </div>
           <button
             type="button"
             className="modal__close"

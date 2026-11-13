@@ -104,7 +104,7 @@ const OpeningBalanceModal = ({ customer, onClose, onSubmit }) => {
   };
 
   return (
-    <Modal open={Boolean(customer)} title="Cargar saldo inicial" onClose={onClose} busy={busy}>
+    <Modal icon="wallet" open={Boolean(customer)} title="Cargar saldo inicial" onClose={onClose} busy={busy}>
       {customer && <BalanceForm key={customer.id} customer={customer} busy={busy} onCancel={onClose} onSubmit={handleSubmit} />}
     </Modal>
   );

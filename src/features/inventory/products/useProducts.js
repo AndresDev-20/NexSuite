@@ -23,6 +23,10 @@ export const normalizeProduct = (product) => ({
   features: Array.isArray(product.features) ? product.features : [],
   categoryId: product.idcategory ?? product.category?.id ?? null,
   categoryName: product.category?.nameCategory ?? "",
+  // Proveedor habitual (Fase 27); solo llega con «Consultar proveedores»
+  supplierId: product.idsupplier ?? product.supplier?.id ?? null,
+  supplierName: product.supplier?.companyname ?? "",
+  supplierActive: product.supplier ? product.supplier.isactive !== false : true,
   // Existencias totales en todas las sucursales (null si el backend no las envía)
   quantity: product.stock != null ? Number(product.stock) : null,
   // Con el filtro por sucursal: cantidad y mínimo en esa sucursal (null sin filtro)
