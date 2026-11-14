@@ -17,6 +17,8 @@ export const normalizeSupplier = (supplier) => ({
   email: supplier.email ?? "",
   contact: supplier.contact ?? "",
   isActive: supplier.isactive !== false,
+  // Fase 28: creado al importar productos solo con su nombre; faltan sus datos
+  incomplete: Boolean(supplier.incomplete),
   // Ya tiene unidades o compras: no se elimina, se desactiva
   hasHistory: Boolean(supplier.hasHistory),
 });

@@ -10,6 +10,7 @@ import usePermissions from "../../../features/auth/usePermissions";
 import useActiveBranch from "../../../features/branches/useActiveBranch";
 import useCategories from "../../../features/inventory/categories/useCategories";
 import AssignBranchesModal from "../../../features/inventory/products/AssignBranchesModal";
+import ImportProductsModal from "../../../features/inventory/products/ImportProductsModal";
 import ProductDetailModal from "../../../features/inventory/products/ProductDetailModal";
 import ProductFormModal from "../../../features/inventory/products/ProductFormModal";
 import ProductsTable from "../../../features/inventory/products/ProductsTable";
@@ -71,7 +72,11 @@ const ProductsPage = () => {
   // La sucursal la elige el selector del encabezado («Todas mis sucursales» = sin filtro). Los pendientes
   // de asignar no están en ninguna sucursal: con «Pendientes» se ven todos
   const branchFilter = canFilterBranch && activeBranchId && !pendingOnly ? String(activeBranchId) : "";
-  const [shopAction, setShopAction] = useState(null); // "add" | "remove": subir o quitar de la tienda los de la lista
+  const [shopAction, setShopAction] = useState(null);
+  // Importar desde Excel (Fase 28): en la sucursal elegida en el encabezado
+  const [importing, setImporting] = useState(false);
+  const canImport = canCreate && canRegisterStock && hasBranches;
+  const importBranch = activeBranchId ? branches.find((branch) => String(branch.id) === String(activeBranchId)) : null; // "add" | "remove": subir o quitar de la tienda los de la lista
 
   // Búsqueda en el servidor (nombre, SKU o código de barras): espera a que dejes de escribir o escanear
   useEffect(() => {
@@ -346,10 +351,25 @@ const ProductsPage = () => {
           <p className="list-page__subtitle">Catálogo de lo que compras y vendes, con sus códigos, precios y existencias.</p>
         </div>
 
-        {canCreate && (
-          <Button className="list-page__add" icon="plus" onClick={openCreate}>
-            Nuevo producto
-          </Button>
+        {(canCreate || canImport) && (
+          <div className="products-header-actions">
+            {canImport && (
+              <Button
+                variant="outline"
+                className="list-page__add"
+                icon="download"
+                title="Carga el inventario inicial de la sucursal elegida desde un Excel"
+                onClick={() => setImporting(true)}
+              >
+                Importar Excel
+              </Button>
+            )}
+            {canCreate && (
+              <Button className="list-page__add" icon="plus" onClick={openCreate}>
+                Nuevo producto
+              </Button>
+            )}
+          </div>
         )}
       </header>
 
@@ -476,6 +496,18 @@ const ProductsPage = () => {
         onViewMovements={
           canReadMovements ? (product) => navigate(`/inventario/movimientos?idproduct=${product.id}`) : undefined
         }
+      />
+
+      <ImportProductsModal
+        open={importing}
+        branch={importBranch ? { id: importBranch.id, name: importBranch.name } : null}
+        showCost={showCost}
+        onClose={() => setImporting(false)}
+        onImported={() => {
+          getAllProducts({ silent: true });
+          if (canReadCategories) getAllCategories();
+          if (canReadSuppliers) getAllSuppliers();
+        }}
       />
 
       <AssignBranchesModal

@@ -301,7 +301,13 @@ const SupplierFormModal = ({ open, supplier = null, onClose, onSubmit }) => {
       open={open}
       icon="users"
       title={supplier ? "Editar proveedor" : "Nuevo proveedor"}
-      subtitle={supplier ? supplier.companyname : "Los campos con * son obligatorios."}
+      subtitle={
+        supplier
+          ? supplier.incomplete
+            ? `${supplier.companyname} · por completar: llena sus datos y queda listo`
+            : supplier.companyname
+          : "Los campos con * son obligatorios."
+      }
       onClose={onClose}
       busy={busy}
     >

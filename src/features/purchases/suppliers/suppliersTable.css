@@ -74,3 +74,10 @@ a.supplier-cell__line:hover {
   border: 1px solid var(--gray-200);
   border-radius: 999px;
 }
+
+/* Fase 28: creado al importar productos, le faltan datos */
+.supplier-cell__tag--incomplete {
+  color: var(--warning-text);
+  background-color: var(--warning-soft);
+  border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+}

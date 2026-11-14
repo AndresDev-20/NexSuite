@@ -286,6 +286,13 @@ const SupplierSheet = ({ listed, onClose, onEdit, onViewOrders, onViewPayables }
               {supplier.isActive ? "Activo" : "Inactivo"}
             </span>
           </li>
+          {supplier.incomplete && (
+            <li>
+              <span className="sheet__badge sheet__badge--low" title="Se creó al importar productos: edítalo para llenar sus datos">
+                Por completar
+              </span>
+            </li>
+          )}
         </ul>
         <ul className="sheet__facts">
           {supplier.contact && <li>Contacto: {supplier.contact}</li>}

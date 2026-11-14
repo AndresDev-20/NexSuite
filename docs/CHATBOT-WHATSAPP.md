@@ -24,7 +24,7 @@ llaves y se ponen en el `.env` del servidor.
 | Una cuenta de **Meta Business** (business.facebook.com) | Dueña del número de WhatsApp del negocio |
 | Un **número de celular dedicado** | El WhatsApp del negocio. **No puede estar en la app normal de WhatsApp ni en WhatsApp Business del celular**: si lo está, hay que borrarlo de ahí primero |
 | Una cuenta en la **consola de Anthropic** (console.anthropic.com) | La llave de Claude y el control de gastos |
-| El servidor publicado con **HTTPS** (`docs/DESPLIEGUE.md`, pasos 1 a 8) | Meta solo envía mensajes a una dirección `https://` pública |
+| El servidor publicado con **HTTPS** (`docs/DESPLIEGUE.md`, pasos 1 a 11) | Meta solo envía mensajes a una dirección `https://` pública |
 
 Para probar **antes** de tener el VPS, mira la sección 6 (túnel temporal).
 

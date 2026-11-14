@@ -21,6 +21,11 @@ const columns = [
         <span className="supplier-cell__name">
           {supplier.companyname}
           {!supplier.isActive && <span className="supplier-cell__tag">Inactivo</span>}
+          {supplier.incomplete && (
+            <span className="supplier-cell__tag supplier-cell__tag--incomplete" title="Se creó al importar productos: edítalo para llenar sus datos">
+              Por completar
+            </span>
+          )}
         </span>
         {supplier.typeorganization && (
           <span className="supplier-cell__type">{getOrganizationLabel(supplier.typeorganization)}</span>

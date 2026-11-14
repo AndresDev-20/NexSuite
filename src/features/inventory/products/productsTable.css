@@ -187,3 +187,17 @@
     white-space: nowrap;
   }
 }
+
+/* Botones del encabezado de Productos: «Importar Excel» (Fase 28) y «Nuevo producto» */
+.products-header-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (min-width: 768px) {
+  .products-header-actions {
+    flex-direction: row;
+    flex-shrink: 0;
+  }
+}

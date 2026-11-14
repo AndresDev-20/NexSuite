@@ -306,9 +306,27 @@ Usa los roles **Vendedor** (tablet: arma y envía pedidos) y **Cajero** (abre la
 - [ ] En cualquier ventana con formulario, Guardar y Cancelar quedan siempre a la vista abajo (en celular, lado a
       lado). Precios con «$», la tarjeta de ganancia en verde o rojo; en claro y en noche.
 
+## 14.8 Importar productos desde Excel (Fase 28)
+
+Usa una copia del Excel del otro sistema (o la plantilla). Hazlo primero con pocas filas.
+
+- [ ] Con «Todas mis sucursales» en el encabezado, **Productos → Importar Excel** pide elegir una sucursal y no deja
+      subir el archivo. Con una sucursal elegida, la ventana dice en cuál se cargará.
+- [ ] **Descargar plantilla** baja un Excel con los títulos y dos filas de ejemplo.
+- [ ] Al soltar o elegir el .xlsx pasa a **Columnas**: cada dato ya trae su columna (por el título) y la puedes cambiar
+      o dejar en «— No usar —». Un .xls viejo o un archivo que no es Excel muestran el aviso.
+- [ ] **Revisión**: productos nuevos, unidades, ya existían (mismo SKU o código de barras) y con errores (fila y
+      motivo); las categorías y proveedores que se van a crear; «Descargar en Excel» baja las filas malas.
+- [ ] **Importar**: los productos quedan en la lista con sus existencias en esa sucursal (en Movimientos como
+      «Inventario inicial») y las categorías nuevas en Categorías.
+- [ ] En **Compras → Proveedores** los creados salen con la etiqueta **«Por completar»**; al editarlos y llenar sus datos
+      la etiqueta desaparece.
+- [ ] Subir el mismo Excel otra vez: todo sale como «ya existía» (lo que tenga SKU o código de barras).
+- [ ] Un usuario sin «Ver costos» importa sin columna de costo (el costo queda en 0).
+
 ## 15. Producción (cuando montes el VPS)
 
-Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 13). Además:
+Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:
 
 - [ ] El sitio real en Netlify **no** muestra «Demostración · datos ficticios» y el demo sigue igual.
 - [ ] `npm run backup` deja el respaldo en el VPS y en el destino de rclone; restaurar en una base de
