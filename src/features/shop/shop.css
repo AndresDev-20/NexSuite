@@ -2205,17 +2205,46 @@
 /* ==========================================================================
    Marca de la empresa (Fase 29): su logo (puede ser ancho) y su nombre en vez de NexStore
    ========================================================================== */
-.shop-brand__mark--company {
+/* Doble clase: le gana al relleno de 2 px de .shop-brand__mark:has(.shop-brand__logo) */
+.shop-brand__mark.shop-brand__mark--company {
   width: auto;
-  padding: 3px 6px;
+  height: 46px;
+  padding: 5px 9px;
   background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2), inset 0 0 0 1px rgb(0 0 0 / 0.05);
 }
 
 .shop-brand__mark--company .shop-brand__logo {
   width: auto;
-  max-width: 96px;
-  height: 100%;
+  max-width: 92px;
+  /* Altura fija (46 - 2 × 5 de relleno): con 100 % la imagen se estiraba y la caja la cortaba */
+  height: 36px;
   object-fit: contain;
+}
+
+/* Un logo ancho no gira como el ícono: solo se levanta un poco */
+.shop-brand:hover .shop-brand__mark--company {
+  transform: translateY(-1px) scale(1.04);
+}
+
+/* El accesorio de temporada va en la esquina del logo, sin taparlo */
+.shop-brand:has(.shop-brand__mark--company) .season-accessory--store {
+  top: -12px;
+  left: -8px;
+}
+
+@media (max-width: 639px) {
+  .shop-brand__mark.shop-brand__mark--company {
+    height: 40px;
+    padding: 4px 7px;
+    border-radius: 12px;
+  }
+
+  .shop-brand__mark--company .shop-brand__logo {
+    max-width: 68px;
+    height: 32px;
+  }
 }
 
 .shop-brand__name--company {
