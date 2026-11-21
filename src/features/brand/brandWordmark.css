@@ -151,12 +151,117 @@
   to { opacity: 1; transform: none; }
 }
 
-:root[data-motion="reduced"] .wordmark {
+/* ==========================================================================
+   Animado (inicio de sesión): las letras caen una por una, las líneas del eslogan se abren
+   desde el centro y luego, cada tanto, pasa una ola de brillo por el nombre.
+   --wm-delay: cuándo empieza (lo pone el inicio de sesión para ir después del logo).
+   ========================================================================== */
+.wordmark--animated {
+  --wm-delay: 0ms;
+  --wm-step: 42ms;
+  animation: none;
+}
+
+.wordmark__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* El nombre ya no se corta con «…»: se acomoda en dos líneas, partiendo entre palabras */
+.wordmark--animated .wordmark__name {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  text-wrap: balance;
+  line-height: 1.05;
+  text-align: center;
+  perspective: 600px;
+}
+
+.wordmark__word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.wordmark__char {
+  display: inline-block;
+  transform-origin: 50% 100%;
+  animation:
+    wordmark-char-in 720ms cubic-bezier(0.2, 0.9, 0.25, 1.25) both,
+    wordmark-char-shine 6s ease-in-out infinite;
+  animation-delay:
+    calc(var(--wm-delay) + var(--i) * var(--wm-step)),
+    calc(var(--wm-delay) + var(--letters, 12) * var(--wm-step) + 1.2s + var(--i) * 70ms);
+}
+
+/* Letrero: el degradado va en cada letra (el padre ya no lo puede recortar con las letras movidas) */
+.wordmark--animated.wordmark--sign .wordmark__name {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  filter: none;
+}
+
+.wordmark--animated.wordmark--sign .wordmark__char {
+  color: var(--wordmark-accent);
+  background: linear-gradient(180deg, var(--wordmark-accent-light) -20%, var(--wordmark-accent) 55%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Las líneas del eslogan se abren desde el centro y el texto aparece después de las letras */
+.wordmark--animated .wordmark__tagline {
+  animation: wordmark-fade-up 700ms ease both;
+  animation-delay: calc(var(--wm-delay) + var(--letters, 12) * var(--wm-step) + 250ms);
+}
+
+.wordmark--animated .wordmark__tagline::before,
+.wordmark--animated .wordmark__tagline::after {
+  animation: wordmark-line-open 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--wm-delay) + var(--letters, 12) * var(--wm-step) + 150ms);
+}
+
+.wordmark--animated .wordmark__tagline::before { transform-origin: 100% 50%; }
+.wordmark--animated .wordmark__tagline::after { transform-origin: 0 50%; }
+
+@keyframes wordmark-char-in {
+  0% { opacity: 0; filter: blur(8px); transform: translateY(-0.7em) rotateX(80deg) scale(1.15); }
+  60% { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; filter: blur(0); transform: none; }
+}
+
+/* Ola de brillo: cada letra se ilumina un instante, una tras otra */
+@keyframes wordmark-char-shine {
+  0%, 88%, 100% { filter: drop-shadow(0 0 0 transparent); transform: none; }
+  93% { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 22px rgba(255, 255, 255, 0.5)); transform: translateY(-0.06em); }
+}
+
+@keyframes wordmark-line-open {
+  from { opacity: 0; transform: scaleX(0); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+@keyframes wordmark-fade-up {
+  from { opacity: 0; transform: translateY(0.5em); letter-spacing: 0.25em; }
+  to { opacity: 1; transform: none; }
+}
+
+:root[data-motion="reduced"] .wordmark,
+:root[data-motion="reduced"] .wordmark *,
+:root[data-motion="reduced"] .wordmark *::before,
+:root[data-motion="reduced"] .wordmark *::after {
   animation: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wordmark {
+  .wordmark,
+  .wordmark *,
+  .wordmark *::before,
+  .wordmark *::after {
     animation: none !important;
   }
 }

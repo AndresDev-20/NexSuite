@@ -177,7 +177,7 @@ function Login() {
           )}
         </span>
         <p className="login__brandname">
-          <BrandWordmark name={brand.displayName} tagline={brand.tagline} size="login" />
+          <BrandWordmark name={brand.displayName} tagline={brand.tagline} size="login" animated />
         </p>
       </header>
 
