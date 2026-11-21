@@ -8,6 +8,7 @@ import StateMessage from "../../../components/feadback/StateMessage/StateMessage
 import useToast from "../../../components/feadback/Toast/useToast";
 import usePermissions from "../../../features/auth/usePermissions";
 import useActiveBranch from "../../../features/branches/useActiveBranch";
+import { purchaseApi } from "../../../features/purchases/orders/purchaseApi";
 import useCategories from "../../../features/inventory/categories/useCategories";
 import AssignBranchesModal from "../../../features/inventory/products/AssignBranchesModal";
 import ImportProductsModal from "../../../features/inventory/products/ImportProductsModal";
@@ -60,6 +61,7 @@ const ProductsPage = () => {
 
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [subcategoryFilter, setSubcategoryFilter] = useState(""); // Fase 33: solo con una categoría elegida
   const [statusFilter, setStatusFilter] = useState("");
   const [shopFilter, setShopFilter] = useState(""); // "" = en la tienda o no
   const [supplierFilter, setSupplierFilter] = useState(""); // "" = todos los proveedores
@@ -83,6 +85,7 @@ const ProductsPage = () => {
     const params = {
       ...(query.trim() && { search: query.trim() }),
       ...(categoryFilter && { idcategory: categoryFilter }),
+      ...(categoryFilter && subcategoryFilter && { idsubcategory: subcategoryFilter }),
       // "Archivados" pide solo los archivados; Activos/Inactivos filtran los demás
       ...(statusFilter === "archived" ? { archived: "true" } : statusFilter && { isactive: statusFilter }),
       ...(branchFilter && { idbranch: branchFilter }),
@@ -92,7 +95,7 @@ const ProductsPage = () => {
     };
     const timer = setTimeout(() => getAllProducts({ params }), SEARCH_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [query, categoryFilter, statusFilter, branchFilter, shopFilter, supplierFilter, getAllProducts]);
+  }, [query, categoryFilter, subcategoryFilter, statusFilter, branchFilter, shopFilter, supplierFilter, getAllProducts]);
 
   // Las categorías alimentan el filtro y el formulario: sin permiso de consultarlas no se piden
   const canReadCategories = can("categories.read");
@@ -125,6 +128,16 @@ const ProductsPage = () => {
   const categoryOptions = useMemo(
     () => categories.map((category) => ({ value: String(category.id), label: category.nameCategory })),
     [categories]
+  );
+
+  // Fase 33: las subcategorías de la categoría elegida en el filtro
+  const subcategoryOptions = useMemo(
+    () =>
+      (categories.find((category) => String(category.id) === categoryFilter)?.subcategories ?? []).map((sub) => ({
+        value: String(sub.id),
+        label: sub.isActive ? sub.nameSubcategory : `${sub.nameSubcategory} (inactiva)`,
+      })),
+    [categories, categoryFilter]
   );
 
   // El formulario ofrece solo categorías activas; al editar se conserva la actual aunque esté inactiva
@@ -168,6 +181,7 @@ const ProductsPage = () => {
   const clearFilters = () => {
     setQuery("");
     setCategoryFilter("");
+    setSubcategoryFilter("");
     setStatusFilter("");
     setSupplierFilter("");
     setShopFilter("");
@@ -187,7 +201,7 @@ const ProductsPage = () => {
     action(product, ...rest);
   };
 
-  const handleSave = async (payload, assignment = null) => {
+  const handleSave = async (payload, assignment = null, purchase = null) => {
     if (form.product) {
       await updateProduct(form.product.id, payload);
       toast.success("Producto actualizado correctamente.");
@@ -198,6 +212,16 @@ const ProductsPage = () => {
     const created = (await createProduct(payload))?.data;
     const product = created && normalizeProduct(created);
     closeForm();
+    // Fase 32.3: el producto va a una compra abierta (las unidades entran al confirmarla)
+    if (purchase && product) {
+      try {
+        await purchaseApi.addItem(purchase.id, { ...purchase.item, idproduct: product.id });
+        toast.success(`${created.nameproduct} creado y agregado a ${purchase.title}. Las unidades entran al confirmar la compra.`);
+      } catch (err) {
+        toast.error(`${created.nameproduct} se creó, pero no entró a ${purchase.title}: ${getErrorMessage(err, "agrégalo desde Compras.")}`);
+      }
+      return;
+    }
     // Último paso del asistente: si eligió sucursales, se asigna de una vez
     if (assignment && product) {
       try {
@@ -393,7 +417,20 @@ const ProductsPage = () => {
                 placeholder="Todas las categorías"
                 options={categoryOptions}
                 value={categoryFilter}
-                onChange={(event) => setCategoryFilter(event.target.value)}
+                onChange={(event) => {
+                  setCategoryFilter(event.target.value);
+                  setSubcategoryFilter("");
+                }}
+              />
+            )}
+            {subcategoryOptions.length > 0 && (
+              <Select
+                className="list-page__filter"
+                label="Filtrar por subcategoría"
+                placeholder="Todas las subcategorías"
+                options={subcategoryOptions}
+                value={subcategoryFilter}
+                onChange={(event) => setSubcategoryFilter(event.target.value)}
               />
             )}
 
@@ -472,7 +509,15 @@ const ProductsPage = () => {
         showCost={showCost}
         branchStep={
           hasBranches
-            ? { branches: assignBranches, suppliers: activeSuppliers, suppliersHint, canStock: canRegisterStock, canUnits: canRegisterUnits }
+            ? {
+                branches: assignBranches,
+                suppliers: activeSuppliers,
+                suppliersHint,
+                canStock: canRegisterStock,
+                canUnits: canRegisterUnits,
+                // Fase 32.3: «¿A qué compra va?» (la compra lleva el costo)
+                canPurchase: can("orders.update") && showCost,
+              }
             : null
         }
         onClose={closeForm}

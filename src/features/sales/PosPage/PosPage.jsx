@@ -24,6 +24,10 @@ import normalizeText from "../../../utils/normalizeText";
 import { sanitizeDecimal } from "../../../utils/validators";
 import SaleDoneModal from "./SaleDoneModal";
 import UnitPickerModal from "./UnitPickerModal";
+import LayawayCreateModal from "../layaways/LayawayCreateModal";
+import LayawayDetailModal from "../layaways/LayawayDetailModal";
+import { GiftLines, OfferBadge, OffersSummary } from "../offers/cartOffers";
+import { giftLinesOf, useCartOffers } from "../offers/cartOffersLogic";
 import "../../../styles/listPage.css";
 import "./pos.css";
 
@@ -37,7 +41,6 @@ const emptyPayment = (method = "efectivo", amount = "") => ({ key: newSaleKey(),
 /** Una línea del carrito: con serial, la cantidad son los IMEI elegidos. */
 const lineQuantity = (line) => (line.hasSerial ? line.units.length : Number(line.quantity) || 0);
 const lineGross = (line) => cents(line.price) * lineQuantity(line);
-const lineTotal = (line) => Math.max(lineGross(line) - cents(line.discount), 0);
 
 const PosPage = () => {
   const { can } = usePermissions();
@@ -68,6 +71,11 @@ const PosPage = () => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(null); // venta registrada
+  // Apartados (Fase 30): apartar el carrito para un cliente y ver el apartado recién creado
+  const [layawayOpen, setLayawayOpen] = useState(false);
+  // Ofertas (Fase 31): el regalo elegido de cada oferta ({ [idoffer]: { productId | null, units } })
+  const [giftChoices, setGiftChoices] = useState({});
+  const [createdLayaway, setCreatedLayaway] = useState(null);
   const searchRef = useRef(null);
 
   const [chosenSession, setChosenSession] = useState(null);
@@ -180,10 +188,23 @@ const PosPage = () => {
     }, 200);
   };
 
+  /* ---------- Ofertas (Fase 31): las calcula el servidor con lo que se compra ---------- */
+  const boughtItems = useMemo(() => lines.map((line) => ({ idproduct: line.productId, quantity: lineQuantity(line) })), [lines]);
+  const { offers, ready: offersReady } = useCartOffers(branchId, boughtItems);
+  const offerOf = (line) => offers.lines.get(line.productId) ?? null;
+  const lineNet = (line) => Math.max(lineGross(line) - cents(line.discount) - (offerOf(line)?.discount ?? 0), 0);
+  // Libres de un producto para el regalo: lo disponible menos lo que ya va comprado en el carrito
+  const freeOfId = (idproduct) => {
+    const product = products.items.find((item) => item.id === idproduct);
+    const inCartQuantity = lines.filter((line) => line.productId === idproduct).reduce((sum, line) => sum + lineQuantity(line), 0);
+    return product ? Math.max(freeOf(product) - inCartQuantity, 0) : 0;
+  };
+  const gifts = giftLinesOf(offers.gifts, giftChoices, freeOfId);
+
   /* ---------- Totales ---------- */
   const subtotal = lines.reduce((sum, line) => sum + lineGross(line), 0);
   const lineDiscounts = lines.reduce((sum, line) => sum + Math.min(cents(line.discount), lineGross(line)), 0);
-  const total = Math.max(subtotal - lineDiscounts - cents(discount), 0);
+  const total = Math.max(subtotal - lineDiscounts - offers.savings - cents(discount), 0);
   // Con un solo pago, su valor es el total (se calcula al mostrar, no se guarda aparte); si es fiado,
   // la cuota inicial va primero y lo fiado es el resto
   const singlePayment = payments.length === 1;
@@ -213,8 +234,10 @@ const PosPage = () => {
     const quantity = lineQuantity(line);
     if (quantity < 1) problems.push(`${line.name}: ${line.hasSerial ? "elige los IMEI" : "escribe la cantidad"}.`);
     else if (!line.hasSerial && quantity > line.available) problems.push(`${line.name}: solo hay ${line.available}.`);
-    if (cents(line.discount) > lineGross(line)) problems.push(`${line.name}: el descuento supera su valor.`);
+    if (cents(line.discount) > lineGross(line) - (offerOf(line)?.discount ?? 0)) problems.push(`${line.name}: el descuento supera lo que queda después de la oferta.`);
   });
+  if (!offersReady) problems.push("Calculando las ofertas… un momento.");
+  problems.push(...gifts.problems);
   if (total > 0 && pending !== 0) problems.push(pending > 0 ? `Faltan ${formatCurrency(pesos(pending))} por pagar.` : `Los pagos pasan el total por ${formatCurrency(pesos(-pending))}.`);
   if (payments.some((payment) => payment.method === "credito") && !canCredit) problems.push("Para fiar elige un cliente con cupo.");
   if (credit > 0 && creditProblem) problems.push(creditProblem);
@@ -231,6 +254,7 @@ const PosPage = () => {
     setNotes("");
     setPlan(emptyPlan());
     setDown(emptyDown());
+    setGiftChoices({});
     setSaleKey(newSaleKey());
     setError("");
     searchRef.current?.focus();
@@ -249,11 +273,15 @@ const PosPage = () => {
         idsession: session.id,
         iduser: Number(sellerId),
         ...(customer && { idcustomer: customer.id }),
-        items: lines.map((line) => ({
-          idproduct: line.productId,
-          ...(line.hasSerial ? { unitIds: line.units.map((unit) => unit.id) } : { quantity: Number(line.quantity) }),
-          ...(canDiscount && cents(line.discount) > 0 && { discount: Number(line.discount) }),
-        })),
+        items: [
+          ...lines.map((line) => ({
+            idproduct: line.productId,
+            ...(line.hasSerial ? { unitIds: line.units.map((unit) => unit.id) } : { quantity: Number(line.quantity) }),
+            ...(canDiscount && cents(line.discount) > 0 && { discount: Number(line.discount) }),
+          })),
+          // Regalos de las ofertas en $0 (el servidor revisa que le toquen)
+          ...gifts.items,
+        ],
         ...(canDiscount && cents(discount) > 0 && { discount: Number(discount) }),
         payments: effectivePayments
           .filter((payment) => cents(payment.amount) > 0)
@@ -278,6 +306,34 @@ const PosPage = () => {
     } finally {
       setBusy(false);
     }
+  };
+
+  /* ---------- Apartar (Fase 30) ---------- */
+  const canLayaway = can("layaways.create");
+  const layawayCart = lines.map((line) => ({
+    productId: line.productId,
+    name: line.name,
+    price: line.price,
+    quantity: lineQuantity(line),
+    ...(line.hasSerial && { unitIds: line.units.map((unit) => unit.id), serials: line.units.map((unit) => unit.serial).join(", ") }),
+  }));
+  const openLayaway = () => {
+    const itemProblem = problems.find((problem) => /elige los IMEI|escribe la cantidad|solo hay|Agrega al menos/.test(problem));
+    if (itemProblem) {
+      setError(itemProblem);
+      return;
+    }
+    setError("");
+    setLayawayOpen(true);
+  };
+  const handleLayawayCreated = ({ message, data }) => {
+    toast.success(message ?? `Apartado ${data.number} registrado.`);
+    setLayawayOpen(false);
+    setCreatedLayaway(data.id);
+    rememberSession(session.id);
+    resetSale();
+    loadProducts();
+    reloadReserved();
   };
 
   /* ---------- Sin turno ---------- */
@@ -542,12 +598,22 @@ const PosPage = () => {
                       {lineQuantity(line)} × {formatCurrency(line.price)}
                       {cents(line.discount) > 0 && ` − ${formatCurrency(Number(line.discount))}`}
                     </span>
-                    <strong key={lineTotal(line)}>{formatCurrency(pesos(lineTotal(line)))}</strong>
+                    <strong key={lineNet(line)}>{formatCurrency(pesos(lineNet(line)))}</strong>
                   </p>
+                  <OfferBadge offer={offerOf(line)} />
                 </li>
               ))}
             </ul>
           )}
+
+          {/* Regalos de las ofertas: entran solos; se cambian o se quitan */}
+          <GiftLines
+            gifts={offers.gifts}
+            choices={giftChoices}
+            onChange={setGiftChoices}
+            freeOf={freeOfId}
+            onPickUnits={({ gift, option, units }) => setPicking({ productId: option.idproduct, name: option.name, hasSerial: true, units, giftOffer: gift.idoffer })}
+          />
 
           <div className="pos__row pos__customer">
             {canReadCustomers ? (
@@ -595,6 +661,12 @@ const PosPage = () => {
               <dt>Subtotal</dt>
               <dd>{formatCurrency(pesos(subtotal))}</dd>
             </div>
+            {offers.savings > 0 && (
+              <div className="pos__offers-total">
+                <dt>Ofertas</dt>
+                <dd>− {formatCurrency(pesos(offers.savings))}</dd>
+              </div>
+            )}
             {lineDiscounts + cents(discount) > 0 && (
               <div>
                 <dt>Descuentos</dt>
@@ -606,6 +678,8 @@ const PosPage = () => {
               <dd key={total}>{formatCurrency(pesos(total))}</dd>
             </div>
           </dl>
+
+          <OffersSummary offers={offers} />
 
           {/* ---------- Pagos ---------- */}
           <h2 className="pos__section-title">
@@ -715,6 +789,18 @@ const PosPage = () => {
             <Button variant="outline" onClick={resetSale} disabled={busy || lines.length === 0}>
               Cancelar venta
             </Button>
+            {canLayaway && (
+              <Button
+                variant="outline"
+                icon="lock"
+                className="pos__layaway-button"
+                title="El cliente abona y se le aparta: no es venta todavía y nadie más lo puede vender"
+                onClick={openLayaway}
+                disabled={busy || lines.length === 0}
+              >
+                Apartar
+              </Button>
+            )}
             <Button
               icon="check"
               className={`pos__charge-button ${lines.length > 0 && !busy && pending <= 0 ? "pos__charge-button--ready" : ""}`.trim()}
@@ -730,19 +816,33 @@ const PosPage = () => {
       <UnitPickerModal
         line={picking}
         branchId={branchId}
+        verb={picking?.giftOffer ? "Regalar" : "Vender"}
         onClose={() => {
-          // Si no eligió ninguno, la línea con serial vacía se quita
-          if (picking && !lines.find((line) => line.productId === picking.productId)?.units.length) removeLine(picking.productId);
+          // Si no eligió ninguno, la línea con serial vacía se quita (el regalo no es una línea del carrito)
+          if (picking && !picking.giftOffer && !lines.find((line) => line.productId === picking.productId)?.units.length) removeLine(picking.productId);
           setPicking(null);
         }}
         onConfirm={(units) => {
-          updateLine(picking.productId, { units });
+          if (picking.giftOffer) setGiftChoices((current) => ({ ...current, [picking.giftOffer]: { productId: picking.productId, units } }));
+          else updateLine(picking.productId, { units });
           setPicking(null);
           searchRef.current?.focus();
         }}
       />
 
       <SaleDoneModal result={done} onClose={() => setDone(null)} />
+
+      <LayawayCreateModal
+        open={layawayOpen}
+        cart={layawayCart}
+        session={session}
+        sellerId={sellerId}
+        customers={customers.filter((item) => item.isActive !== false)}
+        initialCustomerId={customerId}
+        onClose={() => setLayawayOpen(false)}
+        onCreated={handleLayawayCreated}
+      />
+      <LayawayDetailModal layawayId={createdLayaway} onClose={() => setCreatedLayaway(null)} />
     </section>
   );
 };

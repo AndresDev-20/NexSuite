@@ -1,0 +1,322 @@
+/* Logo de la empresa (Fase 29): subir, ver cómo queda y quitar */
+.logo-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  margin-bottom: 20px;
+  background:
+    radial-gradient(120% 80% at 0% 0%, color-mix(in srgb, var(--red-500) 8%, transparent), transparent 60%),
+    var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  animation: logo-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.logo-settings__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.logo-settings__title {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.logo-settings__text {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--color-text-muted);
+}
+
+.logo-settings__status {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--gray-100);
+  border-radius: 999px;
+}
+
+.logo-settings__status .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.logo-settings__status--ok {
+  color: var(--success-text);
+  background: var(--success-soft);
+}
+
+.logo-settings__body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .logo-settings__body {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: start;
+  }
+}
+
+/* ---------- Zona para soltar ---------- */
+.logo-drop {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  padding: 20px 16px;
+  text-align: center;
+  background: var(--color-bg-alt, var(--gray-50));
+  border: 2px dashed var(--gray-300);
+  border-radius: 16px;
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+
+.logo-drop--over {
+  border-color: var(--color-primary);
+  transform: scale(1.01);
+}
+
+.logo-drop--staged {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--success) 55%, transparent);
+}
+
+/* Fondo de cuadros: así se nota si el logo tiene fondo transparente */
+.logo-drop__frame {
+  display: grid;
+  place-items: center;
+  width: 150px;
+  height: 150px;
+  padding: 14px;
+  background: conic-gradient(var(--gray-100) 25%, var(--white) 0 50%, var(--gray-100) 0 75%, var(--white) 0) 0 0 / 18px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: 0 14px 28px -20px rgba(15, 23, 42, 0.6);
+  animation: logo-pop 420ms cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+.logo-drop__frame img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.logo-drop__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.logo-drop__hint strong {
+  color: var(--success-text);
+}
+
+.logo-drop__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.logo-drop__error {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--danger);
+}
+
+/* ---------- Cómo queda ---------- */
+.logo-preview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.logo-preview__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  animation: logo-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 70ms);
+}
+
+.logo-preview__item--header,
+.logo-preview__item--tab {
+  grid-column: 1 / -1;
+}
+
+.logo-preview__caption {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.logo-preview img {
+  object-fit: contain;
+}
+
+.logo-preview strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logo-preview__bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  height: 52px;
+  padding: 0 14px;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-bottom: 3px solid var(--red-600);
+  border-radius: 12px;
+}
+
+.logo-preview__bar img {
+  width: 34px;
+  height: 34px;
+}
+
+.logo-preview__login {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  padding: 14px 12px;
+  background: linear-gradient(180deg, var(--color-primary-soft), var(--white) 60%);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.logo-preview__login img {
+  width: 46px;
+  height: 46px;
+}
+
+.logo-preview__login strong {
+  max-width: 100%;
+  font-size: 0.85rem;
+}
+
+.logo-preview__field,
+.logo-preview__button {
+  width: 100%;
+  height: 10px;
+  background: var(--gray-100);
+  border-radius: 6px;
+}
+
+.logo-preview__button {
+  background: var(--red-600);
+}
+
+.logo-preview__ticket {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+  padding: 12px 10px;
+  font-family: "Courier New", monospace;
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  box-shadow: 0 8px 16px -14px rgba(15, 23, 42, 0.7);
+}
+
+/* Así sale en la impresora térmica (blanco y negro) */
+.logo-preview__ticket img {
+  width: 56px;
+  height: 36px;
+  filter: grayscale(1) contrast(1.2);
+}
+
+.logo-preview__ticket strong {
+  max-width: 100%;
+  font-size: 0.78rem;
+  color: #18181b;
+}
+
+.logo-preview__ticket span {
+  width: 100%;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, #d4d4d8 0 6px, transparent 6px 9px);
+}
+
+.logo-preview__ticket .logo-preview__short {
+  width: 60%;
+}
+
+.logo-preview__tab {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  max-width: 260px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  background: var(--gray-100);
+  border-radius: 10px 10px 0 0;
+}
+
+.logo-preview__tab img {
+  width: 16px;
+  height: 16px;
+}
+
+.logo-preview__tab span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logo-preview__tab .icon {
+  width: 12px;
+  height: 12px;
+  color: var(--color-text-muted);
+}
+
+@keyframes logo-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes logo-pop {
+  0% { opacity: 0; transform: scale(0.85); }
+  70% { transform: scale(1.04); }
+  100% { opacity: 1; transform: none; }
+}
+
+:root[data-motion="reduced"] .logo-settings,
+:root[data-motion="reduced"] .logo-settings * {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-settings,
+  .logo-settings * {
+    animation: none !important;
+  }
+}
+
+/* El nombre con su estilo (BrandWordmark) en las vistas previas */
+.logo-preview__wordmark {
+  max-width: 100%;
+}
+
+.logo-preview__bar .logo-preview__wordmark {
+  align-items: flex-start;
+}

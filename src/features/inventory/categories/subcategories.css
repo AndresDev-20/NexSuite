@@ -1,0 +1,106 @@
+/* Subcategorías (Fase 33): lista dentro de su categoría y etiquetas en la tabla */
+.subcategories {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.subcategories__add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.subcategories__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.subcategories__note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.subcategories__error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-danger, #b42318);
+}
+
+.subcategory-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+@media (min-width: 640px) {
+  .subcategory-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+}
+
+.subcategory-row--off {
+  background-color: var(--gray-50);
+  opacity: 0.8;
+}
+
+.subcategory-row__name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+}
+
+.subcategory-row__name span {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.subcategory-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* En la tabla de categorías */
+.subcategory-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+.subcategory-chip {
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  color: var(--gray-700);
+  background-color: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+}
+
+.subcategory-chip--off {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.subcategory-chips__empty {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.subcategory-chips__btn {
+  min-height: 30px;
+  padding: 2px 10px;
+  font-size: 0.8rem;
+}

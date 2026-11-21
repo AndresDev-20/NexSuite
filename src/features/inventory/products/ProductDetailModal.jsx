@@ -269,6 +269,7 @@ const ProductSheet = ({ listed, onChanged, canEdit, canDelete, showCost, onClose
       <Section title="Datos del producto">
         <dl className="product-detail__list">
           <Item label="Categoría">{product.categoryName}</Item>
+          {product.subcategoryName && <Item label="Subcategoría">{product.subcategoryName}</Item>}
           {product.supplierName && (
             <Item label="Proveedor habitual">{product.supplierActive ? product.supplierName : `${product.supplierName} (inactivo)`}</Item>
           )}

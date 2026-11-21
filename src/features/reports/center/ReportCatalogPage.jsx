@@ -10,7 +10,7 @@ import "./reportCenter.css";
 
 // Los informes por tema; uno que llegue sin tema va en «Otros»
 const GROUPS = [
-  { title: "Ventas y ganancias", types: ["sales", "profit", "products", "comparison"] },
+  { title: "Ventas y ganancias", types: ["sales", "profit", "products", "offers", "comparison"] },
   { title: "Mercancía", types: ["inventory", "purchases"] },
   { title: "Dinero", types: ["cash", "receivables", "payables", "expenses"] },
 ];

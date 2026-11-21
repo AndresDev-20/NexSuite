@@ -1,0 +1,162 @@
+/*
+ * Nombre de la empresa (Fase 29): «letrero» (con eslogan) o «como NexSuite» (solo el nombre).
+ * Colores: --wordmark-accent (rojo) y --wordmark-ink (oscuro); sobre fondo rojo, los dos en blanco.
+ */
+.wordmark {
+  --wordmark-accent: var(--red-600);
+  --wordmark-accent-light: var(--red-400, #f87171);
+  --wordmark-ink: var(--gray-900);
+  --wordmark-line: color-mix(in srgb, var(--wordmark-accent) 70%, transparent);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  line-height: 1;
+  color: var(--wordmark-ink);
+}
+
+:root[data-theme="dark"] .wordmark {
+  --wordmark-ink: #f4f4f5;
+  --wordmark-accent: #ff4d63;
+  --wordmark-accent-light: #ff8a9a;
+}
+
+.wordmark--on-accent,
+:root[data-theme="dark"] .wordmark--on-accent {
+  --wordmark-accent: #ffffff;
+  --wordmark-accent-light: #ffe4e8;
+  --wordmark-ink: rgba(255, 255, 255, 0.92);
+  --wordmark-line: rgba(255, 255, 255, 0.55);
+}
+
+.wordmark__name {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Solo el nombre: como NexSuite ---------- */
+.wordmark--script .wordmark__name {
+  font-family: var(--font-brand);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.wordmark--script .wordmark__first {
+  font-weight: 700;
+  color: var(--wordmark-accent);
+}
+
+/* ---------- Nombre y eslogan: letrero ---------- */
+.wordmark--sign .wordmark__name {
+  padding-bottom: 0.04em;
+  font-family: var(--font-sans);
+  font-weight: 900;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  color: var(--wordmark-accent);
+  background: linear-gradient(180deg, var(--wordmark-accent-light) -20%, var(--wordmark-accent) 55%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 0 color-mix(in srgb, var(--wordmark-accent) 18%, transparent));
+}
+
+.wordmark__tagline {
+  display: flex;
+  gap: 0.6em;
+  align-items: center;
+  max-width: 100%;
+  margin-top: 0.32em;
+  font-family: var(--font-sans);
+  font-size: 0.36em;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  color: var(--wordmark-ink);
+}
+
+/* Las dos líneas finas a los lados del eslogan */
+.wordmark__tagline::before,
+.wordmark__tagline::after {
+  flex: 1 1 1.2em;
+  min-width: 0.8em;
+  height: 2px;
+  content: "";
+  background: linear-gradient(90deg, transparent, var(--wordmark-line));
+  border-radius: 2px;
+}
+
+.wordmark__tagline::after {
+  background: linear-gradient(90deg, var(--wordmark-line), transparent);
+}
+
+/* ---------- Tamaños de cada lugar ---------- */
+.wordmark--login {
+  font-size: clamp(1.4rem, min(4.6dvh, 9vw), 2.4rem);
+}
+
+.wordmark--login.wordmark--sign {
+  /* Un nombre largo en mayúsculas debe caber a lo ancho del celular */
+  font-size: clamp(1.4rem, min(5.4dvh, 8vw), 3rem);
+  animation: wordmark-in 640ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.wordmark--header {
+  align-items: flex-start;
+  font-size: 1.3rem;
+}
+
+.wordmark--header.wordmark--sign {
+  font-size: 1.15rem;
+}
+
+.wordmark--header .wordmark__tagline {
+  font-size: 0.5em;
+}
+
+.wordmark--header .wordmark__tagline::before {
+  display: none;
+}
+
+.wordmark--shop {
+  align-items: flex-start;
+  font-size: 1.15rem;
+}
+
+.wordmark--shop .wordmark__tagline {
+  font-size: 0.48em;
+}
+
+.wordmark--shop .wordmark__tagline::before {
+  display: none;
+}
+
+.wordmark--preview {
+  font-size: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .wordmark--header { font-size: 1.55rem; }
+  .wordmark--header.wordmark--sign { font-size: 1.3rem; }
+  .wordmark--shop { font-size: 1.35rem; }
+}
+
+@keyframes wordmark-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); letter-spacing: 0.06em; }
+  to { opacity: 1; transform: none; }
+}
+
+:root[data-motion="reduced"] .wordmark {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wordmark {
+    animation: none !important;
+  }
+}

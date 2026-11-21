@@ -696,3 +696,58 @@ button.form__link {
     box-shadow: none;
   }
 }
+
+/* ==========================================================================
+   Marca de la empresa (Fase 29)
+   ========================================================================== */
+.login__logo--company {
+  width: auto;
+  max-width: min(70vw, 260px);
+  height: clamp(56px, 11dvh, 96px);
+  object-fit: contain;
+  border-radius: 14px; /* un logo con fondo propio no queda en esquinas duras */
+  filter: drop-shadow(0 10px 18px rgba(15, 23, 42, 0.18));
+}
+
+.login__wordmark--company {
+  max-width: min(90vw, 520px);
+  font-family: inherit;
+  font-style: normal;
+  font-weight: 800;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.login__signature {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.power__logo--company {
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
+}
+
+/* Nombre de la empresa con su estilo (BrandWordmark, Fase 29) */
+.login__brandname {
+  max-width: min(92vw, 560px);
+  margin: 0;
+  text-align: center;
+}
+
+@media (max-height: 560px) {
+  .login__brandname .wordmark__tagline { display: none; }
+}
+
+/* En computador va sobre el panel rojo: en blanco */
+@media (min-width: 1024px) {
+  .login__brandname .wordmark {
+    --wordmark-accent: #ffffff;
+    --wordmark-accent-light: #ffe4e8;
+    --wordmark-ink: rgba(255, 255, 255, 0.92);
+    --wordmark-line: rgba(255, 255, 255, 0.55);
+  }
+  .login__brandname .wordmark--login { font-size: clamp(2.4rem, 6dvh, 3.5rem); }
+  .login__brandname .wordmark--login.wordmark--sign { font-size: clamp(2.2rem, 6.4dvh, 3.8rem); }
+}

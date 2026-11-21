@@ -1,0 +1,360 @@
+/* Compra abierta (Fase 32): detalle por proveedor, resumen y confirmar con la forma de pago de cada uno */
+.purchase-detail__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.purchase-detail__head-side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.purchase-detail__title {
+  margin: 2px 0;
+  font-size: clamp(1.15rem, 3.5vw, 1.45rem);
+  overflow-wrap: anywhere;
+}
+
+.purchase-detail__muted {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  overflow-wrap: anywhere;
+}
+
+.purchase-detail__notes {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  background: var(--gray-50);
+  border-radius: 12px;
+}
+
+.purchase-detail__summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .purchase-detail__summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.purchase-detail__summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  background: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.purchase-detail__summary dt {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--gray-500);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.purchase-detail__summary dd {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  animation: purchase-detail-pop 320ms ease both;
+}
+
+.purchase-detail__summary dd span {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.purchase-detail__summary-total {
+  color: #fff;
+  background: var(--color-primary) !important;
+  border-color: transparent !important;
+}
+
+.purchase-detail__summary-total dt {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.purchase-detail__summary-profit {
+  color: #065f46;
+  background: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+}
+
+.purchase-detail__summary-profit--loss {
+  color: var(--red-700);
+  background: var(--red-50) !important;
+  border-color: var(--red-100) !important;
+}
+
+.purchase-detail__parts {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.purchase-detail__part {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-primary);
+  border-radius: 16px;
+  animation: purchase-detail-in 420ms cubic-bezier(0.3, 1.2, 0.5, 1) both;
+  animation-delay: calc(var(--i) * 70ms);
+}
+
+.purchase-detail__part-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.purchase-detail__part-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  border-radius: 12px;
+}
+
+.purchase-detail__part-icon .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.purchase-detail__part-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.purchase-detail__part-title h3 {
+  margin: 0;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.purchase-detail__part-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.purchase-detail__money {
+  font-variant-numeric: tabular-nums;
+}
+
+.purchase-detail__items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.purchase-detail__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--gray-50);
+  border-radius: 12px;
+}
+
+.purchase-detail__item-main,
+.purchase-detail__item-side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.purchase-detail__item-side {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.purchase-detail__item-name {
+  overflow-wrap: anywhere;
+}
+
+.purchase-detail__split {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.purchase-detail__chip {
+  padding: 2px 8px;
+  font-size: 0.74rem;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+.purchase-detail__sale {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #047857;
+}
+
+.purchase-detail__remove {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: var(--gray-500);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+
+.purchase-detail__remove:hover,
+.purchase-detail__remove:focus-visible {
+  color: var(--red-700);
+  background: var(--red-50);
+  border-color: var(--red-100);
+}
+
+.purchase-detail__remove .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.purchase-detail__part-edit {
+  align-self: flex-start;
+}
+
+@media (max-width: 560px) {
+  .purchase-detail__item {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .purchase-detail__item-side {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    align-items: baseline;
+    text-align: left;
+  }
+
+  .purchase-detail__part-head {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .purchase-detail__part-total {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    gap: 10px;
+    align-items: baseline;
+  }
+}
+
+/* ---------- Confirmar: forma de pago de cada proveedor ---------- */
+.purchase-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.purchase-confirm__intro {
+  margin: 0;
+  color: var(--gray-600, #52525b);
+}
+
+.purchase-confirm__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.purchase-confirm__row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.purchase-confirm__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.purchase-confirm__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.purchase-confirm__total {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 14px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--color-primary);
+  border-radius: 14px;
+}
+
+.purchase-confirm__note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--gray-500);
+}
+
+@keyframes purchase-detail-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes purchase-detail-pop {
+  from { opacity: 0.4; transform: scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+:root[data-motion="reduced"] .purchase-detail__part,
+:root[data-motion="reduced"] .purchase-detail__summary dd {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .purchase-detail__part,
+  .purchase-detail__summary dd {
+    animation: none;
+  }
+}

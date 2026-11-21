@@ -585,3 +585,46 @@
   }
 }
 
+
+/* ==========================================================================
+   Marca de la empresa (Fase 29): su logo (puede ser ancho) y su nombre en vez de NexSuite
+   ========================================================================== */
+.header__logo-image--company {
+  width: auto;
+  max-width: 110px;
+}
+
+:root[data-theme="dark"] .header__logo-image--company {
+  padding: 2px 4px;
+  background: #fff;
+}
+
+.header__logo-text--company {
+  max-width: clamp(90px, 26vw, 260px);
+  overflow: hidden;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-style: normal;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 1024px) {
+  .header__logo-text--company { font-size: 1.15rem; }
+}
+
+/* Nombre de la empresa con su estilo (BrandWordmark); el eslogan solo en pantallas anchas */
+.header__wordmark {
+  max-width: clamp(110px, 34vw, 320px);
+}
+
+.header__wordmark .wordmark__tagline {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .header__wordmark .wordmark__tagline {
+    display: flex;
+  }
+}

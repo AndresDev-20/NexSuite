@@ -4,9 +4,9 @@ import Icon from "../../components/ui/Icon/Icon";
 import getErrorMessage from "../../utils/getErrorMessage";
 import { useCart } from "./cartContext";
 import Reveal from "./Reveal";
-import { Arrow, Availability, ChatIcon, ProductRail, ProductTile, QuantityStepper } from "./ShopParts";
+import { Arrow, Availability, ChatIcon, OfferTags, Price, ProductRail, ProductTile, QuantityStepper } from "./ShopParts";
 import { getShopProduct, getShopProducts } from "./shopApi";
-import { STORE_NAME, money, orderMessage, whatsappLink } from "./shopFormat";
+import { offerNoteOf, orderMessage, priceOf, storeNameOf, whatsappLink } from "./shopFormat";
 
 const UNITS = { unidad: "unidad", caja: "caja", paquete: "paquete", par: "par", kg: "kg", g: "g", l: "litro", ml: "ml", m: "metro" };
 const RELATED = 12;
@@ -20,6 +20,12 @@ const ShopProduct = ({ id }) => {
   const { shop } = useOutletContext();
   const { add, quantityOf, setOpen } = useCart();
   const [state, setState] = useState({ done: false, product: null, error: "", missing: false });
+  // La pestaña: el producto y el nombre de la tienda (el de la empresa, Fase 29)
+  const storeName = storeNameOf(shop);
+  const productName = state.product?.name;
+  useEffect(() => {
+    if (productName) document.title = `${productName} · ${storeName}`;
+  }, [productName, storeName]);
   const [related, setRelated] = useState([]);
   const [quantity, setQuantity] = useState(1);
 
@@ -30,7 +36,6 @@ const ShopProduct = ({ id }) => {
       .then((product) => {
         if (!current) return;
         setState({ done: true, product, error: "", missing: false });
-        document.title = `${product.name} · ${STORE_NAME}`;
         // Otros de la misma categoría (los disponibles primero)
         if (product.category) {
           getShopProducts({ category: product.category.id })
@@ -74,7 +79,7 @@ const ShopProduct = ({ id }) => {
   const { product } = state;
   const out = product.availability === "out";
   const inCart = quantityOf(product.id);
-  const single = shop?.whatsapp && !out ? whatsappLink(shop.whatsapp, orderMessage([{ ...product, quantity }])) : null;
+  const single = shop?.whatsapp && !out ? whatsappLink(shop.whatsapp, orderMessage([{ ...product, price: priceOf(product), note: offerNoteOf(product), quantity }], "", storeNameOf(shop))) : null;
   const ask = shop?.whatsapp && out ? whatsappLink(shop.whatsapp, `Hola, ¿cuándo les llega «${product.name}»?`) : null;
 
   return (
@@ -85,6 +90,12 @@ const ShopProduct = ({ id }) => {
           <>
             <Arrow />
             <Link to={`/tienda?categoria=${product.category.id}`}>{product.category.name}</Link>
+          </>
+        )}
+        {product.category && product.subcategory && (
+          <>
+            <Arrow />
+            <Link to={`/tienda?categoria=${product.category.id}&subcategoria=${product.subcategory.id}`}>{product.subcategory.name}</Link>
           </>
         )}
         <Arrow />
@@ -98,15 +109,19 @@ const ShopProduct = ({ id }) => {
 
         <div className="shop-buybox">
           {product.category && (
-            <Link to={`/tienda?categoria=${product.category.id}`} className="shop-buybox__category">
-              {product.category.name}
+            <Link
+              to={product.subcategory ? `/tienda?categoria=${product.category.id}&subcategoria=${product.subcategory.id}` : `/tienda?categoria=${product.category.id}`}
+              className="shop-buybox__category"
+            >
+              {product.subcategory ? `${product.category.name} · ${product.subcategory.name}` : product.category.name}
             </Link>
           )}
           <h1 className="shop-buybox__name">{product.name}</h1>
           <div className="shop-buybox__price-row">
-            <strong className="shop-buybox__price">{money(product.price)}</strong>
+            <Price product={product} className="shop-buybox__price" />
             <span className="shop-buybox__unit">por {UNITS[product.unit] ?? product.unit}</span>
           </div>
+          <OfferTags offers={product.offers} />
           <ul className="shop-buybox__facts">
             <li>
               <Availability value={product.availability} />

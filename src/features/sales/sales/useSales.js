@@ -17,7 +17,8 @@ export const PAYMENT_METHODS = [
   { value: "credito", label: "Crédito (fiado)" },
 ];
 
-const METHOD_LABELS = Object.fromEntries(PAYMENT_METHODS.map((method) => [method.value, method.label]));
+// «apartado» (Fase 30): la venta que entrega un apartado, pagada con sus abonos
+const METHOD_LABELS = { ...Object.fromEntries(PAYMENT_METHODS.map((method) => [method.value, method.label])), apartado: "Abonos del apartado" };
 export const getMethodLabel = (value) => METHOD_LABELS[value] ?? value;
 
 /** Clave única de una venta: la misma venta enviada dos veces se registra una sola vez. */
@@ -35,6 +36,10 @@ const normalizeItem = (item) => ({
   unitPrice: toNumber(item.unitprice),
   discount: toNumber(item.discount),
   total: toNumber(item.total),
+  // Ofertas (Fase 31): el regalo y lo que rebajó la oferta (va dentro de discount)
+  gift: Boolean(item.isgift),
+  offerName: item.offer?.name ?? "",
+  offerDiscount: toNumber(item.offerdiscount ?? 0),
   // null sin "Ver costos"
   unitCost: item.unitcost === undefined ? null : toNumber(item.unitcost),
   serials: (item.serials ?? []).map((unit) => ({ id: unit.id, serial: unit.serial, imei2: unit.imei2 ?? null, warrantyMonths: unit.warrantymonths ?? 0 })),

@@ -23,6 +23,9 @@ export const normalizeProduct = (product) => ({
   features: Array.isArray(product.features) ? product.features : [],
   categoryId: product.idcategory ?? product.category?.id ?? null,
   categoryName: product.category?.nameCategory ?? "",
+  // Fase 33: subcategoría opcional
+  subcategoryId: product.idsubcategory ?? product.subcategory?.id ?? null,
+  subcategoryName: product.subcategory?.nameSubcategory ?? "",
   // Proveedor habitual (Fase 27); solo llega con «Consultar proveedores»
   supplierId: product.idsupplier ?? product.supplier?.id ?? null,
   supplierName: product.supplier?.companyname ?? "",

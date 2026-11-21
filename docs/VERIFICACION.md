@@ -323,6 +323,139 @@ Usa una copia del Excel del otro sistema (o la plantilla). Hazlo primero con poc
       la etiqueta desaparece.
 - [ ] Subir el mismo Excel otra vez: todo sale como «ya existía» (lo que tenga SKU o código de barras).
 - [ ] Un usuario sin «Ver costos» importa sin columna de costo (el costo queda en 0).
+- [ ] **Varias sucursales:** importa un Excel en la sucursal 1; elige la sucursal 2 y sube su Excel con algunos productos
+      iguales (mismo SKU, o sin SKU pero el mismo nombre): la revisión los muestra en **«Ya existían: se les carga la
+      cantidad en …»** y al importar **no se crean otra vez** (en Productos sale uno solo, con su cantidad en cada
+      sucursal). Si el Excel trae otro precio, avisa y se deja el del sistema.
+
+## 14.9 Logo y nombre de la empresa (Fase 29)
+
+- [ ] **Configuración → Datos del negocio → Logo de la empresa**: suelta o elige un PNG, JPG o WebP; sale «Nuevo logo
+      listo» con su tamaño y la vista previa (encabezado, inicio de sesión, comprobante y pestaña) se ve con él.
+      **Guardar logo** → ya se ve en el encabezado y en el ícono de la pestaña.
+- [ ] Cambia el **Nombre del negocio** y guarda: el encabezado y la pestaña dicen ese nombre.
+- [ ] Cierra sesión: el **inicio de sesión** muestra el logo y el nombre de la empresa, y abajo «© año · Empresa ·
+      Hecho por NEXOON».
+- [ ] La **tienda en línea** tiene el logo y el nombre de la empresa (encabezado, bienvenida, pie con «Hecho por
+      NEXOON» y la pestaña); el mensaje de WhatsApp dice «Pedido desde <empresa>».
+- [ ] Un **comprobante de venta** (tirilla y carta), el **balance** en PDF y en Excel y un **informe** en PDF salen
+      con el logo arriba; los PDF dicen «Hecho por NEXOON» al pie.
+- [ ] Las vistas previas de **Nueva sucursal** y del **carné** del usuario usan el logo de la empresa.
+- [ ] Escribe un **Eslogan** y guarda: el nombre se ve como **letrero** (mayúsculas, rojo, el eslogan debajo entre
+      dos líneas) en el inicio de sesión, el encabezado (eslogan en pantallas anchas) y la tienda; el comprobante
+      lo trae debajo del nombre. Bórralo y guarda: el nombre vuelve al estilo de NexSuite (cursiva, primera palabra
+      en rojo).
+- [ ] **Quitar** el logo: todo vuelve al de NexSuite.
+- [ ] **Comprobante de venta** renovado: en la tirilla la **sucursal de venta** sale en un bloque negro con su nombre
+      grande y el número del comprobante grande; el TOTAL en una barra negra. En carta, la sucursal en una banda
+      resaltada, el número en una tarjeta arriba a la derecha y el TOTAL en rojo. Los descuentos salen con «-».
+- [ ] Un usuario sin «Configurar el negocio» no ve la tarjeta del logo.
+- [ ] En celular (375 px) nada se sale de la pantalla; en modo noche el logo se ve.
+
+## 14.10 Apartados (Fase 30)
+
+Dale los permisos de apartados a los roles que los usan (**Administrativo → Roles → Ventas · Apartados**).
+
+- [ ] En **Vender** arma un carrito (un producto por cantidad y un celular con su IMEI) y toca **«Apartar»**: elige el
+      cliente, escribe un abono pequeño en efectivo y aparta. Se abre la ficha del apartado y el carrito queda vacío.
+- [ ] Ese celular ya no sale para vender (ni en Vender ni en la tienda) y la cantidad apartada no se puede vender,
+      trasladar ni ajustar hacia abajo.
+- [ ] **Caja → Mi caja de hoy**: el abono en efectivo aparece como ingreso «Abono al apartado APT-…».
+- [ ] **Ventas → Apartados**: está en «Vigentes» con su barra; ábrelo y **Abona** por Nequi con referencia (sale en
+      **Pagos por medio**); imprime la **Tirilla** y descarga la **Carta**.
+- [ ] Sube el precio del producto y luego **Entrega**: la venta sale con el precio del día en que se apartó, pagada con
+      «Abonos del apartado», y la caja no vuelve a sumar ese dinero. Esa venta no se puede anular.
+- [ ] Otro apartado: **Entregar** con saldo pendiente avisa que lo que falta queda fiado (con cupo del cliente).
+- [ ] Otro: **Cancelar** pide el motivo y cómo se devuelve; en efectivo sale de la caja y el producto queda libre.
+- [ ] **Ampliar fecha** no deja pasar los días máximos de Datos del negocio (cámbialos ahí y prueba).
+- [ ] Al día siguiente de la fecha límite el apartado pasa a **Vencidos** y sale en **Dinero por devolver**; la campana
+      lo avisa; **Devolver** lo deja en $0.
+
+## 14.11 Ofertas al vender (Fase 31.3)
+
+Antes: crea en **Ventas → Ofertas** un regalo (por ejemplo, cabina → manos libres o teléfono) y un combo (vidrio + funda).
+
+- [ ] En **Vender** agrega la cabina: sale la etiqueta «Cabina con regalo» y abajo el **OBSEQUIO** en $0 con el primer regalo que haya.
+- [ ] Cambia el regalo por otro de la lista; quítalo («El cliente no lo quiere») y vuélvelo a agregar.
+- [ ] Si un regalo es un celular: «Elegir IMEI», marca uno y «Regalar 1 unidad».
+- [ ] Agrega el vidrio y la funda: cada línea muestra «Kit protección − $…» y el total resta **Ofertas** aparte de los descuentos.
+- [ ] Cobra: la venta sale por el total con ofertas; el regalo sale de las existencias (o su IMEI queda vendido).
+- [ ] En la oferta (Ventas → Ofertas) sube el contador de usos.
+- [ ] En **Pedido a caja** (tablet) arma lo mismo: sale el total con ofertas y el aviso «Le toca regalo».
+- [ ] En **Pedidos por cobrar** → Cobrar: el total ya trae las ofertas; elige el regalo y cobra.
+- [ ] Anula una de esas ventas: el uso de la oferta se devuelve.
+
+Ojo: en la tarjeta del pedido en la lista de «Pedidos por cobrar» y en «Mis pedidos en caja» el valor es el de lista (sin ofertas); el cobro sí las aplica.
+
+## 14.12 Ofertas: comprobante, tienda e informe (Fase 31.4)
+
+- [ ] Vende algo con regalo y con precio especial e imprime la **tirilla** y la **carta**: el regalo dice «OBSEQUIO · oferta» en $0 (GRATIS en la carta); la línea con oferta dice «Oferta: …»; los totales muestran Obsequios, Ofertas y Descuentos por separado y abajo «Ahorraste $…».
+- [ ] En **Ventas → historial**, abre esa venta: el regalo dice «🎁 Obsequio · oferta» y «Gratis».
+- [ ] Marca «Mostrar en la tienda» en los productos de una oferta de **todas las sucursales** y abre la tienda: la tarjeta lleva su etiqueta y, si es precio especial, el precio normal tachado.
+- [ ] En la portada sale la sección **Ofertas** con una tarjeta por oferta y «Productos en oferta».
+- [ ] Agrega al carrito un producto con precio especial: el carrito y el mensaje de WhatsApp usan el precio de oferta; uno con regalo anota «(oferta: Lleva gratis …)».
+- [ ] Una oferta de solo algunas sucursales **no** sale en la tienda.
+- [ ] **Informes → Ofertas**: ventas con oferta, ahorro, regalos y, con «Ver costos», lo que costaron; descarga Excel y PDF.
+- [ ] Un usuario sin «Ver costos» abre el informe y no ve el costo de los regalos.
+
+## 14.13 Compra abierta con varios proveedores (Fase 32.2)
+
+- [ ] **Compras → Nueva compra**: escribe un nombre (o déjalo vacío: queda «Compra del …») y créala. Se abre vacía.
+- [ ] **Agregar productos**: elige un proveedor y sus productos con las cantidades por sucursal. No pide fecha, factura ni forma de pago.
+- [ ] Agrega productos de **otro proveedor**: la compra muestra una tarjeta por proveedor y arriba el total, lo que vale a precio de venta y la ganancia esperada.
+- [ ] Quita un producto; si era el único de ese proveedor, el proveedor sale de la compra.
+- [ ] **Editar productos de…** un proveedor: cambia una cantidad y guarda.
+- [ ] Antes de confirmar, las existencias no cambian.
+- [ ] **Confirmar compra**: un proveedor de contado y otro a crédito con días y factura. Entra la mercancía; el de crédito aparece en Cuentas por pagar y se le puede abonar desde la compra.
+- [ ] En la lista, la compra sale como CP-… con sus proveedores; las compras de antes (OC-…) se ven igual que siempre.
+- [ ] **Compra de un proveedor** sigue funcionando como antes.
+- [ ] Anula una compra abierta en borrador: queda anulada con sus proveedores.
+
+## 14.14 «¿A qué compra va?» en Nuevo producto (Fase 32.3)
+
+- [ ] Abre una compra en **Compras → Nueva compra**.
+- [ ] En **Inventarios → Productos → Nuevo producto**, llena los pasos (con su proveedor y su costo). En **Sucursales** sale «¿A qué compra va?» con la compra en **Recientes · últimas 24 horas**.
+- [ ] Elígela, pon las cantidades por sucursal y pulsa «Crear y agregar a …»: el producto se crea con 0 unidades.
+- [ ] En Compras, la compra ya tiene ese producto con su proveedor, su costo y sus cantidades.
+- [ ] Crea otro producto de **otro proveedor** a la misma compra: aparece como segundo proveedor.
+- [ ] Una compra de hace más de un día sale en **Anteriores**; una confirmada o anulada no sale.
+- [ ] Con «Ninguna», el producto se crea como siempre (inventario inicial).
+- [ ] Confirma la compra: las unidades entran a las sucursales.
+
+## 14.15 Agregar productos a una compra confirmada (Fase 32.4)
+
+- [ ] En **Compras**, una compra confirmada tiene el botón **+** al lado del ojito; también «Agregar productos» dentro de su detalle.
+- [ ] Agrega un producto nuevo y más unidades de uno que ya tenía: «Agregar y cargar al inventario».
+- [ ] Las existencias suben de una vez en cada sucursal; el producto repetido suma sus unidades.
+- [ ] El total de la compra sube. De **contado** sigue pagada; a **crédito** sube el saldo en Cuentas por pagar (el vencimiento no cambia).
+- [ ] Con un celular: pide un IMEI por unidad; quedan disponibles para vender.
+- [ ] En una compra con varios proveedores, «Agregar productos de …» en cada proveedor.
+- [ ] Una compra en borrador o anulada no tiene el botón **+**.
+- [ ] El buscador de Compras se ve completo y los filtros alineados.
+
+## 14.16 Subcategorías (Fase 33.1 y 33.2)
+
+- [ ] En **Inventarios → Categorías** cada categoría muestra sus subcategorías como etiquetas, con «Agregar» o «Ver».
+- [ ] En «Ver» o «Agregar»: crea «Samsung» e «iPhone» en Teléfonos. Repetir «samsung» en Teléfonos no se deja; en Accesorios sí.
+- [ ] Renombra y desactiva una subcategoría (sale tachada en la tabla). Una con productos no se puede eliminar; una sin productos sí.
+- [ ] Una categoría con subcategorías no se puede eliminar (desactívala o elimina primero sus subcategorías).
+- [ ] El buscador de Categorías también encuentra por la subcategoría.
+- [ ] En **Nuevo producto**, al elegir Teléfonos sale «Subcategoría (opcional)» con sus subcategorías activas; «Nueva subcategoría» la crea y la deja elegida.
+- [ ] Si cambias la categoría, la subcategoría se borra y salen las de la nueva categoría.
+- [ ] Edita un producto viejo y ponle subcategoría; quitarla también se puede.
+- [ ] En **Productos** la columna dice «Teléfonos · Samsung»; al filtrar por Teléfonos aparece el filtro «Subcategoría»; buscar «samsung» trae los de esa subcategoría.
+- [ ] En **Auditoría** aparece el área «Subcategorías».
+
+## 14.17 Subcategorías en la tienda, el chatbot, la importación y los informes (Fase 33.3)
+
+- [ ] En **NexStore**, al entrar a Teléfonos salen los botones «Todos · Samsung · …» con cuántos productos tiene cada uno, y filtran.
+- [ ] La ficha del producto dice «Teléfonos · Samsung» y la ruta de arriba lleva a esa subcategoría.
+- [ ] Buscar «samsung» en la tienda trae los de esa subcategoría.
+- [ ] El chatbot de WhatsApp encuentra un producto por su subcategoría (ej. «tienen samsung?»).
+- [ ] **Importar desde Excel** con una columna «Subcategoría»: la vista previa dice «Teléfonos · Samsung» y avisa qué subcategorías nuevas se van a crear; al importar quedan en su categoría. Una subcategoría inactiva no deja entrar la fila.
+- [ ] Una columna «Marca» sigue tomándose como **Proveedor**, como antes.
+- [ ] **Informes → Productos**: «Los más vendidos» y «Con existencias y sin ventas» tienen la columna Subcategoría.
+- [ ] **Productos vendidos con detalle**: la categoría sale con su subcategoría, y el Excel tiene la columna Subcategoría.
 
 ## 15. Producción (cuando montes el VPS)
 

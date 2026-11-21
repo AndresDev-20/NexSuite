@@ -1,0 +1,189 @@
+/* Ofertas en el carrito (Fase 31): etiqueta en la línea, regalos y resumen */
+.cart-offer {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin-top: 6px;
+  padding: 3px 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #9d174d;
+  background: #fdf2f8;
+  border: 1px solid #fbcfe8;
+  border-radius: 999px;
+  animation: cart-offer-in 360ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+.cart-offer--precio { color: #9a3412; background: #fff7ed; border-color: #fed7aa; }
+.cart-offer--segundo { color: #1e40af; background: #eff6ff; border-color: #bfdbfe; }
+.cart-offer--combo { color: #065f46; background: #ecfdf5; border-color: #a7f3d0; }
+
+:root[data-theme="dark"] .cart-offer { background: color-mix(in srgb, currentColor 14%, transparent); border-color: color-mix(in srgb, currentColor 35%, transparent); filter: brightness(1.6); }
+
+.cart-offer .icon {
+  width: 13px;
+  height: 13px;
+}
+
+.cart-gifts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cart-gift {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px;
+  background:
+    repeating-linear-gradient(135deg, rgba(219, 39, 119, 0.06) 0 10px, transparent 10px 20px),
+    var(--white);
+  border: 2px dashed #f472b6;
+  border-radius: 14px;
+  animation: cart-gift-in 520ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  animation-delay: calc(var(--i) * 70ms);
+}
+
+.cart-gift--off {
+  opacity: 0.65;
+  border-style: dotted;
+}
+
+.cart-gift__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  font-size: 1.3rem;
+  background: #fdf2f8;
+  border-radius: 12px;
+  animation: cart-gift-wiggle 2.6s ease-in-out 600ms infinite;
+}
+
+.cart-gift__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.cart-gift__title {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.cart-gift__title strong {
+  color: #db2777;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cart-gift__name {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.cart-gift__units {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.cart-gift__side {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cart-gift__price {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.cart-gift__price s {
+  font-size: 0.84rem;
+  color: var(--color-text-muted);
+}
+
+.cart-gift__price strong {
+  font-size: 1.15rem;
+  color: #db2777;
+}
+
+.cart-gift__toggle {
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+.cart-offers-summary {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+  padding: 10px 12px;
+  font-size: 0.86rem;
+  color: #9d174d;
+  background: linear-gradient(90deg, #fdf2f8, #fff7ed);
+  border-radius: 12px;
+  animation: cart-offer-in 360ms ease both;
+}
+
+:root[data-theme="dark"] .cart-offers-summary {
+  color: #f9a8d4;
+  background: color-mix(in srgb, #db2777 16%, transparent);
+}
+
+.cart-offers-summary .icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+@keyframes cart-offer-in {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes cart-gift-in {
+  0% { opacity: 0; transform: translateY(-6px) scale(0.95); }
+  100% { opacity: 1; transform: none; }
+}
+
+@keyframes cart-gift-wiggle {
+  0%, 80%, 100% { transform: rotate(0); }
+  85% { transform: rotate(-12deg); }
+  90% { transform: rotate(10deg); }
+  95% { transform: rotate(-6deg); }
+}
+
+:root[data-motion="reduced"] .cart-offer,
+:root[data-motion="reduced"] .cart-gift,
+:root[data-motion="reduced"] .cart-gift *,
+:root[data-motion="reduced"] .cart-offers-summary {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-offer,
+  .cart-gift,
+  .cart-gift *,
+  .cart-offers-summary {
+    animation: none !important;
+  }
+}

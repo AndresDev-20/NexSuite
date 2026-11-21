@@ -7,7 +7,7 @@ import { Arrow, ChatIcon, ProductCard, ProductRail } from "./ShopParts";
 import { getShopProducts } from "./shopApi";
 import { useSeason } from "../seasons/seasonContext";
 import { SeasonScene } from "../seasons/SeasonScene";
-import { STORE_NAME, initialOf, toneOf } from "./shopFormat";
+import { OFFER_ICONS, initialOf, money, storeNameOf, toneOf } from "./shopFormat";
 
 const SORTS = [
   { value: "name", label: "Nombre (A-Z)" },
@@ -15,6 +15,49 @@ const SORTS = [
   { value: "price-desc", label: "Mayor precio" },
 ];
 const RAIL_SIZE = 12;
+
+const dayText = (value) => new Intl.DateTimeFormat("es-CO", { timeZone: "UTC", day: "numeric", month: "short" }).format(new Date(`${value}T00:00:00Z`));
+
+/** Las ofertas de la portada (Fase 31): una tarjeta por oferta y abajo la fila de productos en oferta. */
+const OffersSection = ({ offers, products }) => {
+  if (offers.length === 0) return null;
+  return (
+    <section className="shop-offers" aria-labelledby="shop-offers-title">
+      <div className="shop-offers__head">
+        <span className="shop-offers__eyebrow">Por tiempo limitado</span>
+        <h2 id="shop-offers-title" className="shop-offers__title">
+          Ofertas
+        </h2>
+      </div>
+      <ul className="shop-offers__list">
+        {offers.map((offer, index) => (
+          <li key={offer.id} className={`shop-offer shop-offer--${offer.type}`} style={{ "--i": index }}>
+            <Link to={`/tienda/producto/${offer.products[0].id}`} className="shop-offer__link">
+              <span className="shop-offer__icon" aria-hidden="true">
+                {OFFER_ICONS[offer.type]}
+              </span>
+              <span className="shop-offer__body">
+                <strong className="shop-offer__name">{offer.name}</strong>
+                <span className="shop-offer__label">
+                  {offer.type === "precio"
+                    ? offer.products.map((product) => `${product.name} a ${money(product.offerPrice)}`).join(" · ")
+                    : offer.type === "combo"
+                      ? `${offer.products.map((product) => `${product.quantity > 1 ? `${product.quantity} × ` : ""}${product.name}`).join(" + ")} por ${money(offer.price)}`
+                      : offer.type === "regalo"
+                        ? `Compra ${offer.products.map((product) => product.name).join(" o ")} y ${offer.label.charAt(0).toLowerCase()}${offer.label.slice(1)}`
+                        : `${offer.label} en ${offer.products.map((product) => product.name).join(", ")}`}
+                </span>
+                {offer.endsAt && <span className="shop-offer__until">Hasta el {dayText(offer.endsAt)}</span>}
+              </span>
+              <Arrow />
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {products.length > 0 && <ProductRail title="Productos en oferta" products={products} />}
+    </section>
+  );
+};
 const SLIDE_MS = 5500;
 
 const reducedMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || document.documentElement.dataset.motion === "reduced";
@@ -28,7 +71,7 @@ const HeroCarousel = ({ shop, categories }) => {
     {
       key: "welcome",
       eyebrow: shop?.name ? `La tienda en línea de ${shop.name}` : "Tienda en línea",
-      title: `Bienvenido a ${STORE_NAME}`,
+      title: `Bienvenido a ${storeNameOf(shop)}`,
       text: "Elige lo que te gusta, arma tu pedido y envíalo por WhatsApp en segundos.",
       tone: "red",
     },
@@ -191,6 +234,8 @@ const ShopHome = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("buscar") ?? "";
   const category = searchParams.get("categoria") ?? "";
+  // Fase 33: solo dentro de una categoría
+  const subcategory = category ? (searchParams.get("subcategoria") ?? "") : "";
   const sort = SORTS.some((item) => item.value === searchParams.get("orden")) ? searchParams.get("orden") : "name";
   const browsing = !search && !category;
   const [state, setState] = useState({ key: "", products: [], error: "" });
@@ -207,11 +252,15 @@ const ShopHome = () => {
     );
 
   // Al volver de un producto, la pestaña vuelve a decir el nombre de la tienda
+  const storeName = storeNameOf(shop);
   useEffect(() => {
-    document.title = shop?.name ? `${STORE_NAME} · ${shop.name}` : STORE_NAME;
-  }, [shop?.name]);
+    document.title = storeName;
+  }, [storeName]);
 
-  const params = useMemo(() => ({ ...(search && { search }), ...(category && { category }), sort }), [search, category, sort]);
+  const params = useMemo(
+    () => ({ ...(search && { search }), ...(category && { category }), ...(subcategory && { subcategory }), sort }),
+    [search, category, subcategory, sort]
+  );
   const requestKey = `${JSON.stringify(params)}#${attempt}`;
 
   useEffect(() => {
@@ -227,6 +276,8 @@ const ShopHome = () => {
   const loading = state.key !== requestKey;
   const categories = useMemo(() => shop?.categories ?? [], [shop]);
   const activeCategory = categories.find((item) => String(item.id) === category);
+  const subcategories = activeCategory?.subcategories ?? [];
+  const activeSubcategory = subcategories.find((item) => String(item.id) === subcategory);
   // Una fila por categoría, en el orden de las categorías (primero los que hay)
   const rails = useMemo(
     () =>
@@ -277,6 +328,9 @@ const ShopHome = () => {
         <HeroCarousel shop={shop} categories={categories} />
         <Benefits />
         {categories.length > 0 && <CategoryCircles categories={categories} />}
+        <Reveal className="shop-section">
+          <OffersSection offers={shop?.offers ?? []} products={state.products.filter((product) => product.offers?.length > 0).slice(0, RAIL_SIZE)} />
+        </Reveal>
         <div id="shop-products" className="shop-anchor" />
         {error ||
           (loading && state.products.length === 0 ? (
@@ -304,11 +358,19 @@ const ShopHome = () => {
       <nav className="shop-breadcrumb" aria-label="Ruta">
         <Link to="/tienda">Inicio</Link>
         <Arrow />
-        <span>{activeCategory ? activeCategory.name : `Resultados para «${search}»`}</span>
+        {activeCategory && activeSubcategory ? (
+          <>
+            <Link to={`/tienda?categoria=${activeCategory.id}`}>{activeCategory.name}</Link>
+            <Arrow />
+            <span>{activeSubcategory.name}</span>
+          </>
+        ) : (
+          <span>{activeCategory ? activeCategory.name : `Resultados para «${search}»`}</span>
+        )}
       </nav>
       <div className="shop-results__head">
         <div className="shop-results__heading">
-          <h1 className="shop-results__title">{activeCategory ? activeCategory.name : search}</h1>
+          <h1 className="shop-results__title">{activeCategory ? (activeSubcategory ? `${activeCategory.name} · ${activeSubcategory.name}` : activeCategory.name) : search}</h1>
           <p className="shop-count" role="status">
             {loading ? "Buscando…" : `${state.products.length} ${state.products.length === 1 ? "producto" : "productos"}${activeCategory && search ? ` para «${search}»` : ""}`}
           </p>
@@ -326,12 +388,30 @@ const ShopHome = () => {
       </div>
       {categories.length > 1 && (
         <div className="shop-chips" role="group" aria-label="Categorías">
-          <button type="button" className={`shop-chip ${!category ? "shop-chip--on" : ""}`.trim()} aria-pressed={!category} onClick={() => update({ categoria: "" })}>
+          <button type="button" className={`shop-chip ${!category ? "shop-chip--on" : ""}`.trim()} aria-pressed={!category} onClick={() => update({ categoria: "", subcategoria: "" })}>
             Todas
           </button>
           {categories.map((item) => (
-            <button key={item.id} type="button" className={`shop-chip ${category === String(item.id) ? "shop-chip--on" : ""}`.trim()} aria-pressed={category === String(item.id)} onClick={() => update({ categoria: String(item.id) })}>
+            <button key={item.id} type="button" className={`shop-chip ${category === String(item.id) ? "shop-chip--on" : ""}`.trim()} aria-pressed={category === String(item.id)} onClick={() => update({ categoria: String(item.id), subcategoria: "" })}>
               {item.name}
+            </button>
+          ))}
+        </div>
+      )}
+      {subcategories.length > 0 && (
+        <div className="shop-chips shop-chips--sub" role="group" aria-label={`Subcategorías de ${activeCategory.name}`}>
+          <button type="button" className={`shop-chip ${!subcategory ? "shop-chip--on" : ""}`.trim()} aria-pressed={!subcategory} onClick={() => update({ subcategoria: "" })}>
+            Todos
+          </button>
+          {subcategories.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`shop-chip ${subcategory === String(item.id) ? "shop-chip--on" : ""}`.trim()}
+              aria-pressed={subcategory === String(item.id)}
+              onClick={() => update({ subcategoria: String(item.id) })}
+            >
+              {item.name} <span className="shop-chip__count">{item.count}</span>
             </button>
           ))}
         </div>
@@ -340,7 +420,7 @@ const ShopHome = () => {
         (loading && state.products.length === 0 ? (
           skeleton
         ) : !loading && state.products.length === 0 ? (
-          <Empty filtered onReset={() => update({ buscar: "", categoria: "", orden: "" })} />
+          <Empty filtered onReset={() => update({ buscar: "", categoria: "", subcategoria: "", orden: "" })} />
         ) : (
           <ul className={`shop-grid ${loading ? "shop-grid--loading" : ""}`.trim()} aria-busy={loading}>
             {state.products.map((product, index) => (

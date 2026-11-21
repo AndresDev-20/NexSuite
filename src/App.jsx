@@ -4,6 +4,7 @@ import Login from "./pages/login/Login";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import MainLayout from "./components/MainLayout";
 import SeasonProvider from "./features/seasons/SeasonProvider";
+import BrandProvider from "./features/brand/BrandProvider";
 const Home = lazy(() => import("./pages/home/Home"));
 const UsersPage = lazy(() => import("./features/administration/UserPage/UsersPage"));
 const RolesPage = lazy(() => import("./features/administration/RolesPage/RolesPage"));
@@ -35,6 +36,8 @@ const OrdersQueuePage = lazy(() => import("./features/saleOrders/OrdersQueuePage
 const PosPage = lazy(() => import("./features/sales/PosPage/PosPage"));
 const SalesPage = lazy(() => import("./features/sales/SalesPage/SalesPage"));
 const ReceivablesPage = lazy(() => import("./features/sales/ReceivablesPage/ReceivablesPage"));
+const LayawaysPage = lazy(() => import("./features/sales/LayawaysPage/LayawaysPage"));
+const OffersPage = lazy(() => import("./features/sales/OffersPage/OffersPage"));
 const ReportsPage = lazy(() => import("./features/sales/ReportsPage/ReportsPage"));
 const BalancePage = lazy(() => import("./features/sales/BalancePage/BalancePage"));
 const ExpensesPage = lazy(() => import("./features/expenses/ExpensesPage/ExpensesPage"));
@@ -49,7 +52,8 @@ const ShopProduct = lazy(() => import("./features/shop/ShopProduct"));
 
 function App() {
   return (
-    // Diseño de temporada (Fase 25): en el inicio de sesión, el sistema y NexStore
+    // Marca de la empresa (Fase 29) y diseño de temporada (Fase 25): en el inicio de sesión, el sistema y la tienda
+    <BrandProvider>
     <SeasonProvider>
     <Routes>
       <Route path="/" element={<Login />} />
@@ -145,6 +149,16 @@ function App() {
             <Route path="/ventas/chats" element={<ChatsPage />} />
           </Route>
 
+          {/* Ofertas (Fase 31): con «Consultar ofertas» */}
+          <Route element={<PermissionRoute permission="offers.read" />}>
+            <Route path="/ventas/ofertas" element={<OffersPage />} />
+          </Route>
+
+          {/* Apartados (Fase 30): con «Consultar apartados» */}
+          <Route element={<PermissionRoute permission="layaways.read" />}>
+            <Route path="/ventas/apartados" element={<LayawaysPage />} />
+          </Route>
+
           {/* Cartera: se ve con "Consultar cartera" o, para cobrar, con "Registrar abonos" */}
           <Route element={<PermissionRoute permission={["receivables.read", "receivables.pay"]} />}>
             <Route path="/ventas/cartera" element={<ReceivablesPage />} />
@@ -226,6 +240,7 @@ function App() {
       </Route>
     </Routes>
     </SeasonProvider>
+    </BrandProvider>
   );
 }
 

@@ -10,6 +10,8 @@ const REPORT_PERMISSIONS = [
   "reports.cash",
   "reports.expenses",
   "reports.comparison",
+  // Fase 31: el informe de ofertas se abre con «Consultar ofertas»
+  "offers.read",
 ];
 
 export default REPORT_PERMISSIONS;

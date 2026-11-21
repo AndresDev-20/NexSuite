@@ -9,6 +9,7 @@ import useStatusToggle from "../../../../hooks/useStatusToggle";
 import usePermissions from "../../../auth/usePermissions";
 import CategoriesTable from "../../../inventory/categories/CategoriesTable";
 import CategoryFormModal from "../../../inventory/categories/CategoryFormModal";
+import SubcategoriesModal from "../../../inventory/categories/SubcategoriesModal";
 import useCategories from "../../../inventory/categories/useCategories";
 import normalizeText from "../../../../utils/normalizeText";
 import "../../../../styles/listPage.css";
@@ -21,8 +22,18 @@ const STATUS_OPTIONS = [
 ];
 
 const CategoriesPage = () => {
-  const { categories, loading, error, getAllCategories, createCategory, updateCategory, deleteCategory } =
-    useCategories();
+  const {
+    categories,
+    loading,
+    error,
+    getAllCategories,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    createSubcategory,
+    updateSubcategory,
+    deleteSubcategory,
+  } = useCategories();
   const toast = useToast();
   const { can } = usePermissions();
 
@@ -35,6 +46,9 @@ const CategoriesPage = () => {
   const [statusFilter, setStatusFilter] = useState(""); // "" = todas
   const [form, setForm] = useState({ open: false, category: null }); // category null = crear
   const [deleting, setDeleting] = useState(null);
+  // Fase 33: la categoría cuyas subcategorías se ven (se lee de la lista, así queda al día al recargar)
+  const [subsOf, setSubsOf] = useState(null);
+  const subsCategory = subsOf ? (categories.find((category) => category.id === subsOf) ?? null) : null;
 
   const status = useStatusToggle({
     setActive: async (category, isActive) => {
@@ -56,7 +70,12 @@ const CategoriesPage = () => {
     const term = normalizeText(query.trim());
     return categories.filter((category) => {
       if (statusFilter && category.isActive !== (statusFilter === "active")) return false;
-      return !term || normalizeText(category.nameCategory).includes(term);
+      // También por el nombre de sus subcategorías (Fase 33)
+      return (
+        !term ||
+        normalizeText(category.nameCategory).includes(term) ||
+        category.subcategories.some((sub) => normalizeText(sub.nameSubcategory).includes(term))
+      );
     });
   }, [categories, query, statusFilter]);
 
@@ -145,6 +164,7 @@ const CategoriesPage = () => {
         onEdit={openEdit}
         onToggleActive={status.toggle}
         onDelete={setDeleting}
+        onOpenSubcategories={(category) => setSubsOf(category.id)}
       />
     );
   };
@@ -154,7 +174,7 @@ const CategoriesPage = () => {
       <header className="list-page__header">
         <div>
           <h1 className="list-page__title">Categorías</h1>
-          <p className="list-page__subtitle">Grupos para clasificar los productos del inventario.</p>
+          <p className="list-page__subtitle">Grupos para clasificar los productos del inventario, con sus subcategorías (ej. Teléfonos → Samsung).</p>
         </div>
 
         {canCreate && (
@@ -168,7 +188,7 @@ const CategoriesPage = () => {
         {showBar && (
           <div className="list-page__bar">
             <div className="list-page__search">
-              <SearchInput label="Buscar categorías" placeholder="Buscar categoría" value={query} onChange={setQuery} />
+              <SearchInput label="Buscar categorías" placeholder="Buscar categoría o subcategoría" value={query} onChange={setQuery} />
             </div>
             <Select
               className="list-page__filter"
@@ -186,6 +206,17 @@ const CategoriesPage = () => {
       </div>
 
       <CategoryFormModal open={form.open} category={form.category} onClose={closeForm} onSubmit={handleSave} />
+
+      <SubcategoriesModal
+        category={subsCategory}
+        canCreate={canCreate}
+        canEdit={canEdit}
+        canDelete={canDelete}
+        onClose={() => setSubsOf(null)}
+        createSubcategory={createSubcategory}
+        updateSubcategory={updateSubcategory}
+        deleteSubcategory={deleteSubcategory}
+      />
 
       <ConfirmDialog
         open={Boolean(status.deactivating)}

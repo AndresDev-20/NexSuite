@@ -208,6 +208,31 @@ export const PERMISSION_CATALOG = [
     ],
   },
   {
+    key: "offers",
+    title: "Ventas · Ofertas",
+    permissions: [
+      { code: "offers.read", label: "Consultar ofertas", description: "Ver las ofertas (regalos, precios especiales, 2x1 y combos), su vigencia y cuánto se han usado." },
+      { code: "offers.manage", label: "Crear y editar ofertas", description: "Crear, editar, pausar y eliminar ofertas. Al vender se aplican solas para todos." },
+    ],
+  },
+  {
+    key: "layaways",
+    title: "Ventas · Apartados",
+    permissions: [
+      { code: "layaways.read", label: "Consultar apartados", description: "Ver los apartados de sus sucursales: productos, abonos, saldo y fecha límite." },
+      {
+        code: "layaways.create",
+        label: "Crear apartados y recibir abonos",
+        description: "Apartar productos para un cliente desde Vender, recibir sus abonos (en efectivo entran a la caja), ampliar la fecha y entregarlos (entregar exige además «Vender»).",
+      },
+      {
+        code: "layaways.cancel",
+        label: "Cancelar apartados y devolver abonos",
+        description: "Cancelar un apartado devolviéndole al cliente lo abonado y registrar la devolución de los vencidos.",
+      },
+    ],
+  },
+  {
     key: "payables",
     title: "Compras · Cuentas por pagar",
     permissions: [

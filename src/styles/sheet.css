@@ -308,3 +308,9 @@
     align-items: flex-end;
   }
 }
+
+/* Ofertas (Fase 31): el obsequio y la oferta de una línea de la venta */
+.sheet__offer {
+  font-weight: 700;
+  color: #db2777;
+}

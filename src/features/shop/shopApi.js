@@ -7,10 +7,10 @@ import { unwrap } from "../../utils/apiResponse";
  */
 const shopApi = axios.create({ baseURL: import.meta.env.VITE_REACT_APP_URL });
 
-/** { name, phone, email, address, city, whatsapp, categories: [{ id, name, count }] } */
+/** { name, phone, email, address, city, whatsapp, categories: [{ id, name, count, subcategories: [{ id, name, count }] }] } */
 export const getShop = async () => unwrap(await shopApi.get("/shop"));
 
-/** params: { search, category, sort }. [{ id, name, category, price, unit, warrantyMonths, availability, summary }] */
+/** params: { search, category, subcategory, sort }. [{ id, name, category, subcategory, price, unit, warrantyMonths, availability, summary }] */
 export const getShopProducts = async (params) => unwrap(await shopApi.get("/shop/products", { params }));
 
 /** Un producto con description y features; 404 si no está en la tienda. */

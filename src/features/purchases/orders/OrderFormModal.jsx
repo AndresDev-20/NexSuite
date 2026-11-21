@@ -217,7 +217,9 @@ const ProductLine = ({ line, index, leaving = false, branches, errors, onChange,
 };
 
 /* ---------- Formulario (solo existe mientras el modal está abierto) ---------- */
-const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint, creation, busy, onCancel, onSubmit }) => {
+const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint, creation, busy, onCancel, onSubmit, part = null }) => {
+  // Fase 32: los productos de un proveedor dentro de una compra abierta (sin fecha, factura ni pago: van al confirmar)
+  const partMode = Boolean(part);
   const [state, setState] = useState(() => initialState(order));
   const [errors, setErrors] = useState({ header: {}, products: {} });
   const [serverError, setServerError] = useState("");
@@ -248,10 +250,13 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
       setSupplierNote(`Proveedor de ${product.name}. Puedes cambiarlo.`);
     }
     let loadedStock = null;
-    try {
-      loadedStock = await fetchLoadedStock(product.id, order?.id);
-    } catch {
-      // Sin poder consultarlo, se agrega como mercancía nueva (el servidor revisa igual al guardar)
+    // Fase 32.4: a una compra confirmada solo entra mercancía nueva (no se documenta lo ya cargado)
+    if (!part?.confirmed) {
+      try {
+        loadedStock = await fetchLoadedStock(product.id, order?.id);
+      } catch {
+        // Sin poder consultarlo, se agrega como mercancía nueva (el servidor revisa igual al guardar)
+      }
     }
     setState((current) =>
       current.products.some((item) => item.productId === product.id)
@@ -409,7 +414,17 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
 
           {/* Columna derecha: datos de la compra y resumen */}
           <aside className="purchase-form__side">
-            <FormSection icon="users" title="Datos de la compra" description="A quién se le compró y cómo se paga.">
+            <FormSection
+              icon="users"
+              title={partMode ? "Proveedor" : "Datos de la compra"}
+              description={
+                part?.confirmed
+                  ? "El de la compra. Lo que agregues entra de una vez al inventario y suma al total (a crédito, al saldo)."
+                  : partMode
+                    ? "A quién se le compró. La forma de pago y la factura se eligen al confirmar la compra."
+                    : "A quién se le compró y cómo se paga."
+              }
+            >
               <div className="purchase-form__supplier purchase-form__supplier--stack">
                 <Select
                   label="Proveedor"
@@ -418,20 +433,26 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
                   options={toOptions(suppliers, (supplier) => supplier.companyname)}
                   value={header.idsupplier}
                   data-autofocus
-                  hint={supplierNote || undefined}
+                  disabled={partMode && part.lockSupplier}
+                  hint={
+                    supplierNote ||
+                    (partMode && !part.lockSupplier ? "Si ese proveedor ya está en la compra, estos productos se suman a los suyos." : undefined)
+                  }
                   error={errors.header.idsupplier}
                   onChange={(event) => {
                     setSupplierNote("");
                     setHeader({ idsupplier: event.target.value });
                   }}
                 />
-                {creation.canCreateSupplier && (
+                {creation.canCreateSupplier && !(partMode && part.lockSupplier) && (
                   <Button variant="outline" icon="plus" className="purchase-form__inline" onClick={() => setCreating("supplier")}>
                     Nuevo proveedor
                   </Button>
                 )}
               </div>
 
+              {!partMode && (
+              <>
               <div className="form-layout__row">
                 <Field
                   label="Fecha de la compra"
@@ -489,6 +510,8 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
                 value={header.notes}
                 onChange={(event) => setHeader({ notes: event.target.value })}
               />
+              </>
+              )}
             </FormSection>
 
             <div className="purchase-summary" aria-live="polite">
@@ -508,11 +531,11 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
                 </div>
                 <div>
                   <dt>Pago</dt>
-                  <dd>{header.paymentterm === "credito" ? (dueText ? `Crédito · vence ${dueText}` : "Crédito") : "Contado"}</dd>
+                  <dd>{part?.confirmed ? "Como el resto de la compra" : partMode ? "Al confirmar la compra" : header.paymentterm === "credito" ? (dueText ? `Crédito · vence ${dueText}` : "Crédito") : "Contado"}</dd>
                 </div>
               </dl>
               <div className="purchase-summary__total">
-                <span>Total de la compra</span>
+                <span>{part?.confirmed ? "Lo que se agrega" : partMode ? "Total de este proveedor" : "Total de la compra"}</span>
                 <strong key={total}>{formatCurrency(total)}</strong>
               </div>
             </div>
@@ -528,7 +551,7 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
             Cancelar
           </Button>
           <Button type="submit" icon={order ? "check" : "plus"} disabled={busy}>
-            {busy ? "Guardando…" : order ? "Guardar cambios" : "Guardar borrador"}
+            {busy ? "Guardando…" : part?.confirmed ? "Agregar y cargar al inventario" : partMode ? "Guardar en la compra" : order ? "Guardar cambios" : "Guardar borrador"}
           </Button>
         </FormActions>
       </FormLayout>
@@ -552,9 +575,12 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
  * defaultBranchId: dónde se pone la primera unidad de cada producto · products: productos activos.
  * creation: { canCreateProduct, canCreateSupplier, categories, categoryHint, createProduct, createSupplier }
  *   para crear un producto o un proveedor sin salir de la compra.
+ * part (Fase 32): { title, lockSupplier, confirmed? } para los productos de un proveedor dentro de una compra abierta
+ *   (sin fecha, factura ni forma de pago, que se eligen al confirmar); order es entonces esa parte (o null para agregar).
+ *   confirmed (Fase 32.4): agregar a una compra ya confirmada; order es esa compra sin sus productos.
  * onSubmit(payload) debe ser async y lanzar el error si algo falla.
  */
-const OrderFormModal = ({ open, order = null, onClose, onSubmit, ...formProps }) => {
+const OrderFormModal = ({ open, order = null, part = null, onClose, onSubmit, ...formProps }) => {
   const [busy, setBusy] = useState(false);
 
   const handleSubmit = async (payload) => {
@@ -571,12 +597,30 @@ const OrderFormModal = ({ open, order = null, onClose, onSubmit, ...formProps })
       icon="cart"
       open={open}
       size="xl"
-      title={order ? `Editar ${order.number}` : "Nueva compra"}
-      subtitle={order ? "Borrador: cámbialo hasta que confirmes la compra." : "Lo que llegó del proveedor, repartido entre tus sucursales."}
+      title={
+        part?.confirmed
+          ? `Agregar productos a ${order.number}`
+          : part
+            ? order
+              ? `Productos de ${order.supplierName}`
+              : "Agregar productos"
+            : order
+              ? `Editar ${order.number}`
+              : "Nueva compra de un proveedor"
+      }
+      subtitle={
+        part?.confirmed
+          ? `${part.title} · compra confirmada: lo que agregues entra de una vez al inventario.`
+          : part
+          ? `${part.title} · las unidades entran al confirmar la compra.`
+          : order
+            ? "Borrador: cámbialo hasta que confirmes la compra."
+            : "Lo que llegó del proveedor, repartido entre tus sucursales."
+      }
       onClose={onClose}
       busy={busy}
     >
-      <OrderForm order={order} busy={busy} onCancel={onClose} onSubmit={handleSubmit} {...formProps} />
+      <OrderForm order={order} part={part} busy={busy} onCancel={onClose} onSubmit={handleSubmit} {...formProps} />
     </Modal>
   );
 };

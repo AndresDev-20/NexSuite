@@ -6,6 +6,7 @@ import { FormActions, FormLayout, FormSection } from "../../../components/forms/
 import Modal from "../../../components/feadback/Modal/Modal";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import Icon from "../../../components/ui/Icon/Icon";
+import { useBrand } from "../../brand/brandContext";
 import "./branchFormModal.css";
 
 /*
@@ -25,12 +26,14 @@ const suggestedPrefix = (name) => {
 };
 
 /** Vista previa del encabezado del comprobante (la tirilla): se llena mientras se escribe. */
-const ReceiptPreview = ({ name, address, email, phone, web, prefix, guessed }) => (
+const ReceiptPreview = ({ name, address, email, phone, web, prefix, guessed }) => {
+  const brandLogo = useBrand().logoUrl; // logo de la empresa (Fase 29)
+  return (
   <aside className="branch-receipt" aria-hidden="true">
     <span className="branch-receipt__label">Así sale en el comprobante</span>
     <div className="branch-receipt__paper">
       <span className="branch-receipt__logo">
-        <img src="/nexsuite-logo-icono.png" alt="" />
+        <img src={brandLogo} alt="" />
       </span>
       <strong className={`branch-receipt__name ${name ? "" : "branch-receipt__name--empty"}`.trim()}>{name || "Nombre de la sucursal"}</strong>
       {address && <span className="branch-receipt__line">{address}</span>}
@@ -54,7 +57,8 @@ const ReceiptPreview = ({ name, address, email, phone, web, prefix, guessed }) =
       {guessed ? "El prefijo se genera del nombre (aprox.)." : "Prefijo elegido por ti."}
     </span>
   </aside>
-);
+  );
+};
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^\+?[\d\s()-]{7,20}$/;

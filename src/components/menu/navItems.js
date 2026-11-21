@@ -105,6 +105,8 @@ const NAV_ITEMS = [
       { label: "Ventas", to: "/ventas/historial", permission: ["sales.read", "sales.read-all"] },
       { label: "Clientes", to: "/ventas/clientes", permission: "customers.read" },
       { label: "Cartera", to: "/ventas/cartera", permission: ["receivables.read", "receivables.pay"] },
+      { label: "Apartados", to: "/ventas/apartados", permission: "layaways.read" },
+      { label: "Ofertas", to: "/ventas/ofertas", permission: "offers.read" },
       { label: "Reportes", to: "/ventas/reportes", permission: ["sales.read", "sales.read-all"] },
       { label: "Garantías", to: "/ventas/garantias", permission: "warranties.manage" },
       // Fase 16: WhatsApp del negocio (asistente y vendedores)

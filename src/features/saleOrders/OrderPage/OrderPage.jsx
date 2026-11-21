@@ -11,6 +11,8 @@ import { FormActions } from "../../../components/forms/FormLayout/FormLayout";
 import useActiveBranch from "../../branches/useActiveBranch";
 import { normalizeProduct } from "../../inventory/products/useProducts";
 import UnitPickerModal from "../../sales/PosPage/UnitPickerModal";
+import { OfferBadge, OffersSummary } from "../../sales/offers/cartOffers";
+import { useCartOffers } from "../../sales/offers/cartOffersLogic";
 import NewCustomerButton from "../../sales/customers/NewCustomerButton";
 import { newSaleKey } from "../../sales/sales/useSales";
 import useSaleOrders, { ORDER_STATUS_LABELS, formatLeft, useReservedQuantities, useSecondsLeft } from "../useSaleOrders";
@@ -66,6 +68,7 @@ const SentModal = ({ order, onClose }) => {
           <p className="orders-sent__label">Dile al cliente que pase a caja con el</p>
           <p className="orders-sent__number">Pedido #{order.id}</p>
           <p className="orders-sent__total">{formatCurrency(order.total)}</p>
+          {order.gift && <p className="pos__hint">🎁 Con regalo: la caja lo agrega al cobrar.</p>}
           <p className="pos__hint">Las unidades quedan apartadas{left > 0 ? ` (vence en ${formatLeft(left)})` : ""}. Si nadie lo cobra a tiempo, se cancela solo.</p>
           <FormActions>
             <Button icon="plus" data-autofocus onClick={onClose}>
@@ -174,7 +177,10 @@ const OrderPage = () => {
 
   const step = (line, delta) => updateLine(line.productId, { quantity: String(Math.min(Math.max(lineQuantity(line) + delta, 1), line.available)) });
 
-  const total = lines.reduce((sum, line) => sum + cents(line.price) * lineQuantity(line), 0);
+  // Ofertas (Fase 31): se muestran para que el total cuadre con el de caja; la caja las aplica al cobrar y agrega el regalo
+  const bought = useMemo(() => lines.map((line) => ({ idproduct: line.productId, quantity: lineQuantity(line) })), [lines]);
+  const { offers } = useCartOffers(branchId, bought);
+  const total = Math.max(lines.reduce((sum, line) => sum + cents(line.price) * lineQuantity(line), 0) - offers.savings, 0);
 
   const problems = [];
   if (lines.length === 0) problems.push("Agrega al menos un producto.");
@@ -203,7 +209,8 @@ const OrderPage = () => {
         ...(notes.trim() && { notes: notes.trim() }),
       });
       toast.success(message ?? `Pedido #${order.id} enviado a caja.`);
-      setSent(order);
+      // Con las ofertas el total es el que cobra la caja (Fase 31)
+      setSent({ ...order, total: total / 100, gift: offers.gifts.length > 0 });
       reset();
       loadMine();
       reloadReserved();
@@ -390,9 +397,17 @@ const OrderPage = () => {
                   <p className="pos__line-total">
                     {lineQuantity(line)} × {formatCurrency(line.price)} = <strong>{formatCurrency((cents(line.price) * lineQuantity(line)) / 100)}</strong>
                   </p>
+                  <OfferBadge offer={offers.lines.get(line.productId) ?? null} />
                 </li>
               ))}
             </ul>
+          )}
+
+          <OffersSummary offers={offers} />
+          {offers.gifts.length > 0 && (
+            <p className="pos__hint" role="status">
+              🎁 Le toca regalo: {offers.gifts.map((gift) => gift.name).join(" · ")}. La caja lo agrega al cobrar (el cliente elige cuál).
+            </p>
           )}
 
           <dl className="pos__totals">

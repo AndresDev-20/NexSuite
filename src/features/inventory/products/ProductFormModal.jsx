@@ -15,6 +15,8 @@ import Stepper from "../../../components/forms/Stepper/Stepper";
 import Icon from "../../../components/ui/Icon/Icon";
 import BranchAssignmentFields from "./BranchAssignmentFields";
 import useBranchAssignment from "./useBranchAssignment";
+import PurchasePicker from "./PurchasePicker";
+import { purchaseApi } from "../../purchases/orders/purchaseApi";
 import "./productFormModal.css";
 import SupplierPicker from "../../purchases/suppliers/SupplierPicker";
 import useSupplierChoices from "../../purchases/suppliers/useSupplierChoices";
@@ -40,6 +42,7 @@ const toFormValues = (product) => ({
   sku: product?.sku ?? "",
   barcode: product?.barcode ?? "",
   idcategory: product?.categoryId != null ? String(product.categoryId) : "",
+  idsubcategory: product?.subcategoryId != null ? String(product.subcategoryId) : "",
   idsupplier: product?.supplierId != null ? String(product.supplierId) : "",
   unit: product?.unit ?? "unidad",
   cost_price: product?.costPrice != null ? String(product.costPrice) : "",
@@ -66,6 +69,8 @@ const buildPayload = (values, isEdit, showCost, withSupplier) => {
   return {
     nameproduct: values.nameproduct.trim(),
     idcategory: Number(values.idcategory),
+    // Fase 33: opcional; vacía al editar la quita
+    ...((values.idsubcategory || isEdit) && { idsubcategory: values.idsubcategory ? Number(values.idsubcategory) : null }),
     ...(withSupplier && (values.idsupplier || isEdit) && { idsupplier: values.idsupplier ? Number(values.idsupplier) : null }),
     unit: values.unit,
     ...(showCost && { cost_price: Number(values.cost_price) }),
@@ -188,6 +193,10 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [newCategories, setNewCategories] = useState([]);
   const [pendingCategory, setPendingCategory] = useState(null); // se elige cuando su opción ya está en la lista
+  // Fase 33: nueva subcategoría de la categoría elegida, sin salir del producto
+  const [creatingSubcategory, setCreatingSubcategory] = useState(false);
+  const [newSubcategories, setNewSubcategories] = useState([]);
+  const [pendingSubcategory, setPendingSubcategory] = useState(null);
   const [currentSupplier] = useState(() =>
     product?.supplierId != null ? { id: product.supplierId, companyname: product.supplierName, isactive: product.supplierActive } : null
   );
@@ -203,7 +212,7 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
     formState: { errors },
   } = useForm({ defaultValues: toFormValues(product) });
 
-  const [name, sku, idcategory, idsupplier, cost, sale, hasSerial, showInShop] = watch([
+  const [name, sku, idcategory, idsupplier, cost, sale, hasSerial, showInShop, idsubcategory] = watch([
     "nameproduct",
     "sku",
     "idcategory",
@@ -212,20 +221,35 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
     "sale_price",
     "hasserial",
     "showinshop",
+    "idsubcategory",
   ]);
 
   // La categoría recién creada se elige cuando su opción ya existe en la lista
   useEffect(() => {
     if (!pendingCategory) return;
     setValue("idcategory", pendingCategory, { shouldDirty: true, shouldValidate: true });
+    setValue("idsubcategory", "", { shouldDirty: true });
     setPendingCategory(null);
   }, [pendingCategory, setValue]);
+  useEffect(() => {
+    if (!pendingSubcategory) return;
+    setValue("idsubcategory", pendingSubcategory, { shouldDirty: true });
+    setPendingSubcategory(null);
+  }, [pendingSubcategory, setValue]);
 
   const allCategories = [...categories, ...newCategories.filter((created) => !categories.some((category) => category.id === created.id))];
   const categoryOptions = allCategories
     .map((category) => ({ value: String(category.id), label: category.nameCategory }))
     .sort((a, b) => a.label.localeCompare(b.label, "es"));
-  const categoryName = allCategories.find((category) => String(category.id) === idcategory)?.nameCategory ?? "";
+  const selectedCategory = allCategories.find((category) => String(category.id) === idcategory) ?? null;
+  const categoryName = selectedCategory?.nameCategory ?? "";
+  // Fase 33: las subcategorías activas de la categoría elegida (y la que ya tenía el producto, aunque esté inactiva)
+  const subcategoryOptions = [...(selectedCategory?.subcategories ?? []), ...newSubcategories.filter((sub) => String(sub.idcategory) === idcategory)]
+    .filter((sub, index, list) => list.findIndex((other) => other.id === sub.id) === index)
+    .filter((sub) => sub.isActive !== false || (isEdit && sub.id === product.subcategoryId))
+    .map((sub) => ({ value: String(sub.id), label: sub.isActive === false ? `${sub.nameSubcategory} (inactiva)` : sub.nameSubcategory }))
+    .sort((a, b) => a.label.localeCompare(b.label, "es"));
+  const subcategoryName = subcategoryOptions.find((option) => option.value === idsubcategory)?.label.replace(" (inactiva)", "") ?? "";
   const supplierName = supplierChoices.options.find((option) => option.value === idsupplier)?.label ?? "";
 
   // Con existencias no se cambia el manejo de seriales (el servidor también lo impide)
@@ -241,6 +265,25 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
     defaultSupplierId: idsupplier || null,
   });
   const canAssignHere = withBranches && (hasSerial ? branchStep.canUnits : branchStep.canStock);
+
+  // Fase 32.3: «¿A qué compra va?» (con «Editar compras» y «Ver costos»: la compra lleva el costo)
+  const canPurchase = withBranches && Boolean(branchStep.canPurchase);
+  const [openPurchases, setOpenPurchases] = useState(() => ({ status: canPurchase ? "loading" : "ready", items: [] }));
+  const [purchaseId, setPurchaseId] = useState(null);
+  useEffect(() => {
+    if (!canPurchase) return undefined;
+    let active = true;
+    purchaseApi
+      .open()
+      .then((items) => active && setOpenPurchases({ status: "ready", items }))
+      .catch(() => active && setOpenPurchases({ status: "error", items: [] }));
+    return () => {
+      active = false;
+    };
+  }, [canPurchase]);
+  const chosenPurchase = openPurchases.items.find((purchase) => purchase.id === purchaseId) ?? null;
+  // A una compra se mandan las cantidades aunque no tenga permiso de cargar existencias (entran al confirmarla)
+  const showAssignment = canAssignHere || Boolean(chosenPurchase);
 
   // Pasos: al crear se avanza en orden; al editar se salta a cualquiera y se guarda desde cualquiera
   const [step, setStep] = useState(0);
@@ -263,6 +306,38 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
   const save = handleSubmit(
     async (values) => {
       setServerError("");
+      // Fase 32.3: a una compra (con su proveedor, su costo y las cantidades por sucursal)
+      if (chosenPurchase) {
+        assignment.setSubmitted(true);
+        const idsupplierOfPurchase = hasSerial ? assignment.supplierValue : values.idsupplier;
+        const problem = !idsupplierOfPurchase
+          ? "Para mandarlo a la compra elige su proveedor (paso Producto)."
+          : !(Number(values.cost_price) > 0)
+            ? "Para mandarlo a la compra escribe su precio de costo."
+            : assignment.rows.length === 0
+              ? "Elige al menos una sucursal con su cantidad para la compra."
+              : assignment.hasErrors
+                ? "Corrige los datos marcados de las sucursales."
+                : "";
+        if (problem) {
+          setServerError(problem);
+          goTo(!idsupplierOfPurchase && !hasSerial ? 0 : !(Number(values.cost_price) > 0) ? stepOfField("cost_price") : steps.length - 1);
+          return;
+        }
+        const stock = assignment.toPayload();
+        const item = {
+          idsupplier: Number(idsupplierOfPurchase),
+          unitcost: Number(values.cost_price),
+          ...(hasSerial && { serialtype: stock.serialtype, warrantymonths: stock.warrantymonths }),
+          branches: stock.branches.map((branch) => ({ idbranch: branch.idbranch, quantity: branch.quantity, ...(branch.units && { units: branch.units }) })),
+        };
+        try {
+          await onSubmit(buildPayload(values, isEdit, showCost, supplierChoices.canRead), null, { id: chosenPurchase.id, title: chosenPurchase.title, item });
+        } catch (error) {
+          setServerError(getErrorMessage(error, "No se pudo crear el producto. Inténtalo de nuevo."));
+        }
+        return;
+      }
       // La asignación solo se envía si eligió sucursales (y tiene permiso)
       const assigning = canAssignHere && assignment.rows.length > 0;
       if (assigning) {
@@ -296,7 +371,11 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
   };
 
   const total = assignment.total;
-  const createLabel = withBranches && assignment.rows.length > 0 ? `Crear y asignar ${total} ${total === 1 ? "unidad" : "unidades"}` : "Crear producto";
+  const createLabel = chosenPurchase
+    ? `Crear y agregar a ${chosenPurchase.title}`
+    : withBranches && assignment.rows.length > 0
+      ? `Crear y asignar ${total} ${total === 1 ? "unidad" : "unidades"}`
+      : "Crear producto";
 
   return (
     <>
@@ -307,7 +386,7 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
             <ProductPreview
               name={name.trim()}
               sku={sku.trim().toUpperCase()}
-              category={categoryName}
+              category={subcategoryName ? `${categoryName} · ${subcategoryName}` : categoryName}
               supplier={supplierName.replace(" (inactivo)", "")}
               salePrice={sale}
               hasSerial={hasSerial}
@@ -361,7 +440,11 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
                     options={categoryOptions}
                     hint={categoryHint}
                     error={errors.idcategory?.message}
-                    {...register("idcategory", RULES.idcategory)}
+                    {...register("idcategory", {
+                      ...RULES.idcategory,
+                      // La subcategoría era de la otra categoría (Fase 33)
+                      onChange: () => setValue("idsubcategory", "", { shouldDirty: true }),
+                    })}
                   />
                   {canCreateCategory && (
                     <Button variant="outline" icon="plus" className="purchase-form__inline" onClick={() => setCreatingCategory(true)}>
@@ -369,6 +452,22 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
                     </Button>
                   )}
                 </div>
+                {selectedCategory && (subcategoryOptions.length > 0 || canCreateCategory) && (
+                  <div className="purchase-form__supplier">
+                    <Select
+                      label="Subcategoría (opcional)"
+                      placeholder={subcategoryOptions.length ? "Sin subcategoría" : "Esta categoría aún no tiene subcategorías"}
+                      options={subcategoryOptions}
+                      hint={`Por ejemplo, la marca o el tipo dentro de ${categoryName}.`}
+                      {...register("idsubcategory")}
+                    />
+                    {canCreateCategory && selectedCategory.isActive !== false && (
+                      <Button variant="outline" icon="plus" className="purchase-form__inline" onClick={() => setCreatingSubcategory(true)}>
+                        Nueva subcategoría
+                      </Button>
+                    )}
+                  </div>
+                )}
                 <Controller
                   name="idsupplier"
                   control={control}
@@ -468,8 +567,17 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
             {/* Paso 4: Sucursales (solo al crear desde Productos) */}
             {withBranches && (
               <div className="step-panel" hidden={step !== 3}>
-                <FormSection icon="home" title="Asignar a sucursales" description="Opcional: si no eliges ninguna, el producto queda «pendiente de asignar» y lo haces después.">
-                  {canAssignHere ? (
+                <FormSection
+                  icon="home"
+                  title={chosenPurchase ? "Cantidades de la compra" : "Asignar a sucursales"}
+                  description={
+                    chosenPurchase
+                      ? `Van a ${chosenPurchase.title}: llegan a cada sucursal al confirmar la compra.`
+                      : "Opcional: si no eliges ninguna, el producto queda «pendiente de asignar» y lo haces después."
+                  }
+                >
+                  {canPurchase && <PurchasePicker state={openPurchases} value={purchaseId} onChange={setPurchaseId} />}
+                  {showAssignment ? (
                     <BranchAssignmentFields assignment={assignment} suppliersHint={branchStep.suppliersHint} />
                   ) : (
                     <p className="product-wizard__note">
@@ -521,6 +629,21 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
           setCreatingCategory(false);
         }}
       />
+      <CategoryFormModal
+        open={creatingSubcategory}
+        parent={selectedCategory}
+        onClose={() => setCreatingSubcategory(false)}
+        onSubmit={async (payload) => {
+          const created = unwrap(await api.post(`/categories/${selectedCategory.id}/subcategories`, payload));
+          setNewSubcategories((current) => [
+            ...current,
+            { id: created.id, idcategory: created.idcategory, nameSubcategory: created.nameSubcategory, isActive: true },
+          ]);
+          setPendingSubcategory(String(created.id));
+          toast.success(`Subcategoría ${created.nameSubcategory} creada.`);
+          setCreatingSubcategory(false);
+        }}
+      />
       <SupplierFormModal
         open={creatingSupplier}
         onClose={() => setCreatingSupplier(false)}
@@ -546,10 +669,10 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
 const ProductFormModal = ({ open, product = null, categories, categoryHint, showCost, branchStep = null, onClose, onSubmit }) => {
   const [busy, setBusy] = useState(false);
 
-  const handleSubmit = async (payload, assignment) => {
+  const handleSubmit = async (payload, assignment, purchase) => {
     setBusy(true);
     try {
-      await onSubmit(payload, assignment);
+      await onSubmit(payload, assignment, purchase);
     } finally {
       setBusy(false);
     }

@@ -386,7 +386,7 @@
 
 @media (min-width: 640px) {
   .import-stats {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
   }
 }
 
@@ -408,6 +408,7 @@
 .import-stat--ok { --tone: var(--success); --soft: var(--success-soft); }
 .import-stat--info { --tone: var(--info); --soft: color-mix(in srgb, var(--info) 12%, transparent); }
 .import-stat--bad { --tone: var(--danger); --soft: var(--red-50); }
+.import-stat--brand { --tone: var(--color-primary); --soft: var(--color-primary-soft); }
 
 .import-stat__icon {
   display: grid;
@@ -699,4 +700,17 @@
   .import-modal * {
     animation: none !important;
   }
+}
+
+/* Fase 28.4: productos que ya existían y se cargan en esta sucursal */
+.import-preview--stocked {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+}
+
+.import-preview--stocked .import-preview__head {
+  background: var(--color-primary-soft);
+}
+
+.import-preview__table td small.import-preview__note {
+  color: var(--warning-text);
 }

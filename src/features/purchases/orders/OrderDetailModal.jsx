@@ -75,7 +75,7 @@ const ProductCard = ({ item }) => (
  * Pagos de una compra confirmada. De contado: pagada al confirmar. A crédito: saldo, vencimiento
  * y abonos (los anulados quedan tachados con su motivo).
  */
-const Payments = ({ order, canPay, canCancelPayment, onPay, onCancelPayment }) => {
+export const Payments = ({ order, canPay, canCancelPayment, onPay, onCancelPayment }) => {
   if (order.status !== "confirmado") return null;
 
   if (order.paymentTerm === "contado") {
@@ -181,6 +181,7 @@ const OrderDetailModal = ({
   onPay,
   onCancelPayment,
   onViewChanges,
+  onAddItems,
 }) => {
   const { order, loading, error } = state;
   const isDraft = order?.status === "borrador";
@@ -281,6 +282,11 @@ const OrderDetailModal = ({
           {canEdit && manage && isDraft && (
             <Button variant="outline" icon="edit" onClick={() => onEdit(order)}>
               Editar
+            </Button>
+          )}
+          {canEdit && manage && onAddItems && order.status === "confirmado" && (
+            <Button variant="outline" icon="plus" onClick={() => onAddItems(order)}>
+              Agregar productos
             </Button>
           )}
           {canConfirm && manage && isDraft ? (

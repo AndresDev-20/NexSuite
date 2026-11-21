@@ -57,7 +57,8 @@ const buildColumns = (branchName) => [
   {
     key: "category",
     header: "Categoría",
-    render: (product) => product.categoryName || EMPTY,
+    render: (product) =>
+      product.categoryName ? (product.subcategoryName ? `${product.categoryName} · ${product.subcategoryName}` : product.categoryName) : EMPTY,
   },
   {
     key: "cost",

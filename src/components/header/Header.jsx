@@ -11,11 +11,15 @@ import { clearSession, getUser } from "../../utils/session";
 import { getFullName, getInitials, getShortName } from "../../utils/userDisplay";
 import { SeasonAccessory, SeasonGarland } from "../../features/seasons/SeasonDecor";
 import { SeasonSky } from "../../features/seasons/SeasonScene";
+import { useBrand } from "../../features/brand/brandContext";
+import BrandWordmark from "../../features/brand/BrandWordmark";
+import { useLayawayAlerts } from "../../features/sales/layaways/layawayApi";
 import "./header.css";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
 
 const Header = () => {
+  const brand = useBrand(); // logo y nombre de la empresa (Fase 29)
   const navigate = useNavigate();
   const { pathname } = useLocation();
   // Aviso: conversaciones de WhatsApp que esperan vendedor (Fase 16); solo con «Ver chats»
@@ -26,15 +30,31 @@ const Header = () => {
   const seesOrders = can("sales.create");
   const { activeBranchId } = useActiveBranch();
   const ordersWaiting = usePendingOrders(seesOrders, activeBranchId);
-  const notifications = chatsWaiting + ordersWaiting;
+  // Y apartados por vencer o con dinero por devolver (Fase 30); con «Consultar apartados»
+  const layawayAlerts = useLayawayAlerts(can("layaways.read"), activeBranchId);
+  const layawaysWaiting = layawayAlerts.dueSoon + layawayAlerts.refunds;
+  const notifications = chatsWaiting + ordersWaiting + layawaysWaiting;
   const noticeLabel = [
     ordersWaiting > 0 && `${ordersWaiting} ${ordersWaiting === 1 ? "pedido espera" : "pedidos esperan"} en caja`,
     chatsWaiting > 0 && `${chatsWaiting} ${chatsWaiting === 1 ? "chat espera" : "chats esperan"} vendedor`,
+    layawayAlerts.dueSoon > 0 && `${layawayAlerts.dueSoon} ${layawayAlerts.dueSoon === 1 ? "apartado vence" : "apartados vencen"} pronto`,
+    layawayAlerts.refunds > 0 && `${layawayAlerts.refunds} ${layawayAlerts.refunds === 1 ? "apartado tiene" : "apartados tienen"} dinero por devolver`,
   ]
     .filter(Boolean)
     .join(" · ");
   // Primero los pedidos: el cliente está esperando en la caja
-  const noticeTarget = ordersWaiting > 0 ? "/ventas/pedidos" : seesChats ? "/ventas/chats" : null;
+  const noticeTarget =
+    ordersWaiting > 0
+      ? "/ventas/pedidos"
+      : chatsWaiting > 0
+        ? "/ventas/chats"
+        : layawayAlerts.dueSoon > 0
+          ? "/ventas/apartados?filtro=por-vencer"
+          : layawayAlerts.refunds > 0
+            ? "/ventas/apartados?filtro=por-devolver"
+            : seesChats
+              ? "/ventas/chats"
+              : null;
 
   const [menuOpen, setMenuOpen] = useState(false); // drawer móvil / tablet
   const [userOpen, setUserOpen] = useState(false); // menú del usuario
@@ -105,12 +125,10 @@ const Header = () => {
       <header className="header">
         <SeasonSky variant="app" />
         <div className="header__inner">
-          <Link to="/welcome" className="header__logo" aria-label="NexSuite - Inicio">
+          <Link to="/welcome" className="header__logo" aria-label={`${brand.displayName} - Inicio`}>
             <SeasonAccessory className="season-accessory--header" />
-            <img src="/nexsuite-logo-icono.png" alt="" className="header__logo-image" />
-            <span className="header__logo-text">
-              <span className="header__logo-nex">Nex</span>Suite
-            </span>
+            <img src={brand.logoUrl} alt="" className={`header__logo-image ${brand.hasLogo ? "header__logo-image--company" : ""}`.trim()} />
+            <BrandWordmark name={brand.displayName} tagline={brand.tagline} size="header" className="header__wordmark" />
           </Link>
 
           <div className="header__actions">

@@ -648,3 +648,19 @@
 .business-preview__dots {
   color: #a1a1aa;
 }
+
+/* Fase 29: logo de la empresa y firma en la vista previa del comprobante */
+.business-preview__logo {
+  display: block;
+  max-width: 120px;
+  max-height: 48px;
+  margin: 0 auto 8px;
+  object-fit: contain;
+  filter: grayscale(1) contrast(1.2);
+}
+
+.business-preview__ticket .business-preview__signature {
+  margin-top: 8px;
+  font-size: 0.65rem;
+  color: #888;
+}

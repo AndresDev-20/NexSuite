@@ -865,6 +865,24 @@
   border-color: var(--red-600);
 }
 
+/* Fase 33: subcategorías de la categoría elegida, más discretas */
+.shop-chips--sub {
+  margin-top: -6px;
+}
+
+.shop-chips--sub .shop-chip {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.shop-chip__count {
+  margin-left: 4px;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
 .shop-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2182,4 +2200,190 @@
 :root[data-motion="reduced"] .shop-reveal {
   opacity: 1;
   transform: none;
+}
+
+/* ==========================================================================
+   Marca de la empresa (Fase 29): su logo (puede ser ancho) y su nombre en vez de NexStore
+   ========================================================================== */
+.shop-brand__mark--company {
+  width: auto;
+  padding: 3px 6px;
+  background: #fff;
+}
+
+.shop-brand__mark--company .shop-brand__logo {
+  width: auto;
+  max-width: 96px;
+  height: 100%;
+  object-fit: contain;
+}
+
+.shop-brand__name--company {
+  max-width: clamp(100px, 30vw, 280px);
+  overflow: hidden;
+  font-style: normal;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shop-footer__signature {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* Nombre de la empresa con su estilo (BrandWordmark, Fase 29) */
+.shop-brand__wordmark {
+  display: flex;
+  min-width: 0;
+  /* En celular ocupa lo que dejan el logo y los dos botones de la derecha */
+  max-width: min(320px, calc(100vw - 170px));
+}
+
+@media (max-width: 639px) {
+  .shop-brand__wordmark .wordmark__tagline { display: none; }
+}
+
+/* ---------- Ofertas (Fase 31) ---------- */
+.shop-tile__offer {
+  position: absolute;
+  /* Debajo de la categoría (arriba a la izquierda) para no taparla */
+  top: 38px;
+  left: 10px;
+  max-width: calc(100% - 20px);
+  overflow: hidden;
+  padding: 4px 10px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #fff;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background: #db2777;
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(219, 39, 119, 0.35);
+  transform-origin: left center;
+  animation: shop-offer-pop 2.8s ease-in-out infinite;
+}
+.shop-tile__offer--precio { background: #ea580c; box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35); }
+.shop-tile__offer--segundo { background: #2563eb; box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35); }
+.shop-tile__offer--combo { background: #059669; box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35); }
+
+.shop-price-offer {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  align-items: baseline;
+}
+.shop-price-offer__now { color: #db2777; }
+.shop-price-offer__before {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.shop-offer-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.shop-offer-tag {
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #9d174d;
+  background: #fdf2f8;
+  border: 1px solid #fbcfe8;
+  border-radius: 12px;
+}
+.shop-offer-tag--precio { color: #9a3412; background: #fff7ed; border-color: #fed7aa; }
+.shop-offer-tag--segundo { color: #1e40af; background: #eff6ff; border-color: #bfdbfe; }
+.shop-offer-tag--combo { color: #065f46; background: #ecfdf5; border-color: #a7f3d0; }
+
+.shop-offers {
+  padding: clamp(18px, 4vw, 28px);
+  background:
+    radial-gradient(circle at 100% 0, rgba(219, 39, 119, 0.16), transparent 45%),
+    radial-gradient(circle at 0 100%, rgba(234, 88, 12, 0.12), transparent 45%),
+    var(--shop-surface);
+  border: 1px solid rgba(219, 39, 119, 0.18);
+  border-radius: var(--shop-radius);
+}
+.shop-offers__eyebrow {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #db2777;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.shop-offers__title {
+  margin: 2px 0 14px;
+  font-size: clamp(1.4rem, 4.5vw, 2rem);
+}
+.shop-offers__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 12px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+}
+.shop-offer {
+  animation: shop-offer-in 520ms cubic-bezier(0.3, 1.3, 0.5, 1) both;
+  animation-delay: calc(var(--i) * 80ms);
+}
+.shop-offer__link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  height: 100%;
+  padding: 14px;
+  color: inherit;
+  text-decoration: none;
+  background: var(--shop-surface);
+  border: 1px solid var(--color-border);
+  border-left: 5px solid #db2777;
+  border-radius: 14px;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.shop-offer--precio .shop-offer__link { border-left-color: #ea580c; }
+.shop-offer--segundo .shop-offer__link { border-left-color: #2563eb; }
+.shop-offer--combo .shop-offer__link { border-left-color: #059669; }
+.shop-offer__link:hover,
+.shop-offer__link:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+.shop-offer__icon { font-size: 1.7rem; }
+.shop-offer__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.shop-offer__name { overflow-wrap: anywhere; }
+.shop-offer__label {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+.shop-offer__until {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #db2777;
+}
+
+@keyframes shop-offer-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes shop-offer-pop {
+  0%, 85%, 100% { transform: scale(1); }
+  92% { transform: scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shop-tile__offer,
+  .shop-offer { animation: none; }
 }

@@ -1,0 +1,667 @@
+/* Apartados (Fase 30): lista con filtros, tarjetas con su avance, ficha y formulario de apartar */
+
+/* ---------- Tonos ---------- */
+.layaway-card,
+.layaway-badge,
+.layaway-progress,
+.layaway-filter,
+.layaway-hero {
+  --tone: var(--info);
+  --tone-soft: color-mix(in srgb, var(--info) 12%, var(--white));
+}
+
+.layaway-card--ready,
+.layaway-badge--ready,
+.layaway-progress--ready,
+.layaway-hero--ready,
+.layaway-card--success,
+.layaway-badge--success,
+.layaway-progress--success,
+.layaway-filter--success,
+.layaway-hero--success {
+  --tone: var(--success);
+  --tone-soft: var(--success-soft);
+}
+
+.layaway-card--warning,
+.layaway-badge--warning,
+.layaway-progress--warning,
+.layaway-filter--warning,
+.layaway-hero--warning {
+  --tone: var(--warning-strong, var(--warning));
+  --tone-soft: var(--warning-soft);
+}
+
+.layaway-card--danger,
+.layaway-badge--danger,
+.layaway-progress--danger,
+.layaway-filter--danger,
+.layaway-hero--danger {
+  --tone: var(--danger);
+  --tone-soft: var(--red-50);
+}
+
+.layaway-card--muted,
+.layaway-badge--muted,
+.layaway-progress--muted,
+.layaway-filter--muted,
+.layaway-hero--muted {
+  --tone: var(--gray-500);
+  --tone-soft: var(--gray-100);
+}
+
+/* ---------- Filtros ---------- */
+.layaway-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+  .layaway-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .layaway-filters {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.layaway-filter {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 2px 10px;
+  align-items: center;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+  animation: layaway-in 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 40ms);
+}
+
+.layaway-filter:hover {
+  transform: translateY(-2px);
+}
+
+.layaway-filter--active {
+  background: linear-gradient(160deg, var(--tone-soft), var(--white) 85%);
+  border-color: var(--tone);
+  box-shadow: 0 10px 22px -16px var(--tone);
+}
+
+.layaway-filter__icon {
+  display: grid;
+  grid-row: span 2;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--tone);
+  background: var(--tone-soft);
+  border-radius: 10px;
+}
+
+.layaway-filter__icon .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.layaway-filter__label {
+  overflow: hidden;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layaway-filter__count {
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--tone);
+}
+
+/* ---------- Tarjetas ---------- */
+.layaway-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.layaway-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-top: 3px solid var(--tone);
+  border-radius: 14px;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  animation: layaway-in 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 35ms);
+}
+
+.layaway-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 30px -22px rgba(15, 23, 42, 0.6);
+}
+
+.layaway-card--skeleton {
+  height: 178px;
+  cursor: default;
+  background: linear-gradient(90deg, var(--gray-100), var(--gray-50), var(--gray-100)) 0 0 / 200% 100%;
+  border-top-color: var(--gray-200);
+  animation: layaway-shimmer 1.2s linear infinite;
+}
+
+.layaway-card__top,
+.layaway-card__money,
+.layaway-card__foot {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.layaway-card__number {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.layaway-card__customer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.layaway-card__customer > .icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-muted);
+}
+
+.layaway-card__customer > span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.layaway-card__customer strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layaway-card__customer small,
+.layaway-card__money small {
+  font-size: 0.74rem;
+  color: var(--color-text-muted);
+}
+
+.layaway-card__money > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.layaway-card__money > span:last-child {
+  align-items: flex-end;
+}
+
+.layaway-card__money strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.layaway-card__money > span:last-child strong {
+  color: var(--tone);
+}
+
+.layaway-card__foot {
+  padding-top: 8px;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  border-top: 1px dashed var(--color-border);
+}
+
+.layaway-card__foot .icon {
+  width: 13px;
+  height: 13px;
+  vertical-align: -2px;
+}
+
+.layaway-card__due {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.layaway-card__due--soon {
+  color: var(--warning-text);
+}
+
+.layaway-card__due--refund {
+  color: var(--danger);
+}
+
+.layaway-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* ---------- Etiqueta y barra ---------- */
+.layaway-badge {
+  display: inline-flex;
+  padding: 3px 9px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--tone);
+  white-space: nowrap;
+  background: var(--tone-soft);
+  border-radius: 999px;
+}
+
+.layaway-progress {
+  position: relative;
+  display: block;
+  height: 8px;
+  overflow: hidden;
+  background: var(--gray-100);
+  border-radius: 999px;
+}
+
+.layaway-progress__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--value);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tone) 70%, white), var(--tone));
+  border-radius: inherit;
+  animation: layaway-fill 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* ---------- Ficha ---------- */
+.layaway-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.layaway-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  background: linear-gradient(140deg, var(--tone-soft), var(--white) 70%);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  animation: layaway-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (min-width: 640px) {
+  .layaway-hero {
+    grid-template-columns: auto 1fr;
+  }
+}
+
+/* Anillo de lo pagado */
+.layaway-hero__ring {
+  --value: 0;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  width: 118px;
+  height: 118px;
+  background: conic-gradient(var(--tone) calc(var(--value) * 1%), var(--gray-200) 0);
+  border-radius: 50%;
+  animation: layaway-pop 560ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+.layaway-hero__ring > span {
+  display: grid;
+  place-items: center;
+  width: 92px;
+  height: 92px;
+  text-align: center;
+  background: var(--white);
+  border-radius: 50%;
+}
+
+.layaway-hero__ring strong {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--tone);
+}
+
+.layaway-hero__ring small {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+.layaway-hero__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.layaway-hero__body .layaway-badge {
+  align-self: flex-start;
+}
+
+.layaway-hero__money {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.layaway-hero__money dt {
+  font-size: 0.74rem;
+  color: var(--color-text-muted);
+}
+
+.layaway-hero__money dd {
+  margin: 0;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.layaway-hero__balance dd {
+  font-size: 1.15rem;
+  color: var(--tone);
+}
+
+.layaway-hero__due {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--color-text-muted);
+}
+
+.layaway-hero__due .icon {
+  width: 15px;
+  height: 15px;
+}
+
+.layaway-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .layaway-facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.layaway-facts dt {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.layaway-facts dd {
+  display: flex;
+  flex-direction: column;
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.layaway-facts small {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.layaway-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.layaway-action {
+  padding: 16px;
+  background: var(--color-bg-alt, var(--gray-50));
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  animation: layaway-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.layaway-action__title {
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+
+/* Dentro de la ficha, los botones del formulario no quedan pegados abajo */
+.layaway-action .form-layout__actions {
+  position: static;
+  margin: 4px 0 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+.layaway-section__title {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.layaway-items,
+.layaway-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.layaway-items li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  animation: layaway-in 340ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 40ms);
+}
+
+.layaway-items__icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  border-radius: 10px;
+}
+
+.layaway-items__icon .icon {
+  width: 17px;
+  height: 17px;
+}
+
+.layaway-items__name {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.layaway-items__name small {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.layaway-timeline li {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 4px 0 4px 4px;
+  animation: layaway-in 340ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 50ms);
+}
+
+.layaway-timeline li > span:nth-child(2) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.layaway-timeline small {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+}
+
+.layaway-timeline__dot {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  background: var(--success);
+  border: 3px solid var(--success-soft);
+  border-radius: 50%;
+  box-sizing: content-box;
+}
+
+.layaway-timeline__refund .layaway-timeline__dot {
+  background: var(--danger);
+  border-color: var(--red-50);
+}
+
+.layaway-timeline__amount {
+  color: var(--success-text);
+  white-space: nowrap;
+}
+
+.layaway-timeline__refund .layaway-timeline__amount {
+  color: var(--danger);
+}
+
+.layaway-note {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--color-text-muted);
+}
+
+.layaway-note--warning {
+  padding: 10px 12px;
+  color: var(--warning-text);
+  background: var(--warning-soft);
+  border-radius: 10px;
+}
+
+.layaway-note--success {
+  padding: 10px 12px;
+  color: var(--success-text);
+  background: var(--success-soft);
+  border-radius: 10px;
+}
+
+/* ---------- Apartar desde Vender ---------- */
+.layaway-new__items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 12px;
+  list-style: none;
+  background: var(--color-bg-alt, var(--gray-50));
+  border-radius: 12px;
+}
+
+.layaway-new__items li {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  font-size: 0.88rem;
+}
+
+.layaway-new__items li span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.layaway-new__total {
+  padding-top: 6px;
+  font-weight: 800;
+  border-top: 1px dashed var(--color-border);
+}
+
+.layaway-new__balance {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 12px 14px;
+  color: #fff;
+  background: linear-gradient(120deg, var(--red-600), var(--red-800));
+  border-radius: 14px;
+}
+
+.layaway-new__balance strong {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Animaciones ---------- */
+@keyframes layaway-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes layaway-fill {
+  from { width: 0; }
+}
+
+@keyframes layaway-pop {
+  0% { transform: scale(0.7) rotate(-40deg); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+
+@keyframes layaway-shimmer {
+  to { background-position: -200% 0; }
+}
+
+:root[data-motion="reduced"] .layaways-page *,
+:root[data-motion="reduced"] .layaway-detail *,
+:root[data-motion="reduced"] .layaway-detail {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layaways-page *,
+  .layaway-detail,
+  .layaway-detail * {
+    animation: none !important;
+  }
+}

@@ -8,20 +8,27 @@ import WizardForm from "../../../components/forms/WizardForm/WizardForm";
 import Modal from "../../../components/feadback/Modal/Modal";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import Icon from "../../../components/ui/Icon/Icon";
+import { useBrand } from "../../brand/brandContext";
 import "./userFormModal.css";
 
 /** Carné del usuario: se arma mientras se escribe (vista previa, solo adorno). */
 const UserBadge = ({ firstNames, lastNames, cc, email, phone, roleName, hasPassword, isEdit }) => {
   const name = `${firstNames} ${lastNames}`.trim();
   const initials = `${firstNames.charAt(0)}${lastNames.charAt(0)}`.toUpperCase() || "?";
+  const brand = useBrand(); // logo y nombre de la empresa (Fase 29)
+  const brandLogo = brand.logoUrl;
   return (
     <div className="user-badge" aria-hidden="true">
       <span className="user-badge__label">Así queda su carné</span>
       <div className="user-badge__card">
         <span className="user-badge__hole" />
         <span className="user-badge__brand">
-          <img src="/nexsuite-logo-icono.png" alt="" />
-          Nex<strong>Suite</strong>
+          <img src={brandLogo} alt="" />
+          {brand.name ? <strong className="user-badge__company">{brand.name}</strong> : (
+            <>
+              Nex<strong>Suite</strong>
+            </>
+          )}
         </span>
         <span className="user-badge__avatar" key={initials}>
           {initials}

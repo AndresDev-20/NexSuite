@@ -25,3 +25,14 @@
   font-weight: 600;
   color: var(--danger);
 }
+
+/* Fase 32: compra abierta (varios proveedores) */
+.order-cell__title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.order-cell__multi {
+  font-weight: 600;
+  color: var(--color-primary);
+}

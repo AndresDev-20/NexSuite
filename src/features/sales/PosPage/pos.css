@@ -1025,3 +1025,23 @@
     animation: none !important;
   }
 }
+
+/* Apartados (Fase 30): «Cancelar» y «Apartar» lado a lado; «Cobrar» ocupa toda la fila (en celular) */
+.pos__charge:has(.pos__layaway-button) {
+  grid-template-columns: 1fr 1fr;
+}
+
+.pos__charge:has(.pos__layaway-button) .pos__charge-button {
+  grid-column: 1 / -1;
+}
+
+.pos__layaway-button .btn__icon {
+  color: var(--color-primary);
+}
+
+/* Ofertas (Fase 31): su descuento en los totales */
+.pos__offers-total dt,
+.pos__offers-total dd {
+  font-weight: 700;
+  color: #db2777;
+}

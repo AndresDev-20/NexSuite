@@ -8,7 +8,9 @@ import { CartProvider } from "./cart";
 import { useCart } from "./cartContext";
 import { ChatIcon } from "./ShopParts";
 import { getShop } from "./shopApi";
-import { STORE_NAME, money } from "./shopFormat";
+import { money, storeNameOf } from "./shopFormat";
+import { SIGNATURE, useBrand } from "../brand/brandContext";
+import BrandWordmark from "../brand/BrandWordmark";
 import { SeasonAccessory, SeasonGarland, SeasonParticles } from "../seasons/SeasonDecor";
 import WelcomeGreeting from "../seasons/WelcomeGreeting";
 import { SeasonSky } from "../seasons/SeasonScene";
@@ -81,6 +83,7 @@ const HeaderSearch = () => {
 
 /** Encabezado: el negocio, el buscador, el tema, el carrito y las categorías. */
 const ShopHeader = ({ shop }) => {
+  const brand = useBrand(); // logo de la empresa (Fase 29)
   const { count, setOpen, notice } = useCart();
   const { activeTheme } = usePreferences();
   const [searchParams] = useSearchParams();
@@ -94,14 +97,20 @@ const ShopHeader = ({ shop }) => {
     <header className="shop-header">
       <SeasonSky variant="store" />
       <div className="shop-header__top">
-        <Link to="/tienda" className="shop-brand" aria-label={`${STORE_NAME}: inicio`}>
+        <Link to="/tienda" className="shop-brand" aria-label={`${storeNameOf(shop)}: inicio`}>
           <SeasonAccessory className="season-accessory--store" />
-          <span className="shop-brand__mark" aria-hidden="true">
-            <img src="/nexsuite-logo-icono.png" alt="" className="shop-brand__logo" />
+          <span className={`shop-brand__mark ${brand.hasLogo ? "shop-brand__mark--company" : ""}`.trim()} aria-hidden="true">
+            <img src={brand.logoUrl} alt="" className="shop-brand__logo" />
           </span>
-          <span className="shop-brand__name" aria-hidden="true">
-            Nex<span className="shop-brand__store">Store</span>
-          </span>
+          {shop?.name ? (
+            <span className="shop-brand__wordmark" aria-hidden="true">
+              <BrandWordmark name={shop.name} tagline={brand.tagline} size="shop" onAccent />
+            </span>
+          ) : (
+            <span className="shop-brand__name" aria-hidden="true">
+              Nex<span className="shop-brand__store">Store</span>
+            </span>
+          )}
         </Link>
         <HeaderSearch />
         <div className="shop-header__actions">
@@ -183,8 +192,8 @@ const ShopFooter = ({ shop }) => (
   <footer className="shop-footer">
     <div className="shop-footer__inner">
       <div className="shop-footer__col">
-        <strong className="shop-footer__name">{shop?.name || STORE_NAME}</strong>
-        <p className="shop-footer__text">Arma tu pedido en {STORE_NAME} y envíalo por WhatsApp. Te respondemos para confirmar disponibilidad, pago y entrega.</p>
+        <strong className="shop-footer__name">{storeNameOf(shop)}</strong>
+        <p className="shop-footer__text">Arma tu pedido en {storeNameOf(shop)} y envíalo por WhatsApp. Te respondemos para confirmar disponibilidad, pago y entrega.</p>
       </div>
       <div className="shop-footer__col">
         <h2 className="shop-footer__title">Contacto</h2>
@@ -224,8 +233,7 @@ const ShopFooter = ({ shop }) => (
       </div>
     </div>
     <p className="shop-footer__copy">
-      © {YEAR} {shop?.name ? `${shop.name} · ` : ""}
-      {STORE_NAME} · Precios en pesos colombianos
+      © {YEAR} {storeNameOf(shop)} · Precios en pesos colombianos · <span className="shop-footer__signature">{SIGNATURE}</span>
     </p>
   </footer>
 );
@@ -238,10 +246,15 @@ const ShopLayout = () => {
   const [state, setState] = useState({ shop: null, error: "", loading: true });
   const [attempt, setAttempt] = useState(0);
 
-  // Al salir de la tienda (por ejemplo, al sistema) la pestaña vuelve a su nombre de siempre
+  // Al salir de la tienda (por ejemplo, al sistema) la pestaña vuelve al nombre de la empresa
+  const brand = useBrand();
+  const appTitle = useRef(brand.displayName);
+  useEffect(() => {
+    appTitle.current = brand.displayName;
+  }, [brand.displayName]);
   useEffect(
     () => () => {
-      document.title = "NexSuite";
+      document.title = appTitle.current;
     },
     []
   );
@@ -252,7 +265,7 @@ const ShopLayout = () => {
       .then((shop) => {
         if (!current) return;
         setState({ shop, error: "", loading: false });
-        document.title = shop.name ? `${STORE_NAME} · ${shop.name}` : STORE_NAME;
+        document.title = storeNameOf(shop);
       })
       .catch((error) => current && setState({ shop: null, error: getErrorMessage(error, "No pudimos abrir la tienda."), loading: false }));
     return () => {

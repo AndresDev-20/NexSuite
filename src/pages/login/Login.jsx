@@ -8,6 +8,8 @@ import { DEMO_MODE } from "../../demo/demoMode";
 import { SeasonAccessory, SeasonParticles } from "../../features/seasons/SeasonDecor";
 import { GREETING_FLAG } from "../../features/seasons/WelcomeGreeting";
 import { SeasonScene, SeasonSky } from "../../features/seasons/SeasonScene";
+import { SIGNATURE, useBrand } from "../../features/brand/brandContext";
+import BrandWordmark from "../../features/brand/BrandWordmark";
 
 // Tiempos de las animaciones (deben coincidir con --power-ms en login.css)
 const LOADING_MS = 2400;
@@ -98,6 +100,7 @@ function LockIcon() {
 }
 
 function Login() {
+  const brand = useBrand();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [shake, setShake] = useState(false);
@@ -166,10 +169,15 @@ function Login() {
         {/* El gorro (o el accesorio de la temporada) va pegado al logo en cualquier tamaño */}
         <span className="season-logo-holder">
           <SeasonAccessory className="season-accessory--login" />
-          <LogoMark className="login__logo" />
+          {/* Logo y nombre de la empresa (Fase 29); sin logo propio, el de NexSuite */}
+          {brand.hasLogo ? (
+            <img className="login__logo login__logo--company" src={brand.logoUrl} alt={`Logo de ${brand.displayName}`} />
+          ) : (
+            <LogoMark className="login__logo" />
+          )}
         </span>
-        <p className="login__wordmark">
-          <span className="login__wordmark-nex">Nex</span>Suite
+        <p className="login__brandname">
+          <BrandWordmark name={brand.displayName} tagline={brand.tagline} size="login" />
         </p>
       </header>
 
@@ -289,7 +297,9 @@ function Login() {
             </button>
           </form>
 
-          <p className="login__footer">© {new Date().getFullYear()} NexSuite</p>
+          <p className="login__footer">
+            © {new Date().getFullYear()} {brand.displayName} · <span className="login__signature">{SIGNATURE}</span>
+          </p>
         </div>
 
         {/* Animación de carga: aura de poder alrededor del logo */}
@@ -305,7 +315,7 @@ function Login() {
               <span className="power__ring" />
               <span className="power__spikes" />
               <span className="power__aura" />
-              <LogoMark className="power__logo" />
+              {brand.hasLogo ? <img className="power__logo power__logo--company" src={brand.logoUrl} alt="" /> : <LogoMark className="power__logo" />}
             </div>
 
             <p className="power__text">

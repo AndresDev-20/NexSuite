@@ -392,10 +392,15 @@ Las variables `*_DEV` y `*_TEST` no se usan en producción.
 
 ```bash
 cd ~/apps/empresa1/BackEnd
-npm run db:setup
+npm run db:migrate
+npm run seed:permissions
+npm run seed:admin
 ```
 
 Corre todas las migraciones y crea los permisos y los roles del sistema (Administrador y Developer).
+
+> En un VPS **no uses `npm run db:setup`**: además corre el seeder del Developer pensado para Render, con una
+> contraseña fija que está en el repositorio, y luego `setup:first-user` ya no deja crear tu usuario.
 
 Luego crea **tu usuario** (Developer); en una base nueva nadie puede entrar todavía:
 
@@ -487,7 +492,8 @@ El sitio de **demostración** sigue como está. Cada empresa tiene **su propio s
 4. *Site configuration → Site details → Change site name*: `empresa1` (queda `https://empresa1.netlify.app`).
    Con tu dominio: *Domain management → Add a domain* (`app.empresa1.com`, con el CNAME del paso 2).
 5. Despliega. Pon la dirección del sitio en `CORS_ORIGINS` del `.env` de esa empresa y luego
-   `pm2 reload empresa1-api --update-env`.
+   `pm2 reload deploy/ecosystem.config.js --update-env` (desde la carpeta BackEnd de esa empresa; así PM2
+   vuelve a leer el `.env`).
 6. Entra con tu usuario del paso 9. En **Configuración → Datos del negocio** llena nombre, NIT,
    teléfono y demás: salen en los comprobantes.
 
@@ -736,7 +742,7 @@ reinstalar.
 | *Actions* en rojo en «Prueba de salud» | `pm2 logs empresa1-api`: el código nuevo no arranca; vuelve a la versión anterior (paso 15) |
 | Respuestas «429 Too Many Requests» | Se pasó el límite de peticiones: revisa si es un abuso (`/var/log/nginx/access.log`) o sube `rate` en el paso 5.3 |
 | La caja no abre sola a las 8:00 | `pm2 status` (debe estar *online*), la caja con «Abre sola» y sin «día sin abrir»; el reloj usa la hora de Colombia |
-| Todos aparecen con la misma IP en la auditoría | `TRUST_PROXY=1` en el `.env` y `pm2 reload empresa1-api --update-env` |
+| Todos aparecen con la misma IP en la auditoría | `TRUST_PROXY=1` en el `.env` y `pm2 reload deploy/ecosystem.config.js --update-env` (desde su BackEnd) |
 | `npm run backup` dice «mysqldump: not found» | `sudo apt install mysql-client` o define `MYSQL_BIN_DIR` |
 | El respaldo no llega a Drive | `rclone lsd drive:` y el log `~/logs/respaldos-empresa1.log` |
 | Un certificado vencido | `sudo certbot renew --dry-run` |

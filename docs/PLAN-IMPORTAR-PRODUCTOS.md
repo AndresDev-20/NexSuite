@@ -80,3 +80,33 @@ productos, con sus existencias, en la sucursal elegida.
 - **¿El Excel del otro sistema trae los IMEI de los celulares?** Si los trae (una fila por equipo con su IMEI),
   se pueden importar como unidades con serial; si no, los celulares se crean sin existencias y luego se registran
   sus IMEI. Mándame una foto de las columnas del Excel y lo ajusto.
+
+## 28.4 Cargar el mismo producto en varias sucursales (definición del 2026-11-14)
+
+Problema: el catálogo es uno solo para todas las sucursales; al subir el Excel de otra sucursal, los productos que
+ya existían se saltaban completos y **esa sucursal se quedaba sin su cantidad**.
+
+**Decisión: un Excel por sucursal (opción A) y el sistema reconoce el producto que ya existe**, por:
+
+1. **SKU o código de barras** (lo primero que se mira).
+2. **El nombre**, sin mayúsculas, tildes ni espacios de más («iPhone 1» = «iphone 1»), **solo si la fila no trae SKU ni
+   código de barras**.
+
+Qué pasa con cada fila:
+
+| La fila | Resultado |
+|---|---|
+| Producto nuevo | Se crea con su cantidad en la sucursal elegida (como hoy) |
+| Ya existe y **no tiene existencias en esta sucursal** | **No se crea otro**: se le carga la cantidad en esta sucursal («Inventario inicial», cargada sin compra). Ej.: iPhone 1 con 10 en la sucursal 1 → al subir la sucursal 2 con 7 queda **un solo** iPhone 1 con 10 y 7 |
+| Ya existe y **ya tiene existencias en esta sucursal** | Se salta: «ya tiene existencias aquí: usa Ajustar» (subir el mismo Excel dos veces no suma dos veces) |
+| Trae un SKU nuevo, pero **el nombre ya existe** con otro SKU | Error de la fila: «ya hay un producto con ese nombre y otro SKU: revisa cuál es» (para no crear dos iguales) |
+| Sin SKU ni código y **varios productos** tienen ese nombre | Error de la fila: «hay varios con ese nombre: escribe su SKU» |
+| Ya existe y **maneja serial** (IMEI) | No se carga cantidad: «ya existe; registra sus IMEI en Asignar a sucursales» |
+| El mismo producto **repetido dentro del Excel** (por SKU, código o nombre) | Entra la primera fila; las demás, error «repetido en el archivo» |
+
+- **El precio, la categoría y el proveedor del producto que ya existe no cambian** (el catálogo es uno solo). Si el
+  Excel trae otro precio, la revisión lo muestra como aviso: «en el sistema vale $X; se deja ese».
+- La **revisión** separa: productos nuevos, **existencias en otra sucursal** (ya existían, se les carga aquí), saltados
+  y con error, cada uno con su motivo.
+- Solo cambia el servidor de la importación y los textos de la revisión; no hay migración.
+

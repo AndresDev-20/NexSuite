@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Icon from "../../components/ui/Icon/Icon";
 import { useCart } from "./cartContext";
-import { AVAILABILITY, MAX_QUANTITY, initialOf, money, toneOf } from "./shopFormat";
+import { AVAILABILITY, MAX_QUANTITY, OFFER_ICONS, initialOf, money, offerPriceOf, priceOf, toneOf } from "./shopFormat";
 
 /* Piezas de la tienda en línea (Fase 24): íconos, disponibilidad, cantidad, tarjeta y filas de productos. */
 
@@ -31,8 +31,38 @@ export const ProductTile = ({ product, large = false, badges = true }) => (
     {badges && product.category && <span className="shop-tile__category">{product.category.name}</span>}
     {badges && product.availability === "few" && <span className="shop-tile__badge shop-tile__badge--few">Últimas unidades</span>}
     {badges && product.availability === "out" && <span className="shop-tile__badge shop-tile__badge--out">Agotado</span>}
+    {badges && product.offers?.length > 0 && (
+      <span className={`shop-tile__offer shop-tile__offer--${product.offers[0].type}`}>
+        {OFFER_ICONS[product.offers[0].type]} {product.offers[0].type === "precio" ? "Oferta" : product.offers[0].label}
+      </span>
+    )}
   </div>
 );
+
+/** El precio con la oferta: el normal tachado y el de oferta (Fase 31). */
+export const Price = ({ product, className }) => {
+  const offer = offerPriceOf(product);
+  return offer === null ? (
+    <strong className={className}>{money(product.price)}</strong>
+  ) : (
+    <span className="shop-price-offer">
+      <strong className={`${className} shop-price-offer__now`}>{money(offer)}</strong>
+      <s className="shop-price-offer__before">{money(product.price)}</s>
+    </span>
+  );
+};
+
+/** Todas las ofertas de un producto (página del producto). */
+export const OfferTags = ({ offers = [] }) =>
+  offers.length > 0 && (
+    <ul className="shop-offer-tags">
+      {offers.map((offer) => (
+        <li key={`${offer.id}-${offer.type}`} className={`shop-offer-tag shop-offer-tag--${offer.type}`}>
+          <span aria-hidden="true">{OFFER_ICONS[offer.type]}</span> {offer.label}
+        </li>
+      ))}
+    </ul>
+  );
 
 /** − cantidad + (de 1 a 99). */
 export const QuantityStepper = ({ value, onChange, label, min = 1 }) => (
@@ -64,11 +94,11 @@ export const ProductCard = ({ product, index = 0, as: Tag = "li" }) => {
 
   return (
     <Tag className={`shop-card ${out ? "shop-card--out" : ""}`.trim()} style={{ "--i": Math.min(index, 12) }}>
-      <Link className="shop-card__link" to={`/tienda/producto/${product.id}`} aria-label={`${product.name}, ${money(product.price)}`}>
+      <Link className="shop-card__link" to={`/tienda/producto/${product.id}`} aria-label={`${product.name}, ${money(priceOf(product))}`}>
         <ProductTile product={product} />
         <span className="shop-card__body">
           <span className="shop-card__name">{product.name}</span>
-          <strong className="shop-card__price">{money(product.price)}</strong>
+          <Price product={product} className="shop-card__price" />
           <span className="shop-card__meta">
             <Availability value={product.availability} />
             {product.warrantyMonths > 0 && <span className="shop-card__warranty">Garantía {product.warrantyMonths} m</span>}

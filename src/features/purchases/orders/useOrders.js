@@ -6,6 +6,8 @@ import { toNumber } from "../../../utils/money";
 import { getFullName } from "../../../utils/userDisplay";
 
 const ORDERS_PATH = "/orders";
+// Fase 32: la lista de Compras trae las compras abiertas (varios proveedores) y las de siempre juntas
+const LIST_PATH = "/purchases";
 
 const normalizeBranch = (branch) => ({ id: branch.id, name: branch.nameBranch });
 
@@ -97,6 +99,26 @@ export const normalizeOrder = (order) => ({
   payments: (order.payments ?? []).map(normalizePayment),
 });
 
+/** Una fila de la lista de Compras: una compra abierta (kind «purchase») o una de siempre (kind «order»). */
+export const normalizeListRow = (row) =>
+  row.kind === "order"
+    ? { kind: "order", ...normalizeOrder(row) }
+    : {
+        kind: "purchase",
+        id: row.id,
+        number: row.number,
+        title: row.title,
+        purchaseDate: row.purchasedate,
+        status: row.status,
+        suppliers: (row.suppliers ?? []).map((supplier) => ({ id: supplier.id, name: supplier.companyname })),
+        total: toNumber(row.total),
+        balance: toNumber(row.balance),
+        paymentStatus: row.paymentStatus ?? null,
+        branches: (row.branches ?? []).map(normalizeBranch),
+        productCount: row.productCount ?? 0,
+        manageable: row.manageable !== false,
+      };
+
 const EMPTY = { items: [], total: 0, page: 1, pages: 1 };
 
 /**
@@ -120,9 +142,9 @@ const useOrders = () => {
     }
 
     try {
-      const data = unwrap(await api.get(ORDERS_PATH, { params }));
+      const data = unwrap(await api.get(LIST_PATH, { params }));
       if (request !== lastRequest.current) return;
-      setResult({ items: data.items.map(normalizeOrder), total: data.total, page: data.page, pages: data.pages });
+      setResult({ items: data.items.map(normalizeListRow), total: data.total, page: data.page, pages: data.pages });
     } catch (err) {
       if (request !== lastRequest.current || silent) return;
       setResult(EMPTY);
@@ -147,8 +169,10 @@ const useOrders = () => {
   const updateOrder = useCallback((id, payload) => run(() => api.put(`${ORDERS_PATH}/${id}`, payload)), [run]);
   const confirmOrder = useCallback((id) => run(() => api.post(`${ORDERS_PATH}/${id}/confirm`)), [run]);
   const cancelOrder = useCallback((id, reason) => run(() => api.post(`${ORDERS_PATH}/${id}/cancel`, { reason })), [run]);
+  // Fase 32.4: lo que quedó por fuera de una compra confirmada (entra de una vez al inventario)
+  const addItemsConfirmed = useCallback((id, items) => run(() => api.post(`${ORDERS_PATH}/${id}/add-items`, { items })), [run]);
 
-  return { ...result, loading, error, getOrders, getOrder, createOrder, updateOrder, confirmOrder, cancelOrder };
+  return { ...result, loading, error, getOrders, getOrder, createOrder, updateOrder, confirmOrder, cancelOrder, addItemsConfirmed };
 };
 
 export default useOrders;

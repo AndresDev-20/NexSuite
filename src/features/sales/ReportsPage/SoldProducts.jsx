@@ -67,7 +67,8 @@ const Detail = ({ params }) => {
                 {row.serials && <span className="sold__serials"> · {row.serials}</span>}
               </td>
               <td>{row.unit}</td>
-              <td className="sold__text">{row.category}</td>
+              {/* Fase 33: con su subcategoría */}
+              <td className="sold__text">{row.subcategory ? `${row.category} · ${row.subcategory}` : row.category}</td>
               <td>{row.quantity}</td>
               <td>{severalDays ? `${dayOf(row.soldAt)} ${timeOf(row.soldAt)}` : timeOf(row.soldAt)}</td>
               <td>{formatCurrency(toNumber(row.total))}</td>

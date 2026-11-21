@@ -216,3 +216,13 @@
     animation: none !important;
   }
 }
+
+/* Fase 29: el nombre de la empresa en el carné */
+.user-badge__brand .user-badge__company {
+  max-width: 180px;
+  overflow: hidden;
+  font-style: normal;
+  color: #fff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

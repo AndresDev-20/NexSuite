@@ -9,8 +9,10 @@ import useToast from "../../components/feadback/Toast/useToast";
 import { formatDateTime } from "../administration/audit/auditOptions";
 import { unwrap } from "../../utils/apiResponse";
 import getErrorMessage from "../../utils/getErrorMessage";
+import { SIGNATURE, useBrand } from "../brand/brandContext";
+import LogoSettings from "./LogoSettings";
 
-const FIELDS = ["name", "nit", "phone", "email", "address", "city", "receiptfooter", "shopwhatsapp"];
+const FIELDS = ["name", "tagline", "layawaymaxdays", "nit", "phone", "email", "address", "city", "receiptfooter", "shopwhatsapp"];
 // WhatsApp de la tienda (Fase 24): el servidor guarda solo los dígitos, con el indicativo del país
 const whatsappDigits = (value) => value.replace(/[\s()+-]/g, "");
 const EMPTY = Object.fromEntries(FIELDS.map((field) => [field, ""]));
@@ -20,6 +22,7 @@ const toForm = (data) => Object.fromEntries(FIELDS.map((field) => [field, data?.
 const headerLines = (values) =>
   [
     values.name.trim(),
+    values.tagline.trim(),
     values.nit.trim() && `NIT ${values.nit.trim()}`,
     [values.phone.trim() && `Tel. ${values.phone.trim()}`, values.email.trim()].filter(Boolean).join(" · "),
     [values.address.trim(), values.city.trim()].filter(Boolean).join(" · "),
@@ -35,12 +38,14 @@ const RULES = {
 };
 
 /** Vista previa del encabezado y el pie del comprobante mientras se escribe. */
-const ReceiptPreview = ({ values }) => {
+const ReceiptPreview = ({ values, logo }) => {
   const lines = headerLines(values);
   return (
     <div className="business-preview" aria-label="Vista previa del comprobante">
       <p className="business-preview__label">Así sale en el comprobante</p>
       <div className="business-preview__ticket">
+        {/* Logo de la empresa (Fase 29), como sale en la tirilla */}
+        {logo && <img className="business-preview__logo" src={logo} alt="" />}
         {lines.length > 0 ? (
           lines.map((line, index) => (
             <p key={line} className={index === 0 ? "business-preview__name" : "business-preview__line"}>
@@ -56,6 +61,7 @@ const ReceiptPreview = ({ values }) => {
         </p>
         {values.receiptfooter.trim() && <p className="business-preview__line">{values.receiptfooter.trim()}</p>}
         <p className="business-preview__line">Documento de venta interno. No es factura electrónica.</p>
+        <p className="business-preview__signature">{SIGNATURE}</p>
       </div>
     </div>
   );
@@ -95,6 +101,7 @@ const ShopAddress = () => {
  */
 const BusinessSettings = () => {
   const toast = useToast();
+  const brand = useBrand();
   const [state, setState] = useState({ loading: true, error: "", saved: null });
   const [serverError, setServerError] = useState("");
   const {
@@ -124,9 +131,13 @@ const BusinessSettings = () => {
   const submit = handleSubmit(async (form) => {
     setServerError("");
     try {
-      const data = unwrap(await api.put("/settings/business", Object.fromEntries(FIELDS.map((field) => [field, form[field].trim()]))));
+      // Los días máximos de un apartado (Fase 30) van como número; lo demás, texto
+      const payload = Object.fromEntries(FIELDS.map((field) => [field, String(form[field] ?? "").trim()]));
+      payload.layawaymaxdays = Number(payload.layawaymaxdays) || 90;
+      const data = unwrap(await api.put("/settings/business", payload));
       reset(toForm(data));
       setState({ loading: false, error: "", saved: data });
+      brand.setInfo({ name: data.name, tagline: data.tagline }); // el nombre y el eslogan en el encabezado y la pestaña
       toast.success("Datos del negocio guardados: ya salen en los documentos.");
     } catch (error) {
       setServerError(getErrorMessage(error, "No se pudieron guardar los datos del negocio."));
@@ -146,9 +157,18 @@ const BusinessSettings = () => {
 
   return (
     <div className="business-settings">
+      <LogoSettings businessName={values.name} tagline={values.tagline} />
       <FormLayout onSubmit={submit} error={serverError}>
         <div className="business-settings__grid">
           <Field label="Nombre del negocio" maxLength={120} placeholder="Ej: Celulares Rovira" error={errors.name?.message} {...register("name", RULES.name)} />
+          <Field
+            label="Eslogan (opcional)"
+            maxLength={80}
+            placeholder="Ej: La mejor opción en tecnología"
+            hint="Va debajo del nombre. Con eslogan el nombre se ve como letrero; sin él, con el estilo de NexSuite."
+            error={errors.tagline?.message}
+            {...register("tagline")}
+          />
           <Field label="NIT" maxLength={30} placeholder="Ej: 900123456-7" error={errors.nit?.message} {...register("nit")} />
           <Field label="Teléfono" inputMode="tel" maxLength={20} placeholder="Ej: 300 123 4567" error={errors.phone?.message} {...register("phone", RULES.phone)} />
           <Field label="Correo" type="email" maxLength={120} placeholder="Ej: ventas@minegocio.com" error={errors.email?.message} {...register("email", RULES.email)} />
@@ -173,8 +193,20 @@ const BusinessSettings = () => {
           error={errors.shopwhatsapp?.message}
           {...register("shopwhatsapp", RULES.shopwhatsapp)}
         />
+        <Field
+          label="Días máximos de un apartado"
+          type="number"
+          inputMode="numeric"
+          min={7}
+          max={365}
+          hint="Un apartado puede durar hasta estos días (30 por defecto al apartar). Entre 7 y 365."
+          error={errors.layawaymaxdays?.message}
+          {...register("layawaymaxdays", {
+            validate: (value) => (Number(value) >= 7 && Number(value) <= 365 && Number.isInteger(Number(value))) || "Escribe un número entero de 7 a 365.",
+          })}
+        />
         <ShopAddress />
-        <ReceiptPreview values={values} />
+        <ReceiptPreview values={values} logo={brand.hasLogo ? brand.logoUrl : null} />
         <p className="settings-section__subtitle">
           Salen en la tirilla y la carta de venta, el documento de garantía, el balance y los Excel. Un dato vacío usa el del servidor.
           {state.saved?.editor && ` Último cambio: ${state.saved.editor.name} · ${formatDateTime(state.saved.updatedat)}`}

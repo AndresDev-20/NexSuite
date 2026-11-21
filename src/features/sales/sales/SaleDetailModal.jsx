@@ -113,8 +113,14 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onClose }) => {
                 <span className="sheet__row-title">{item.name}</span>
                 <span className="sheet__row-meta">
                   {item.sku} · {item.quantity} × {formatCurrency(item.unitPrice)}
-                  {item.discount > 0 && ` − ${formatCurrency(item.discount)}`}
+                  {!item.gift && item.discount - item.offerDiscount > 0 && ` − ${formatCurrency(item.discount - item.offerDiscount)}`}
                 </span>
+                {item.gift && <span className="sheet__row-meta sheet__offer">🎁 Obsequio · {item.offerName}</span>}
+                {!item.gift && item.offerDiscount > 0 && (
+                  <span className="sheet__row-meta sheet__offer">
+                    Oferta {item.offerName} · − {formatCurrency(item.offerDiscount)}
+                  </span>
+                )}
                 {item.serials.map((unit) => (
                   <span className="sheet__row-meta" key={unit.id}>
                     <span className="sheet__mono">{unit.serial}</span>
@@ -124,7 +130,7 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onClose }) => {
                 ))}
               </div>
               <div className="sheet__row-side">
-                <span className="sheet__number">{formatCurrency(item.total)}</span>
+                <span className="sheet__number">{item.gift ? "Gratis" : formatCurrency(item.total)}</span>
               </div>
             </li>
           ))}

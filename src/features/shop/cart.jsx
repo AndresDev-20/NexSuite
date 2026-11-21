@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import CartContext from "./cartContext";
-import { MAX_QUANTITY } from "./shopFormat";
+import { MAX_QUANTITY, offerNoteOf, priceOf } from "./shopFormat";
 
 /*
  * Carrito de la tienda en línea (Fase 24). Se guarda en el navegador del cliente (si cierra y
@@ -45,10 +45,12 @@ export const CartProvider = ({ children }) => {
 
   /** Suma unidades de un producto (con su precio y nombre de ahora) y avisa. */
   const add = useCallback((product, quantity = 1) => {
+    // Con oferta (Fase 31): el precio especial y la nota del regalo / 2x1 / combo para el pedido
+    const fields = { name: product.name, price: priceOf(product), note: offerNoteOf(product) };
     setItems((current) => {
       const found = current.find((item) => item.id === product.id);
-      if (found) return current.map((item) => (item.id === product.id ? { ...item, name: product.name, price: product.price, quantity: clamp(item.quantity + quantity) } : item));
-      return [...current, { id: product.id, name: product.name, price: product.price, quantity: clamp(quantity) }];
+      if (found) return current.map((item) => (item.id === product.id ? { ...item, ...fields, quantity: clamp(item.quantity + quantity) } : item));
+      return [...current, { id: product.id, ...fields, quantity: clamp(quantity) }];
     });
     clearTimeout(timer.current);
     setNotice({ id: product.id, name: product.name, quantity, key: Date.now() });

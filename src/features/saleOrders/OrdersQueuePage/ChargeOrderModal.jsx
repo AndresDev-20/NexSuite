@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Button from "../../../components/ui/Button/Button";
 import Icon from "../../../components/ui/Icon/Icon";
 import Field from "../../../components/forms/Field/Field";
@@ -14,6 +14,9 @@ import NewCustomerButton from "../../sales/customers/NewCustomerButton";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { formatCurrency } from "../../../utils/money";
 import { sanitizeDecimal } from "../../../utils/validators";
+import UnitPickerModal from "../../sales/PosPage/UnitPickerModal";
+import { GiftLines, OfferBadge, OffersSummary } from "../../sales/offers/cartOffers";
+import { giftLinesOf, useCartOffers } from "../../sales/offers/cartOffersLogic";
 
 const cents = (value) => Math.round(Number(value || 0) * 100);
 const pesos = (value) => value / 100;
@@ -34,8 +37,14 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
   const [saleKey] = useState(newSaleKey);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // Ofertas (Fase 31): se aplican al cobrar; el regalo lo agrega la caja ({ [idoffer]: { productId | null, units } })
+  const [giftChoices, setGiftChoices] = useState({});
+  const [picking, setPicking] = useState(null);
+  const bought = useMemo(() => order.items.map((item) => ({ idproduct: item.productId, quantity: Number(item.quantity) })), [order.items]);
+  const { offers, ready: offersReady } = useCartOffers(order.branchId, bought);
+  const gifts = giftLinesOf(offers.gifts, giftChoices);
 
-  const total = cents(order.total);
+  const total = Math.max(cents(order.total) - offers.savings, 0);
   const singlePayment = payments.length === 1;
   const { effectivePayments, creditOnly } = buildPayments({ payments, total, down });
   const paid = effectivePayments.reduce((sum, payment) => sum + cents(payment.amount), 0);
@@ -54,6 +63,8 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
   const credit = effectivePayments.filter((payment) => payment.method === "credito").reduce((sum, payment) => sum + cents(payment.amount), 0);
 
   const problems = [];
+  if (!offersReady) problems.push("Calculando las ofertas… un momento.");
+  problems.push(...gifts.problems);
   if (!sessionId) problems.push("Elige la caja donde se cobra.");
   if (pending !== 0) problems.push(pending > 0 ? `Faltan ${formatCurrency(pesos(pending))} por pagar.` : `Los pagos pasan el total por ${formatCurrency(pesos(-pending))}.`);
   if (payments.some((payment) => payment.method === "credito") && !canCredit) problems.push("Para fiar elige un cliente con cupo.");
@@ -80,6 +91,7 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
               ...(payment.method === "efectivo" && payment.received && { received: Number(payment.received) }),
               ...(payment.reference.trim() && { reference: payment.reference.trim() }),
             })),
+          ...(gifts.items.length > 0 && { gifts: gifts.items }),
           ...planPayload(plan, pesos(credit), customer?.creditDays),
           ...(notes.trim() && { notes: notes.trim() }),
         },
@@ -98,16 +110,24 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
         <span>
           Pedido <strong>#{order.id}</strong> · vendió {order.sellerName}
         </span>
-        <strong className="orders-charge__total">{formatCurrency(order.total)}</strong>
+        <strong className="orders-charge__total">{formatCurrency(pesos(total))}</strong>
       </div>
       <ul className="orders-card__items">
         {order.items.map((item) => (
           <li key={item.id}>
             {item.quantity} × {item.name}
             {item.serials.length > 0 && <span className="pos-mono orders-card__serials">{item.serials.map((unit) => unit.serial).join(", ")}</span>}
+            <OfferBadge offer={offers.lines.get(item.productId) ?? null} />
           </li>
         ))}
       </ul>
+      <GiftLines
+        gifts={offers.gifts}
+        choices={giftChoices}
+        onChange={setGiftChoices}
+        onPickUnits={({ gift, option, units }) => setPicking({ productId: option.idproduct, name: option.name, hasSerial: true, units, giftOffer: gift.idoffer })}
+      />
+      <OffersSummary offers={offers} />
 
       {branchSessions.length === 0 ? (
         <p className="pos__error">No hay cajas abiertas en {order.branchName}: abre el turno de una caja para cobrarlo.</p>
@@ -238,9 +258,21 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
           Volver
         </Button>
         <Button icon="check" onClick={submit} disabled={busy || branchSessions.length === 0}>
-          {busy ? "Cobrando…" : `Cobrar ${formatCurrency(order.total)}`}
+          {busy ? "Cobrando…" : `Cobrar ${formatCurrency(pesos(total))}`}
         </Button>
       </FormActions>
+
+      {/* El IMEI del regalo (cuando el regalo es un celular) */}
+      <UnitPickerModal
+        line={picking}
+        branchId={order.branchId}
+        verb="Regalar"
+        onClose={() => setPicking(null)}
+        onConfirm={(units) => {
+          setGiftChoices((current) => ({ ...current, [picking.giftOffer]: { productId: picking.productId, units } }));
+          setPicking(null);
+        }}
+      />
     </div>
   );
 };

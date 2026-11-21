@@ -19,6 +19,9 @@ import OrderFormModal from "../../../features/purchases/orders/OrderFormModal";
 import OrdersTable from "../../../features/purchases/orders/OrdersTable";
 import PaymentCancelModal from "../../../features/purchases/orders/PaymentCancelModal";
 import PaymentFormModal from "../../../features/purchases/orders/PaymentFormModal";
+import PurchaseDetailModal from "../../../features/purchases/orders/PurchaseDetailModal";
+import { PurchaseConfirmModal, PurchaseHeaderModal } from "../../../features/purchases/orders/PurchaseModals";
+import { purchaseApi } from "../../../features/purchases/orders/purchaseApi";
 import usePayables from "../../../features/purchases/orders/usePayables";
 import { ORDER_STATUSES } from "../../../features/purchases/orders/orderOptions";
 import useOrders from "../../../features/purchases/orders/useOrders";
@@ -36,9 +39,11 @@ const SEARCH_DELAY_MS = 300;
 // La sucursal la da el selector del encabezado; el resto vive en la URL
 const FILTER_KEYS = ["search", "status", "idsupplier", "from", "to"];
 const CLOSED_DETAIL = { open: false, id: null, order: null, loading: false, error: "" };
+// Fase 32: compra abierta con varios proveedores
+const CLOSED_PURCHASE = { open: false, id: null, purchase: null, loading: false, error: "" };
 
 const OrdersPage = () => {
-  const { items, total, page, pages, loading, error, getOrders, getOrder, createOrder, updateOrder, confirmOrder, cancelOrder } =
+  const { items, total, page, pages, loading, error, getOrders, getOrder, createOrder, updateOrder, confirmOrder, cancelOrder, addItemsConfirmed } =
     useOrders();
   const { addPayment, cancelPayment } = usePayables();
   const { suppliers, getAllSuppliers, createSupplier } = useSuppliers();
@@ -77,6 +82,15 @@ const OrdersPage = () => {
   const [cancelling, setCancelling] = useState(null);
   const [paying, setPaying] = useState(null);
   const [cancellingPayment, setCancellingPayment] = useState(null);
+  // Compra abierta (Fase 32): su detalle, nombre y fecha, los productos de un proveedor, quitar uno, confirmar y anular
+  const [purchaseDetail, setPurchaseDetail] = useState(CLOSED_PURCHASE);
+  const [header, setHeader] = useState({ open: false, purchase: null });
+  const [partForm, setPartForm] = useState({ open: false, part: null });
+  const [removing, setRemoving] = useState(null); // { part, item }
+  // Fase 32.4: agregar productos a una compra confirmada (o a un proveedor de una compra con varios)
+  const [adding, setAdding] = useState(null); // { order, title }
+  const [confirmingPurchase, setConfirmingPurchase] = useState(null);
+  const [cancellingPurchase, setCancellingPurchase] = useState(null);
 
   const params = useMemo(
     () => ({
@@ -211,6 +225,82 @@ const OrdersPage = () => {
   const showInDetail = (order) =>
     setDetail((current) => (current.open && current.id === order.id ? { ...current, order } : current));
 
+  /* ---------- Compra abierta (Fase 32) ---------- */
+  const loadPurchase = useCallback(async (id, { silent = false } = {}) => {
+    setPurchaseDetail((current) => (silent && current.id === id ? current : { open: true, id, purchase: null, loading: true, error: "" }));
+    try {
+      const purchase = await purchaseApi.get(id);
+      setPurchaseDetail((current) => (current.id === id ? { open: true, id, purchase, loading: false, error: "" } : current));
+    } catch (err) {
+      setPurchaseDetail((current) => (current.id === id ? { ...current, loading: false, error: getErrorMessage(err, "No se pudo cargar la compra.") } : current));
+    }
+  }, []);
+  /** Tras una acción: el detalle muestra la compra que devolvió el servidor y la lista se refresca. */
+  const showPurchase = (purchase) => {
+    setPurchaseDetail((current) => (current.open && current.id === purchase.id ? { ...current, purchase } : current));
+    getOrders(undefined, { silent: true });
+  };
+  const purchaseOpen = purchaseDetail.open ? purchaseDetail.purchase : null;
+
+  const handleHeader = async (payload) => {
+    if (header.purchase) {
+      const purchase = await purchaseApi.update(header.purchase.id, payload);
+      toast.success("Compra actualizada.");
+      showPurchase(purchase);
+    } else {
+      const purchase = await purchaseApi.create(payload);
+      toast.success(`${purchase.title} (${purchase.number}) creada: ya puedes llenarla.`);
+      getOrders(undefined, { silent: true });
+      setPurchaseDetail({ open: true, id: purchase.id, purchase, loading: false, error: "" });
+    }
+    setHeader({ open: false, purchase: null });
+  };
+
+  const handlePartSave = async (payload) => {
+    const purchase = await purchaseApi.setSupplierItems(purchaseOpen.id, { idsupplier: payload.idsupplier, items: payload.items, replace: Boolean(partForm.part) });
+    toast.success(partForm.part ? "Productos del proveedor actualizados." : "Productos agregados a la compra.");
+    showPurchase(purchase);
+    setPartForm({ open: false, part: null });
+  };
+
+  const handleRemoveItem = async () => {
+    const purchase = await purchaseApi.removeItem(purchaseOpen.id, removing.part.id, removing.item.productId);
+    toast.success(`${removing.item.productName} quitado de la compra.`);
+    showPurchase(purchase);
+    setRemoving(null);
+  };
+
+  const handleConfirmPurchase = async (suppliers) => {
+    const purchase = await purchaseApi.confirm(confirmingPurchase.id, suppliers);
+    toast.success(`${purchase.title} confirmada: la mercancía ya está en el inventario.`);
+    showPurchase(purchase);
+    setConfirmingPurchase(null);
+    getAllProducts(); // el costo promedio cambió
+  };
+
+  const handleCancelPurchase = async (reason) => {
+    const purchase = await purchaseApi.cancel(cancellingPurchase.id, reason);
+    toast.success(`${purchase.title} anulada.`);
+    showPurchase(purchase);
+    setCancellingPurchase(null);
+  };
+
+  /** Fase 32.4: de una vez al inventario; el detalle abierto (de siempre o con varios proveedores) se actualiza. */
+  const handleAddItems = async (payload) => {
+    const order = await addItemsConfirmed(adding.order.id, payload.items);
+    toast.success(`Productos agregados a ${order.number}: ya están en el inventario.`);
+    showInDetail(order);
+    if (purchaseDetail.open) loadPurchase(purchaseDetail.id, { silent: true });
+    setAdding(null);
+    getAllProducts(); // existencias y costo promedio cambiaron
+  };
+  const openAdd = async (row) => {
+    // Con varios proveedores se elige el proveedor en su detalle
+    if (row.kind === "purchase") return loadPurchase(row.id);
+    setDetail(CLOSED_DETAIL);
+    setAdding({ order: { ...row, items: [] }, title: `${row.number} · ${row.supplierName}` });
+  };
+
   /* ---------- Acciones ---------- */
   const openCreate = () => setForm({ open: true, order: null });
   const openEdit = async (order) => {
@@ -257,6 +347,7 @@ const OrdersPage = () => {
     showInDetail(order);
     setPaying(null);
     getOrders(undefined, { silent: true });
+    if (purchaseDetail.open) loadPurchase(purchaseDetail.id, { silent: true });
   };
 
   const handleCancelPayment = async (reason) => {
@@ -265,6 +356,7 @@ const OrdersPage = () => {
     showInDetail(order);
     setCancellingPayment(null);
     getOrders(undefined, { silent: true });
+    if (purchaseDetail.open) loadPurchase(purchaseDetail.id, { silent: true });
   };
 
   /* ---------- Contenido ---------- */
@@ -304,7 +396,7 @@ const OrdersPage = () => {
       ) : (
         <StateMessage icon="bag" title="Aún no hay compras" text="Registra la mercancía que trajiste y repártela entre tus sucursales.">
           {canCreate && (
-            <Button icon="plus" onClick={openCreate}>
+            <Button icon="plus" onClick={() => setHeader({ open: true, purchase: null })}>
               Nueva compra
             </Button>
           )}
@@ -314,7 +406,7 @@ const OrdersPage = () => {
 
     return (
       <div className={`orders-page__results ${loading ? "orders-page__results--loading" : ""}`.trim()} aria-busy={loading}>
-        <OrdersTable orders={items} canEdit={canEdit} onView={(order) => loadDetail(order.id)} onEdit={openEdit} />
+        <OrdersTable orders={items} canEdit={canEdit} onView={(row) => (row.kind === "purchase" ? loadPurchase(row.id) : loadDetail(row.id))} onEdit={openEdit} onAdd={openAdd} />
         <Pagination page={page} pages={pages} total={total} label="compras" disabled={loading} onChange={setPage} />
       </div>
     );
@@ -331,9 +423,14 @@ const OrdersPage = () => {
         </div>
 
         {canCreate && hasBranches && (
-          <Button className="list-page__add" icon="plus" onClick={openCreate}>
-            Nueva compra
-          </Button>
+          <div className="orders-page__actions">
+            <Button variant="outline" icon="cart" onClick={openCreate}>
+              Compra de un proveedor
+            </Button>
+            <Button className="list-page__add" icon="plus" onClick={() => setHeader({ open: true, purchase: null })}>
+              Nueva compra
+            </Button>
+          </div>
         )}
       </header>
 
@@ -341,8 +438,8 @@ const OrdersPage = () => {
         {hasBranches && (
           <div className="orders-page__filters">
             <SearchInput
-              label="Buscar por número o factura"
-              placeholder="Número (OC-…) o factura"
+              label="Buscar por número, nombre o factura"
+              placeholder="Buscar por número (CP-… u OC-…), nombre de la compra o factura"
               value={searchText}
               onChange={setSearchText}
             />
@@ -417,6 +514,7 @@ const OrdersPage = () => {
         onViewChanges={
           canAudit ? (order) => navigate(`/administrativo/auditoria?entity=order&entityid=${order.id}`) : undefined
         }
+        onAddItems={openAdd}
       />
 
       <ConfirmDialog
@@ -439,6 +537,84 @@ const OrdersPage = () => {
       />
 
       <OrderCancelModal order={cancelling} onClose={() => setCancelling(null)} onSubmit={handleCancel} />
+
+      {/* ---------- Compra abierta (Fase 32) ---------- */}
+      <PurchaseDetailModal
+        open={purchaseDetail.open}
+        state={purchaseDetail}
+        canEdit={canEdit}
+        canConfirm={canConfirm}
+        canCancel={canCancel}
+        canPay={canPay}
+        canCancelPayment={canCancelPayment}
+        onClose={() => setPurchaseDetail(CLOSED_PURCHASE)}
+        onRetry={() => loadPurchase(purchaseDetail.id)}
+        onRename={(purchase) => setHeader({ open: true, purchase })}
+        onAddSupplier={() => setPartForm({ open: true, part: null })}
+        onEditPart={(part) => setPartForm({ open: true, part })}
+        onAddToPart={(part) => setAdding({ order: { ...part, items: [] }, title: `${purchaseOpen.title} · ${part.supplierName}` })}
+        onRemoveItem={(part, item) => setRemoving({ part, item })}
+        onConfirm={setConfirmingPurchase}
+        onCancel={setCancellingPurchase}
+        onPay={setPaying}
+        onCancelPayment={setCancellingPayment}
+        onViewChanges={canAudit ? (purchase) => navigate(`/administrativo/auditoria?entity=purchase&entityid=${purchase.id}`) : undefined}
+      />
+      <PurchaseHeaderModal open={header.open} purchase={header.purchase} onClose={() => setHeader({ open: false, purchase: null })} onSubmit={handleHeader} />
+      <OrderFormModal
+        open={partForm.open}
+        order={partForm.part}
+        part={purchaseOpen ? { title: purchaseOpen.title, lockSupplier: Boolean(partForm.part) } : null}
+        suppliers={formSuppliers}
+        branches={branches}
+        defaultBranchId={activeBranchId ?? (branches.length === 1 ? branches[0].id : null)}
+        products={activeProducts}
+        hint={productsHint}
+        creation={creation}
+        onClose={() => setPartForm({ open: false, part: null })}
+        onSubmit={handlePartSave}
+      />
+      <ConfirmDialog
+        open={Boolean(removing)}
+        title="Quitar de la compra"
+        message={
+          removing && (
+            <>
+              ¿Quitar <strong>{removing.item.productName}</strong> de lo que va de {removing.part.supplierName}?
+            </>
+          )
+        }
+        detail={removing && removing.part.items.length === 1 ? "Es el único producto de ese proveedor: el proveedor también sale de la compra." : "El producto sigue en Inventarios."}
+        confirmLabel="Quitar"
+        confirmIcon="trash"
+        errorFallback="No se pudo quitar el producto."
+        onConfirm={handleRemoveItem}
+        onClose={() => setRemoving(null)}
+      />
+      <OrderFormModal
+        open={Boolean(adding)}
+        order={adding?.order ?? null}
+        part={adding ? { title: adding.title, lockSupplier: true, confirmed: true } : null}
+        suppliers={formSuppliers}
+        branches={branches}
+        defaultBranchId={activeBranchId ?? (branches.length === 1 ? branches[0].id : null)}
+        products={activeProducts}
+        hint={productsHint}
+        creation={creation}
+        onClose={() => setAdding(null)}
+        onSubmit={handleAddItems}
+      />
+      <PurchaseConfirmModal purchase={confirmingPurchase} onClose={() => setConfirmingPurchase(null)} onSubmit={handleConfirmPurchase} />
+      <OrderCancelModal
+        order={
+          cancellingPurchase && {
+            number: cancellingPurchase.number,
+            supplierName: cancellingPurchase.parts.map((part) => part.supplierName).join(", ") || "sin proveedores",
+          }
+        }
+        onClose={() => setCancellingPurchase(null)}
+        onSubmit={handleCancelPurchase}
+      />
       <PaymentFormModal order={paying} onClose={() => setPaying(null)} onSubmit={handlePay} />
       <PaymentCancelModal payment={cancellingPayment} onClose={() => setCancellingPayment(null)} onSubmit={handleCancelPayment} />
     </section>

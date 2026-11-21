@@ -27,12 +27,35 @@
 
 @media (min-width: 1280px) {
   .orders-page__filters {
-    grid-template-columns: minmax(0, 1.3fr) repeat(4, minmax(0, 1fr)) auto;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
   }
+}
+
+/* El buscador en su propia fila, a todo el ancho: su texto se lee completo y los filtros quedan alineados debajo */
+.orders-page__filters > .search-input {
+  grid-column: 1 / -1;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .orders-page__results {
     transition: none;
+  }
+}
+
+/* Fase 32: «Nueva compra» (abierta, varios proveedores) y «Compra de un proveedor» (la de siempre) */
+.orders-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 560px) {
+  .orders-page__actions {
+    width: 100%;
+  }
+
+  .orders-page__actions > * {
+    flex: 1 1 auto;
   }
 }

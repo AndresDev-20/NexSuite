@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Icon from "../../components/ui/Icon/Icon";
 import { useCart } from "./cartContext";
 import { ChatIcon, QuantityStepper } from "./ShopParts";
-import { money, orderMessage, whatsappLink } from "./shopFormat";
+import { money, orderMessage, storeNameOf, whatsappLink } from "./shopFormat";
 
 /**
  * Carrito de la tienda (Fase 24): un panel que sale por la derecha. Cambiar cantidades, quitar,
@@ -22,7 +22,7 @@ const CartDrawer = ({ shop }) => {
   }, [open]);
 
   const whatsapp = shop?.whatsapp;
-  const link = whatsapp && items.length > 0 ? whatsappLink(whatsapp, orderMessage(items, name)) : null;
+  const link = whatsapp && items.length > 0 ? whatsappLink(whatsapp, orderMessage(items, name, storeNameOf(shop))) : null;
 
   return (
     <dialog

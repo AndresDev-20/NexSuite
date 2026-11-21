@@ -274,7 +274,7 @@ const ImportProductsModal = ({ open, branch, showCost, onClose, onImported }) =>
           <ul>
             <li>Una fila de títulos (Nombre, Precio, Cantidad…) y debajo un producto por fila.</li>
             <li>Obligatorios: nombre y precio de venta{showCost ? " y precio de costo" : ""}.</li>
-            <li>Lo que ya exista (mismo SKU o código de barras) se salta.</li>
+            <li>Lo que ya exista (mismo SKU, código de barras o nombre) no se repite: si no tiene existencias en esta sucursal, se le carga la cantidad aquí.</li>
             <li>Las categorías y los proveedores que no existan se crean solos.</li>
           </ul>
         </div>
@@ -347,12 +347,14 @@ const ImportProductsModal = ({ open, branch, showCost, onClose, onImported }) =>
       <div className="import-step">
         <div className="import-stats">
           <Stat index={0} tone="ok" icon="plus" value={analysis.totals.ready} label="productos nuevos" />
-          <Stat index={1} tone="info" icon="box" value={analysis.totals.units} label={`unidades en ${analysis.branch.name}`} />
-          <Stat index={2} tone="muted" icon="refresh" value={analysis.totals.skipped} label="ya existían" />
-          <Stat index={3} tone="bad" icon="alert" value={analysis.totals.invalid} label="con errores" />
+          <Stat index={1} tone="brand" icon="store" value={analysis.totals.stocked ?? 0} label={`ya existían: se cargan en ${analysis.branch.name}`} />
+          <Stat index={2} tone="info" icon="box" value={analysis.totals.units} label={`unidades en ${analysis.branch.name}`} />
+          <Stat index={3} tone="muted" icon="refresh" value={analysis.totals.skipped} label="se saltan" />
+          <Stat index={4} tone="bad" icon="alert" value={analysis.totals.invalid} label="con errores" />
         </div>
 
         <Chips title="Categorías que se van a crear" icon="sparkles" items={analysis.newCategories} />
+        <Chips title="Subcategorías que se van a crear" icon="sparkles" items={analysis.newSubcategories ?? []} />
         <Chips title="Proveedores que se van a crear (quedan «por completar»)" icon="users" items={analysis.newSuppliers} />
 
         {analysis.preview.length > 0 && (
@@ -385,7 +387,7 @@ const ImportProductsModal = ({ open, branch, showCost, onClose, onImported }) =>
                         <strong>{row.name}</strong>
                         <small>{[row.sku, row.barcode, row.supplier].filter(Boolean).join(" · ") || "SKU automático"}</small>
                       </td>
-                      <td>{row.category}</td>
+                      <td>{row.subcategory ? `${row.category} · ${row.subcategory}` : row.category}</td>
                       {showCost && <td className="is-number">{formatCurrency(row.costPrice ?? 0)}</td>}
                       <td className="is-number">{formatCurrency(row.salePrice)}</td>
                       <td className="is-number">{row.quantity}</td>
@@ -397,11 +399,46 @@ const ImportProductsModal = ({ open, branch, showCost, onClose, onImported }) =>
           </section>
         )}
 
-        <IssueList title="Filas con errores (no se importan)" tone="bad" rows={analysis.invalid} failedFile={analysis.failedFile} />
-        <IssueList title="Ya existían (se saltan)" tone="muted" rows={analysis.skipped} />
+        {(analysis.stockedPreview?.length ?? 0) > 0 && (
+          <section className="import-preview import-preview--stocked">
+            <header className="import-preview__head">
+              <strong>Ya existían: se les carga la cantidad en {analysis.branch.name}</strong>
+              <span>No se crean otra vez: es el mismo producto en otra sucursal</span>
+            </header>
+            <div className="import-preview__scroll">
+              <table className="import-preview__table">
+                <thead>
+                  <tr>
+                    <th>Fila</th>
+                    <th>Producto del sistema</th>
+                    <th className="is-number">Cant.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {analysis.stockedPreview.map((row) => (
+                    <tr key={row.row}>
+                      <td className="is-muted">{row.row}</td>
+                      <td>
+                        <strong>{row.name}</strong>
+                        <small>
+                          {row.sku} · reconocido por {row.by}
+                        </small>
+                        {row.note && <small className="import-preview__note">{row.note}</small>}
+                      </td>
+                      <td className="is-number">{row.quantity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
 
-        {analysis.totals.ready === 0 && (
-          <p className="import-lead import-lead--warn">No hay productos nuevos para importar. Corrige el Excel y vuelve a subirlo.</p>
+        <IssueList title="Filas con errores (no se importan)" tone="bad" rows={analysis.invalid} failedFile={analysis.failedFile} />
+        <IssueList title="Se saltan" tone="muted" rows={analysis.skipped} />
+
+        {analysis.totals.ready + (analysis.totals.stocked ?? 0) === 0 && (
+          <p className="import-lead import-lead--warn">No hay nada para cargar: ni productos nuevos ni existencias para esta sucursal. Corrige el Excel y vuelve a subirlo.</p>
         )}
       </div>
     );
@@ -417,12 +454,14 @@ const ImportProductsModal = ({ open, branch, showCost, onClose, onImported }) =>
           {plural(result.totals.units, "unidad quedó", "unidades quedaron")} en {result.branch.name} como inventario inicial (cargadas sin compra).
         </p>
         <div className="import-stats">
-          <Stat index={0} tone="ok" icon="check" value={result.totals.created} label="importados" />
-          <Stat index={1} tone="info" icon="box" value={result.totals.units} label="unidades" />
-          <Stat index={2} tone="muted" icon="refresh" value={result.totals.skipped} label="ya existían" />
-          <Stat index={3} tone="bad" icon="alert" value={result.invalid.length} label="no entraron" />
+          <Stat index={0} tone="ok" icon="check" value={result.totals.created} label="productos nuevos" />
+          <Stat index={1} tone="brand" icon="store" value={result.totals.stocked ?? 0} label={`existentes cargados en ${result.branch.name}`} />
+          <Stat index={2} tone="info" icon="box" value={result.totals.units} label="unidades" />
+          <Stat index={3} tone="muted" icon="refresh" value={result.totals.skipped} label="se saltaron" />
+          <Stat index={4} tone="bad" icon="alert" value={result.invalid.length} label="no entraron" />
         </div>
         <Chips title="Categorías creadas" icon="sparkles" items={result.newCategories} />
+        <Chips title="Subcategorías creadas" icon="sparkles" items={result.newSubcategories ?? []} />
         <Chips title="Proveedores creados: complétalos en Compras → Proveedores" icon="users" items={result.newSuppliers} />
         <IssueList title="No entraron" tone="bad" rows={result.invalid} failedFile={result.failedFile} />
       </div>
@@ -473,8 +512,8 @@ const ImportProductsModal = ({ open, branch, showCost, onClose, onImported }) =>
             </Button>
           )}
           {step === 2 && (
-            <Button icon="download" onClick={handleImport} disabled={busy || !analysis?.totals?.ready}>
-              {busy ? "Importando…" : `Importar ${plural(analysis?.totals?.ready ?? 0, "producto", "productos")}`}
+            <Button icon="download" onClick={handleImport} disabled={busy || !(analysis?.totals?.ready || analysis?.totals?.stocked)}>
+              {busy ? "Importando…" : `Importar ${plural((analysis?.totals?.ready ?? 0) + (analysis?.totals?.stocked ?? 0), "producto", "productos")}`}
             </Button>
           )}
           {step === 3 && (

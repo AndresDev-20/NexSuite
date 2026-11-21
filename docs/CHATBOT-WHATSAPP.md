@@ -76,7 +76,7 @@ En `~/app/BackEnd/.env` (las variables están en `.env.example`, sin valores):
 | `CHATBOT_MODEL` | `claude-haiku-5-5` (o `claude-opus-5-5` si hace falta más capacidad) |
 | `CHATBOT_ENABLED` | `true`. Con `false`, los mensajes llegan a la bandeja Chats pero el asistente no contesta: sirve como **interruptor de emergencia** |
 
-Luego: `chmod 600 .env` y `pm2 reload nexsuite-api`.
+Luego: `chmod 600 .env` y `pm2 reload deploy/ecosystem.config.js --update-env` (desde la carpeta BackEnd).
 
 ## 5. Registrar el webhook en Meta
 
@@ -122,7 +122,7 @@ abierto tu equipo queda expuesto a internet.
    2. Asígnale la app y la cuenta de WhatsApp.
    3. Genera un token con los permisos `whatsapp_business_messaging` y `whatsapp_business_management`.
    4. Ese token va en `WHATSAPP_TOKEN`.
-4. Cambia `WHATSAPP_PHONE_NUMBER_ID` por el identificador del **número real** y `pm2 reload nexsuite-api`.
+4. Cambia `WHATSAPP_PHONE_NUMBER_ID` por el identificador del **número real** y `pm2 reload deploy/ecosystem.config.js --update-env` (desde la carpeta BackEnd).
 5. **Método de pago en Meta**: las conversaciones que inicia el cliente son gratis o muy baratas, pero Meta
    pide una tarjeta registrada para el número real.
 
@@ -146,7 +146,7 @@ abierto tu equipo queda expuesto a internet.
 
 | Síntoma | Qué revisar |
 |---|---|
-| Meta dice que no pudo verificar el webhook | `WHATSAPP_VERIFY_TOKEN` igual en el `.env` y en Meta; `pm2 reload nexsuite-api` después de cambiarlo; que `https://api.tudominio.com/health` responda |
+| Meta dice que no pudo verificar el webhook | `WHATSAPP_VERIFY_TOKEN` igual en el `.env` y en Meta; `pm2 reload deploy/ecosystem.config.js --update-env` (desde la carpeta BackEnd) después de cambiarlo; que `https://api.tudominio.com/health` responda |
 | Llegan avisos pero `pm2 logs` dice «Aviso rechazado: firma inválida» | `WHATSAPP_APP_SECRET` es la **clave secreta de la app** correcta (no el token) |
 | No llega nada a NexSuite | Suscripción al campo **`messages`** (paso 5.5); el número del cliente está entre los destinatarios de prueba (solo con el número de prueba) |
 | El mensaje llega a la bandeja pero el asistente no contesta | `CHATBOT_ENABLED=true`; `ANTHROPIC_API_KEY` válida y con saldo; `pm2 logs` con `[chatbot]` |
