@@ -472,7 +472,7 @@ Ojo: en la tarjeta del pedido en la lista de «Pedidos por cobrar» y en «Mis p
 
 - [ ] Al contar la caja en **Mi caja**, sale «Imprimir cuadre» e imprime en la térmica: ventas, por vendedor, por medio, efectivo, ENTREGA y firmas.
 - [ ] Un cajero sin «Ver turnos» imprime su tirilla **sin** «Debería haber» ni la diferencia; tú (con «Ver turnos») la ves con «Cuadra / Sobran / Faltan».
-- [ ] La ganancia (por vendedor y del turno) solo sale con «Ver costos».
+- [ ] «Por vendedor» trae solo las ventas y el total de cada uno (sin ganancia); el costo y la utilidad salen al final de TOTALES, solo con «Ver costos».
 - [ ] En **Caja → Turnos**, el detalle de un turno contado tiene «Imprimir cuadre» para reimprimirla.
 - [ ] En **Ventas → Reportes** (un solo día), «Tirilla del día» trae las ventas, los vendedores, los medios, cada caja con su entrega y la ganancia del día.
 - [ ] Con el turno todavía vendiendo no deja imprimir el cuadre (primero se cuenta).
