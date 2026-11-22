@@ -479,6 +479,14 @@ Ojo: en la tarjeta del pedido en la lista de «Pedidos por cobrar» y en «Mis p
 - [ ] La sección **TOTALES** sigue la cascada de tu tirilla anterior: venta neta − electrónicos − crédito = saldo efectivo, − gastos, − proveedores (día), + abonos = **Efectivo disponible**; efectivo final (contado); costo real, % y $ utilidad.
 - [ ] Las cifras de TOTALES cuadran con un día real que conozcas.
 
+## 14.20 Precio de compra al vender, paginación y orden de productos (Fase 36)
+
+- [ ] En **Vender**, con «Ver costos», la búsqueda dice «Compra $X» debajo del precio, y cada línea «Precio de compra $X c/u» con la ganancia.
+- [ ] Un descuento que pasa la ganancia pone la línea en rojo: «Pierdes $X».
+- [ ] Un vendedor **sin** «Ver costos» no ve el precio de compra en ningún lado.
+- [ ] **Productos** muestra 50 por página con «Anterior / Siguiente» y el total.
+- [ ] «Ordenar»: Nombre A→Z, Z→A, primero el más antiguo y primero el más reciente; al buscar o filtrar vuelve a la página 1.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

@@ -5,6 +5,7 @@ import SearchInput from "../../../components/forms/SearchInput/SearchInput";
 import Select from "../../../components/forms/Select/Select";
 import ConfirmDialog from "../../../components/feadback/ConfirmDialog/ConfirmDialog";
 import StateMessage from "../../../components/feadback/StateMessage/StateMessage";
+import Pagination from "../../../components/tables/Pagination/Pagination";
 import useToast from "../../../components/feadback/Toast/useToast";
 import usePermissions from "../../../features/auth/usePermissions";
 import useActiveBranch from "../../../features/branches/useActiveBranch";
@@ -22,6 +23,23 @@ import getErrorMessage from "../../../utils/getErrorMessage";
 import "../../../styles/listPage.css";
 
 const SKELETON_ITEMS = 5;
+
+// Paginación y orden de la lista (2026-11-22): el servidor manda la lista filtrada; aquí se ordena y se muestra por páginas
+const PAGE_SIZE = 50;
+const SORT_OPTIONS = [
+  { value: "nombre", label: "Nombre (A → Z)" },
+  { value: "nombre-desc", label: "Nombre (Z → A)" },
+  { value: "antiguos", label: "Primero el más antiguo" },
+  { value: "recientes", label: "Primero el más reciente" },
+];
+const createdTime = (product) => (product.createdAt ? new Date(product.createdAt).getTime() : 0);
+const SORTERS = {
+  nombre: (a, b) => a.name.localeCompare(b.name, "es"),
+  "nombre-desc": (a, b) => b.name.localeCompare(a.name, "es"),
+  // Mismo momento de creación (importados juntos): el de id menor se creó primero
+  antiguos: (a, b) => createdTime(a) - createdTime(b) || a.id - b.id,
+  recientes: (a, b) => createdTime(b) - createdTime(a) || b.id - a.id,
+};
 const SEARCH_DELAY_MS = 300;
 
 const ProductsPage = () => {
@@ -65,6 +83,8 @@ const ProductsPage = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [shopFilter, setShopFilter] = useState(""); // "" = en la tienda o no
   const [supplierFilter, setSupplierFilter] = useState(""); // "" = todos los proveedores
+  const [sortOrder, setSortOrder] = useState("nombre");
+  const [page, setPage] = useState({ key: "", number: 1 });
   const [form, setForm] = useState({ open: false, product: null }); // product null = crear
   const [viewing, setViewing] = useState(null);
   const [deactivating, setDeactivating] = useState(null);
@@ -124,6 +144,21 @@ const ProductsPage = () => {
   // Pendientes de asignar: se filtran aquí (la lista ya trae la marca)
   const pendingCount = products.filter((product) => product.isActive && product.pendingAssignment).length;
   const visibleProducts = pendingOnly ? products.filter((product) => product.isActive && product.pendingAssignment) : products;
+
+  // Ordenada y por páginas; al cambiar la búsqueda, un filtro o el orden se vuelve a la primera página
+  const sortedProducts = useMemo(() => [...visibleProducts].sort(SORTERS[sortOrder] ?? SORTERS.nombre), [visibleProducts, sortOrder]);
+  const pages = Math.max(1, Math.ceil(sortedProducts.length / PAGE_SIZE));
+  // La página vale para la búsqueda, los filtros y el orden con que se eligió; si cambian, es la 1
+  const listKey = JSON.stringify([query, categoryFilter, subcategoryFilter, statusFilter, branchFilter, shopFilter, supplierFilter, pendingOnly, sortOrder]);
+  const currentPage = page.key === listKey ? Math.min(page.number, pages) : 1;
+  const pageProducts = useMemo(
+    () => sortedProducts.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [sortedProducts, currentPage]
+  );
+  const changePage = (next) => {
+    setPage({ key: listKey, number: next });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const categoryOptions = useMemo(
     () => categories.map((category) => ({ value: String(category.id), label: category.nameCategory })),
@@ -352,8 +387,9 @@ const ProductsPage = () => {
     }
 
     return (
+      <>
       <ProductsTable
-        products={visibleProducts}
+        products={pageProducts}
         canEdit={canEdit}
         showCost={showCost}
         canAssign={canAssign}
@@ -364,6 +400,8 @@ const ProductsPage = () => {
         onAssign={(product) => openAssign(product)}
         onRestore={canDelete ? handleRestore : undefined}
       />
+      <Pagination page={currentPage} pages={pages} total={sortedProducts.length} label="productos" onChange={changePage} />
+      </>
     );
   };
 
@@ -461,6 +499,14 @@ const ProductsPage = () => {
               options={SHOP_FILTERS}
               value={shopFilter}
               onChange={(event) => setShopFilter(event.target.value)}
+            />
+
+            <Select
+              className="list-page__filter"
+              label="Ordenar"
+              options={SORT_OPTIONS}
+              value={sortOrder}
+              onChange={(event) => setSortOrder(event.target.value)}
             />
           </div>
 

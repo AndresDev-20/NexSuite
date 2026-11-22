@@ -135,7 +135,7 @@ const PosPage = () => {
     setError("");
     const existing = inCart(product.id);
     if (product.hasSerial) {
-      const line = existing ?? { productId: product.id, name: product.name, sku: product.sku, price: product.salePrice, hasSerial: true, available: freeOf(product), units: [], discount: "" };
+      const line = existing ?? { productId: product.id, name: product.name, sku: product.sku, price: product.salePrice, cost: product.costPrice, hasSerial: true, available: freeOf(product), units: [], discount: "" };
       if (units) {
         const merged = [...line.units, ...units.filter((unit) => !line.units.some((current) => current.id === unit.id))];
         setLines((current) => (existing ? current.map((item) => (item.productId === product.id ? { ...item, units: merged } : item)) : [...current, { ...line, units: merged }]));
@@ -148,7 +148,7 @@ const PosPage = () => {
     } else {
       setLines((current) => [
         ...current,
-        { productId: product.id, name: product.name, sku: product.sku, price: product.salePrice, hasSerial: false, available: freeOf(product), quantity: "1", units: [], discount: "" },
+        { productId: product.id, name: product.name, sku: product.sku, price: product.salePrice, cost: product.costPrice, hasSerial: false, available: freeOf(product), quantity: "1", units: [], discount: "" },
       ]);
     }
     setQuery("");
@@ -495,6 +495,8 @@ const PosPage = () => {
                       </span>
                       <span className="pos__result-side">
                         <strong>{formatCurrency(product.salePrice)}</strong>
+                        {/* Precio de compra: el servidor solo lo manda con «Ver costos» */}
+                        {product.costPrice !== null && <span className="pos__cost">Compra {formatCurrency(product.costPrice)}</span>}
                         <span className={`pos__stock pos__stock--${tone}`}>{stock > 0 ? `${stock} disp.` : "Agotado"}</span>
                       </span>
                       <span className="pos__result-add" aria-hidden="true">
@@ -601,6 +603,16 @@ const PosPage = () => {
                     </span>
                     <strong key={lineNet(line)}>{formatCurrency(pesos(lineNet(line)))}</strong>
                   </p>
+                  {/* Con «Ver costos»: lo que costó y lo que queda, para saber hasta dónde se puede descontar */}
+                  {line.cost !== null && line.cost !== undefined && (() => {
+                    const profit = lineNet(line) - cents(line.cost) * lineQuantity(line);
+                    return (
+                      <p className={`pos__line-cost ${profit < 0 ? "pos__line-cost--loss" : ""}`.trim()}>
+                        <span>Precio de compra {formatCurrency(line.cost)} c/u</span>
+                        <span>{profit < 0 ? `Pierdes ${formatCurrency(pesos(-profit))}` : `Ganancia ${formatCurrency(pesos(profit))}`}</span>
+                      </p>
+                    );
+                  })()}
                   <OfferBadge offer={offerOf(line)} />
                 </li>
               ))}

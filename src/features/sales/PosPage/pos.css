@@ -855,6 +855,51 @@
   color: var(--color-text);
 }
 
+/* Precio de compra (con «Ver costos»): en la búsqueda y en cada línea, con lo que queda de ganancia */
+.pos__cost {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  white-space: nowrap;
+}
+
+.pos__line-cost {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  justify-content: space-between;
+  margin: 4px 0 0;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #13693a;
+  background: color-mix(in srgb, #1f9d55 10%, var(--white));
+  border-radius: 8px;
+}
+
+.pos__line-cost span:first-child {
+  color: var(--gray-600, #52525b);
+}
+
+.pos__line-cost--loss {
+  color: var(--danger);
+  background: var(--red-50);
+}
+
+:root[data-theme="dark"] .pos__line-cost {
+  color: #6fdc9b;
+  background: color-mix(in srgb, #1f9d55 16%, transparent);
+}
+
+:root[data-theme="dark"] .pos__line-cost span:first-child {
+  color: #a1a1aa;
+}
+
+:root[data-theme="dark"] .pos__line-cost--loss {
+  color: #ff8a9a;
+  background: color-mix(in srgb, #e3283f 18%, transparent);
+}
+
 /* Cliente y descuento en un bloque */
 .pos__customer {
   padding: 12px 14px;
