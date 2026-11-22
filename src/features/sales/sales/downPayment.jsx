@@ -3,11 +3,12 @@ import Select from "../../../components/forms/Select/Select";
 import { formatCurrency } from "../../../utils/money";
 import { sanitizeDecimal } from "../../../utils/validators";
 import InstallmentsEditor from "./InstallmentsEditor";
-import { PAYMENT_METHODS } from "./useSales";
+import { FINANCED_METHODS, PAYMENT_METHODS } from "./useSales";
 
 const cents = (value) => Math.round(Number(value || 0) * 100);
 const pesos = (value) => value / 100;
-const DOWN_METHODS = PAYMENT_METHODS.filter((method) => method.value !== "credito");
+// La cuota inicial no se paga con una financiera (Fase 34)
+const DOWN_METHODS = PAYMENT_METHODS.filter((method) => method.value !== "credito" && !FINANCED_METHODS.includes(method.value));
 
 /** Cuota inicial de lo fiado (Fase 19.3): lo que el cliente paga hoy y con qué medio. */
 export const emptyDown = () => ({ method: "efectivo", amount: "", received: "", reference: "" });

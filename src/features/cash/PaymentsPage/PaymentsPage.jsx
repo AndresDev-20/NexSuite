@@ -10,7 +10,8 @@ import NoBranchesMessage from "../../branches/NoBranchesMessage";
 import useActiveBranch from "../../branches/useActiveBranch";
 import { formatDateTime } from "../../administration/audit/auditOptions";
 import { PERIODS, periodRange } from "../../sales/reports/useSalesReport";
-import { getMethodLabel } from "../../sales/receivables/useReceivables";
+// Nombres de todos los medios de una venta (incluye Sistecrédito, Addi y Alocrédito, Fase 34)
+import { getMethodLabel } from "../../sales/sales/useSales";
 import { AnimatedNumber } from "../../dashboard/charts";
 import { useCashRegisters } from "../useCash";
 import { unwrap } from "../../../utils/apiResponse";
@@ -28,6 +29,9 @@ const METHODS = [
   { value: "nequi", label: "Nequi" },
   { value: "daviplata", label: "Daviplata" },
   { value: "transferencia", label: "Transferencia" },
+  { value: "sistecredito", label: "Sistecrédito" },
+  { value: "addi", label: "Addi" },
+  { value: "alocredito", label: "Alocrédito" },
 ];
 
 const normalize = (data) => ({
@@ -102,7 +106,7 @@ const columns = [
 ];
 
 /**
- * Pagos por medio: lo que entra por tarjeta, Nequi, Daviplata y transferencia (ventas y abonos)
+ * Pagos por medio: lo que entra por tarjeta, Nequi, Daviplata, transferencia, Sistecrédito, Addi y Alocrédito (ventas y abonos)
  * no va a la caja; aquí se ve por día o periodo, con su referencia, para cuadrarlo con el banco.
  */
 const PaymentsPage = () => {
@@ -205,7 +209,7 @@ const PaymentsPage = () => {
         <div>
           <h1 className="list-page__title">Pagos por medio</h1>
           <p className="list-page__subtitle">
-            Tarjeta, Nequi, Daviplata y transferencia{activeBranch ? ` en ${activeBranch.name}` : ""}: no entran a la caja, se cuadran con el banco.
+            Tarjeta, Nequi, Daviplata, transferencia, Sistecrédito, Addi y Alocrédito{activeBranch ? ` en ${activeBranch.name}` : ""}: no entran a la caja, se cuadran con el banco.
           </p>
         </div>
       </header>

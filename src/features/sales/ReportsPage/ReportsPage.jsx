@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import PrintClosingButton from "../../cash/PrintClosingButton";
 import { Link, useSearchParams } from "react-router-dom";
 import Button from "../../../components/ui/Button/Button";
 import Field from "../../../components/forms/Field/Field";
@@ -429,6 +430,8 @@ const ReportsPage = () => {
           <Button icon="download" onClick={downloadClose} disabled={downloading}>
             {downloading ? "Preparando…" : "Cuadre en Excel"}
           </Button>
+          {/* Fase 35: la tirilla del cuadre del día (de un solo día) para la impresora térmica */}
+          {singleDay && <PrintClosingButton label="Tirilla del día" day={{ date: from, ...(activeBranchId && { idbranch: activeBranchId }) }} />}
           {can("reports.balance") && (
             <Link className="pos-new-sale balance-link" to="/ventas/balance">
               Balance mensual

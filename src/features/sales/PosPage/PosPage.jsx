@@ -16,7 +16,7 @@ import { emptyPlan, planPayload, planProblems } from "../sales/InstallmentsEdito
 import { CreditPanel, buildPayments, creditAccess, downProblems, emptyDown } from "../sales/downPayment";
 import useOpenRegisters, { pickSession, rememberSession, sessionOptions } from "../sales/useOpenRegisters";
 import { useReservedQuantities } from "../../saleOrders/useSaleOrders";
-import useSales, { PAYMENT_METHODS, newSaleKey } from "../sales/useSales";
+import useSales, { FINANCED_METHODS, FINANCED_PROBLEM, PAYMENT_METHODS, newSaleKey } from "../sales/useSales";
 import { unwrap } from "../../../utils/apiResponse";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { formatCurrency } from "../../../utils/money";
@@ -241,6 +241,7 @@ const PosPage = () => {
   if (total > 0 && pending !== 0) problems.push(pending > 0 ? `Faltan ${formatCurrency(pesos(pending))} por pagar.` : `Los pagos pasan el total por ${formatCurrency(pesos(-pending))}.`);
   if (payments.some((payment) => payment.method === "credito") && !canCredit) problems.push("Para fiar elige un cliente con cupo.");
   if (credit > 0 && creditProblem) problems.push(creditProblem);
+  if (credit > 0 && effectivePayments.some((payment) => FINANCED_METHODS.includes(payment.method))) problems.push(FINANCED_PROBLEM);
   problems.push(...downProblems(down, total, creditOnly));
   if (cashPayment && cashPayment.received && change < 0) problems.push("Lo recibido en efectivo no alcanza.");
   if (!sellerId) problems.push("Elige quién hizo la venta (vendedor).");

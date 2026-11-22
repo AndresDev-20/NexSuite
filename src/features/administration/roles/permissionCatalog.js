@@ -149,7 +149,7 @@ export const PERMISSION_CATALOG = [
       {
         code: "payments.read",
         label: "Ver pagos por medio",
-        description: "Consultar los pagos por tarjeta, Nequi, Daviplata y transferencia, que no entran a la caja.",
+        description: "Consultar los pagos por tarjeta, Nequi, Daviplata, transferencia, Sistecrédito, Addi y Alocrédito, que no entran a la caja.",
       },
     ],
   },

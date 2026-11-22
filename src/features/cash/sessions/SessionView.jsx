@@ -1,6 +1,7 @@
 import { formatDateTime } from "../../administration/audit/auditOptions";
 import { formatCurrency } from "../../../utils/money";
-import { getMethodLabel } from "../../sales/receivables/useReceivables";
+// Nombres de todos los medios de una venta (incluye Sistecrédito, Addi y Alocrédito, Fase 34)
+import { getMethodLabel } from "../../sales/sales/useSales";
 import "../cash.css";
 
 /** Sobrante (+), faltante (−) o "Cuadró". */

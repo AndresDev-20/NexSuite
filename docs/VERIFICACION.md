@@ -457,6 +457,28 @@ Ojo: en la tarjeta del pedido en la lista de «Pedidos por cobrar» y en «Mis p
 - [ ] **Informes → Productos**: «Los más vendidos» y «Con existencias y sin ventas» tienen la columna Subcategoría.
 - [ ] **Productos vendidos con detalle**: la categoría sale con su subcategoría, y el Excel tiene la columna Subcategoría.
 
+## 14.18 Sistecrédito, Addi y Alocrédito (Fase 34)
+
+- [ ] En **Vender**, la lista de medios trae Sistecrédito, Addi y Alocrédito; se cobra una venta con cada uno, con su referencia.
+- [ ] Pago mixto: una parte en efectivo y el resto por Addi; a la caja solo entra el efectivo.
+- [ ] **Cobrar pedido** también los ofrece.
+- [ ] Una venta fiada no deja usarlos: la cuota inicial no los muestra y, si se combinan con fiado, avisa antes de cobrar.
+- [ ] El **comprobante** dice «Sistecrédito», «Addi» o «Alocrédito» con su valor y referencia.
+- [ ] **Pagos por medio** los muestra con su nombre, su total y su filtro; el turno los muestra en «Fuera de la caja».
+- [ ] Los **abonos** de apartados y del fiado no los ofrecen.
+- [ ] **Informes** de ventas y de caja (y su Excel) los muestran por medio.
+
+## 14.19 Tirilla del cuadre (Fase 35)
+
+- [ ] Al contar la caja en **Mi caja**, sale «Imprimir cuadre» e imprime en la térmica: ventas, por vendedor, por medio, efectivo, ENTREGA y firmas.
+- [ ] Un cajero sin «Ver turnos» imprime su tirilla **sin** «Debería haber» ni la diferencia; tú (con «Ver turnos») la ves con «Cuadra / Sobran / Faltan».
+- [ ] La ganancia (por vendedor y del turno) solo sale con «Ver costos».
+- [ ] En **Caja → Turnos**, el detalle de un turno contado tiene «Imprimir cuadre» para reimprimirla.
+- [ ] En **Ventas → Reportes** (un solo día), «Tirilla del día» trae las ventas, los vendedores, los medios, cada caja con su entrega y la ganancia del día.
+- [ ] Con el turno todavía vendiendo no deja imprimir el cuadre (primero se cuenta).
+- [ ] La sección **TOTALES** sigue la cascada de tu tirilla anterior: venta neta − electrónicos − crédito = saldo efectivo, − gastos, − proveedores (día), + abonos = **Efectivo disponible**; efectivo final (contado); costo real, % y $ utilidad.
+- [ ] Las cifras de TOTALES cuadran con un día real que conozcas.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

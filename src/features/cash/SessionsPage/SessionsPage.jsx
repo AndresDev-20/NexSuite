@@ -11,6 +11,7 @@ import NoBranchesMessage from "../../../features/branches/NoBranchesMessage";
 import useActiveBranch from "../../../features/branches/useActiveBranch";
 import { formatDateTime } from "../../../features/administration/audit/auditOptions";
 import SessionView from "../../../features/cash/sessions/SessionView";
+import PrintClosingButton from "../PrintClosingButton";
 import CloseSessionModal from "../../../features/cash/sessions/CloseSessionModal";
 import ReceiveHandoverModal from "../../../features/cash/sessions/ReceiveHandoverModal";
 import ReopenSessionModal from "../../../features/cash/sessions/ReopenSessionModal";
@@ -276,8 +277,10 @@ const SessionsPage = () => {
           <SessionView
             session={detail.session}
             actions={
-              (canClose(detail.session) || canStop(detail.session) || canReceive(detail.session) || canReopen(detail.session)) && (
+              (canClose(detail.session) || canStop(detail.session) || canReceive(detail.session) || canReopen(detail.session) || detail.session.status === "cerrada") && (
                 <div className="my-cash__actions">
+                  {/* Fase 35: la tirilla del cuadre de un turno contado */}
+                  {detail.session.status === "cerrada" && <PrintClosingButton sessionId={detail.session.id} />}
                   {canStop(detail.session) && (
                     <Button variant="outline" icon="lock" onClick={() => handleStop(detail.session)}>
                       Dejar de vender

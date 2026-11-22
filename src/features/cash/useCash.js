@@ -82,7 +82,7 @@ export const normalizeSession = (session) => ({
   // null en la caja de hoy del vendedor: cuenta sin saber cuánto debería haber
   totals: session.totals === null ? null : normalizeTotals(session.totals),
   openingAmount: toNumber(session.openingamount),
-  // Lo que entró fuera de la caja (tarjeta, Nequi, Daviplata, transferencia y lo fiado)
+  // Lo que entró fuera de la caja (tarjeta, Nequi, Daviplata, transferencia, financieras y lo fiado)
   outsideCash: (session.outsideCash ?? []).map((row) => ({ method: row.method, count: row.count, amount: toNumber(row.amount) })),
   movements: (session.movements ?? []).map((movement) => ({
     id: movement.id,

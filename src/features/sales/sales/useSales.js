@@ -14,8 +14,16 @@ export const PAYMENT_METHODS = [
   { value: "nequi", label: "Nequi" },
   { value: "daviplata", label: "Daviplata" },
   { value: "tarjeta", label: "Tarjeta" },
+  // Fase 34: financieras; como la tarjeta, el dinero lo consignan después (solo al vender)
+  { value: "sistecredito", label: "Sistecrédito" },
+  { value: "addi", label: "Addi" },
+  { value: "alocredito", label: "Alocrédito" },
   { value: "credito", label: "Crédito (fiado)" },
 ];
+
+/** Sistecrédito, Addi y Alocrédito (Fase 34): no se combinan con una venta fiada. */
+export const FINANCED_METHODS = ["sistecredito", "addi", "alocredito"];
+export const FINANCED_PROBLEM = "Sistecrédito, Addi y Alocrédito no se combinan con una venta fiada.";
 
 // «apartado» (Fase 30): la venta que entrega un apartado, pagada con sus abonos
 const METHOD_LABELS = { ...Object.fromEntries(PAYMENT_METHODS.map((method) => [method.value, method.label])), apartado: "Abonos del apartado" };

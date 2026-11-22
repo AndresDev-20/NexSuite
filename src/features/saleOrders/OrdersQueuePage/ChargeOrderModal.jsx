@@ -6,7 +6,7 @@ import Select from "../../../components/forms/Select/Select";
 import Modal from "../../../components/feadback/Modal/Modal";
 import { FormActions } from "../../../components/forms/FormLayout/FormLayout";
 import { pickSession, rememberSession, sessionOptions } from "../../sales/sales/useOpenRegisters";
-import { PAYMENT_METHODS, newSaleKey } from "../../sales/sales/useSales";
+import { FINANCED_METHODS, FINANCED_PROBLEM, PAYMENT_METHODS, newSaleKey } from "../../sales/sales/useSales";
 import { emptyPlan, planPayload, planProblems } from "../../sales/sales/InstallmentsEditor";
 import { CreditPanel, buildPayments, creditAccess, downProblems, emptyDown } from "../../sales/sales/downPayment";
 import usePermissions from "../../auth/usePermissions";
@@ -69,6 +69,7 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
   if (pending !== 0) problems.push(pending > 0 ? `Faltan ${formatCurrency(pesos(pending))} por pagar.` : `Los pagos pasan el total por ${formatCurrency(pesos(-pending))}.`);
   if (payments.some((payment) => payment.method === "credito") && !canCredit) problems.push("Para fiar elige un cliente con cupo.");
   if (credit > 0 && creditProblem) problems.push(creditProblem);
+  if (credit > 0 && effectivePayments.some((payment) => FINANCED_METHODS.includes(payment.method))) problems.push(FINANCED_PROBLEM);
   problems.push(...downProblems(down, total, creditOnly));
   if (cashPayment && cashPayment.received && change < 0) problems.push("Lo recibido en efectivo no alcanza.");
   problems.push(...planProblems(plan, pesos(credit), customer?.creditDays));

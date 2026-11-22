@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import Button from "../../../components/ui/Button/Button";
+import PrintClosingButton from "../PrintClosingButton";
 import Field from "../../../components/forms/Field/Field";
 import Select from "../../../components/forms/Select/Select";
 import { FormLayout } from "../../../components/forms/FormLayout/FormLayout";
@@ -303,6 +304,8 @@ const MyCashPage = () => {
                 <span>Entrega al administrador</span>
                 <strong>{formatCurrency(lastCount.handoverAmount)}</strong>
               </div>
+              {/* Fase 35: la tirilla del cuadre, para entregar el dinero con ella */}
+              <PrintClosingButton sessionId={lastCount.id} variant="primary" />
               <Button variant="outline" icon="check" onClick={() => setLastCount(null)}>
                 Listo
               </Button>
