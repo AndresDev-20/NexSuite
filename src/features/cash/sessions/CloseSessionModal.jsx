@@ -44,22 +44,24 @@ const CloseForm = ({ session, base, busy, onCancel, onSubmit }) => {
     watch,
     setValue,
     formState: { errors },
-  } = useForm({ defaultValues: { countedamount: "", closingnotes: "" } });
+  } = useForm({ defaultValues: { countedamount: "0", closingnotes: "" } });
 
-  // Fase 38: contar por billetes y monedas (opcional); la suma llena «Efectivo contado»
-  const [byBills, setByBills] = useState(false);
+  // Fase 38: primero se ofrece contar billete por billete (la suma es «Efectivo contado»); quien no cuenta así
+  // puede escribir el total (decisión del 2026-11-22)
+  const [byBills, setByBills] = useState(true);
   const [counts, setCounts] = useState({});
-  const setCount = (value, raw) => {
-    const next = { ...counts, [value]: raw.replace(/\D/g, "").slice(0, 6) };
-    setCounts(next);
-    setValue("countedamount", String(sumOf(next)), { shouldValidate: true });
-  };
   const toggleBills = () => {
     const next = !byBills;
     setByBills(next);
     setCounts({});
     setValue("countedamount", next ? "0" : "", { shouldValidate: false });
   };
+  const setCount = (value, raw) => {
+    const next = { ...counts, [value]: raw.replace(/\D/g, "").slice(0, 6) };
+    setCounts(next);
+    setValue("countedamount", String(sumOf(next)), { shouldValidate: true });
+  };
+
 
   const counted = watch("countedamount");
   const result = blind ? null : differenceText(counted, expected);
@@ -86,7 +88,7 @@ const CloseForm = ({ session, base, busy, onCancel, onSubmit }) => {
     <FormLayout onSubmit={submit} error={serverError}>
       {blind ? (
         <p className="my-cash__since">
-          {session.registerName} · {session.branchName}. Cuenta todo el efectivo que hay en la caja y escribe el total.
+          {session.registerName} · {session.branchName}. Cuenta todo el efectivo de la caja: escribe cuántos billetes y monedas hay de cada uno (o escribe el total).
         </p>
       ) : (
         <p className="my-cash__since">
@@ -102,7 +104,7 @@ const CloseForm = ({ session, base, busy, onCancel, onSubmit }) => {
         </Button>
       </div>
       {byBills && (
-        <div className="cash-bills">
+      <div className="cash-bills">
           {[
             ["Billetes", BILLS],
             ["Monedas", COINS],
@@ -118,6 +120,7 @@ const CloseForm = ({ session, base, busy, onCancel, onSubmit }) => {
                     autoComplete="off"
                     placeholder="0"
                     aria-label={`Cuántos de ${formatCurrency(value)}`}
+                    data-autofocus={value === BILLS[0] ? true : undefined}
                     value={counts[value] ?? ""}
                     onChange={(event) => setCount(value, event.target.value)}
                   />
@@ -131,17 +134,17 @@ const CloseForm = ({ session, base, busy, onCancel, onSubmit }) => {
       <Field
         label={byBills ? "Efectivo contado (suma de billetes y monedas)" : "Efectivo contado"}
         readOnly={byBills}
+        data-autofocus={byBills ? undefined : true}
         required
         inputMode="decimal"
         autoComplete="off"
         maxLength={15}
         placeholder="0"
         onInput={sanitizeDecimal}
-        data-autofocus
         hint={result?.text}
         error={errors.countedamount?.message}
         {...register("countedamount", {
-          validate: (value) => (value !== "" && Number(value) >= 0) || "Escribe cuánto efectivo contaste (0 o más).",
+          validate: (value) => (value !== "" && Number(value) >= 0) || "Cuenta los billetes y monedas, o escribe cuánto efectivo contaste (0 o más).",
         })}
       />
       {split && (

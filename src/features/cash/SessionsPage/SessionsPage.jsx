@@ -181,8 +181,9 @@ const SessionsPage = () => {
   const handleReceive = async (payload) => {
     const updated = await receiveHandover(receiving.id, payload);
     setReceiving(null);
-    if (detail.session?.id === updated.id) setDetail({ open: true, session: updated, loading: false, error: "" });
-    toast.success(`Recibiste ${formatCurrency(updated.receivedAmount)} de ${updated.registerName}.`);
+    // Se abre el turno recibido para imprimir la tirilla del administrador (con ganancia y utilidad)
+    setDetail({ open: true, session: updated, loading: false, error: "" });
+    toast.success(`Recibiste ${formatCurrency(updated.receivedAmount)} de ${updated.registerName}: ya puedes imprimir el cuadre del administrador.`);
     getSessions(params);
   };
 
@@ -292,7 +293,12 @@ const SessionsPage = () => {
               (canClose(detail.session) || canStop(detail.session) || canReceive(detail.session) || canReopen(detail.session) || canResume(detail.session) || detail.session.status === "cerrada") && (
                 <div className="my-cash__actions">
                   {/* Fase 35: la tirilla del cuadre de un turno contado */}
-                  {detail.session.status === "cerrada" && <PrintClosingButton sessionId={detail.session.id} />}
+                  {detail.session.status === "cerrada" && (
+                    <PrintClosingButton
+                      sessionId={detail.session.id}
+                      label={detail.session.receivedAt ? "Imprimir cuadre del administrador" : "Imprimir cuadre"}
+                    />
+                  )}
                   {canResume(detail.session) && (
                     <Button variant="outline" icon="refresh" onClick={() => setResuming(detail.session)}>
                       Volver a vender
