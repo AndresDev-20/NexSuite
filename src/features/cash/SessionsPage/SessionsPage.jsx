@@ -183,7 +183,9 @@ const SessionsPage = () => {
     setReceiving(null);
     // Se abre el turno recibido para imprimir la tirilla del administrador (con ganancia y utilidad)
     setDetail({ open: true, session: updated, loading: false, error: "" });
-    toast.success(`Recibiste ${formatCurrency(updated.receivedAmount)} de ${updated.registerName}: ya puedes imprimir el cuadre del administrador.`);
+    toast.success(
+      `Recibiste ${formatCurrency(updated.receivedAmount)} de ${updated.registerName}${can("costs.read") ? ": ya puedes imprimir el cuadre del administrador" : ""}.`
+    );
     getSessions(params);
   };
 
@@ -296,7 +298,10 @@ const SessionsPage = () => {
                   {detail.session.status === "cerrada" && (
                     <PrintClosingButton
                       sessionId={detail.session.id}
-                      label={detail.session.receivedAt ? "Imprimir cuadre del administrador" : "Imprimir cuadre"}
+                      label={
+                        // La del administrador: quien recibe entregas y ve costos (el servidor decide igual)
+                        detail.session.receivedAt && can("cash-sessions.receive") && can("costs.read") ? "Imprimir cuadre del administrador" : "Imprimir cuadre"
+                      }
                     />
                   )}
                   {canResume(detail.session) && (

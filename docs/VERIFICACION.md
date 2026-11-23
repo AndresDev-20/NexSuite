@@ -504,6 +504,7 @@ Ojo: en la tarjeta del pedido en la lista de «Pedidos por cobrar» y en «Mis p
 - [ ] Al reabrir el conteo, el detalle anterior se borra (queda en la auditoría).
 - [ ] «Contar la caja» abre primero con la tabla de billetes; «Escribir el total» permite contar sin billetes.
 - [ ] Al dar «Recibir», se abre el turno con «Imprimir cuadre del administrador»: dice «CUADRE DE CAJA · ADMINISTRADOR» y trae la ganancia por vendedor y la utilidad; la del cajero no.
+- [ ] Un cajero (aunque tenga «Ver turnos» o «Ver costos», como en la empresa de Carlos) que abre un turno ya recibido en Caja → Turnos ve «Imprimir cuadre» y le sale la tirilla del cajero, sin ganancias ni utilidad.
 
 ## 15. Producción (cuando montes el VPS)
 
