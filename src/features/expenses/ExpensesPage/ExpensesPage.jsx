@@ -108,6 +108,8 @@ const ExpensesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [creating, setCreating] = useState(false);
   const [viewing, setViewing] = useState(null);
+  // Fase 42: el gasto recién registrado se abre con su comprobante
+  const [justCreated, setJustCreated] = useState(null);
   const [configuring, setConfiguring] = useState(false);
   // 13.2 · gastos fijos: el mes del recordatorio, el que se está pagando y su configuración
   const due = useFixedExpenses();
@@ -169,10 +171,12 @@ const ExpensesPage = () => {
   })?.value;
 
   const handleCreate = async (payload) => {
-    const { message } = await createExpense(payload);
+    const { expense, message } = await createExpense(payload);
     setCreating(false);
     setPaying(null);
     toast.success(message ?? "Gasto registrado.");
+    setJustCreated(expense);
+    setViewing(expense.id);
     // Pagar un gasto fijo lo deja como pagado en el recordatorio
     getFixed(dueParams);
   };
@@ -362,6 +366,7 @@ const ExpensesPage = () => {
       />
       <ExpenseDetailModal
         id={viewing}
+        initial={justCreated?.id === viewing ? justCreated : null}
         getExpense={getExpense}
         canCancel={canCancel}
         onCancelExpense={async (id, reason) => {
@@ -370,7 +375,10 @@ const ExpensesPage = () => {
           getFixed(dueParams);
           return result;
         }}
-        onClose={() => setViewing(null)}
+        onClose={() => {
+          setViewing(null);
+          setJustCreated(null);
+        }}
       />
       <CategoriesModal
         open={configuring}

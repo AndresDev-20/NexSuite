@@ -539,6 +539,21 @@ Antes de probar en desarrollo hay que aplicar la migración `20261218000000-expe
 - [ ] Un usuario que registra gastos pero no tiene «Configurar gastos» no ve el botón «Terceros», pero sí elige terceros al registrar.
 - [ ] Los proveedores de Compras ya no aparecen en Gastos y siguen igual en Compras.
 
+## 14.26 Comprobante de egreso de un gasto (Fase 42)
+
+Sin migración (ver `PLAN-COMPROBANTE-GASTO.md`).
+
+- [ ] Registra un gasto con tercero y transferencia (con referencia y factura): al guardar se abre «Gasto registrado» con «Imprimir tirilla», «Imprimir carta» y «Descargar PDF».
+- [ ] La tirilla sale en la térmica (80 mm) con el logo y los datos del negocio, la sucursal, «COMPROBANTE DE EGRESO» y el número GTO-…, el gasto, el tercero con su documento, teléfono, correo y dirección, el VALOR PAGADO, el medio, la referencia, la factura, quién lo registró y las firmas «Entregó» y «Recibió».
+- [ ] La carta muestra lo mismo en una hoja, con el diseño de los comprobantes de venta.
+- [ ] «Descargar PDF» baja el archivo `GTO-….pdf`.
+- [ ] Un gasto en efectivo de una caja dice de qué caja y qué turno salió; uno fuera de caja dice que no tocó ninguna caja.
+- [ ] El pago del mes de un gasto fijo muestra el gasto fijo, el mes y el monto aproximado.
+- [ ] Un gasto general dice «General del negocio».
+- [ ] Desde la lista, el ojito de cualquier gasto permite reimprimir su comprobante; buscando el número GTO-… se encuentra.
+- [ ] Un gasto anulado se imprime marcado ANULADO, con el motivo, quién y cuándo.
+- [ ] Quien solo registra gastos puede imprimir el comprobante del gasto que acaba de registrar.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

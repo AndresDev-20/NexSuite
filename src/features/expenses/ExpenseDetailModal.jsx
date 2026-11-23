@@ -8,6 +8,7 @@ import { formatDateTime } from "../administration/audit/auditOptions";
 import { formatDay } from "../purchases/orders/orderOptions";
 import getErrorMessage from "../../utils/getErrorMessage";
 import { formatCurrency } from "../../utils/money";
+import ExpenseReceiptActions from "./ExpenseReceiptActions";
 import { getExpenseMethodLabel, monthLabel } from "./useExpenses";
 import "../../styles/sheet.css";
 import "./expenses.css";
@@ -19,12 +20,14 @@ const Fact = ({ label, children }) => (
   </div>
 );
 
-const ExpenseSheet = ({ id, getExpense, canCancel, onCancelExpense, onClose }) => {
+const ExpenseSheet = ({ id, initial, getExpense, canCancel, onCancelExpense, onClose }) => {
   const toast = useToast();
-  const [state, setState] = useState({ expense: null, loading: true, error: "" });
+  // initial: el gasto recién registrado (no se vuelve a pedir; quien solo registra no tiene «Ver gastos»)
+  const [state, setState] = useState(() => (initial ? { expense: initial, loading: false, error: "" } : { expense: null, loading: true, error: "" }));
   const [cancelling, setCancelling] = useState(null);
 
   useEffect(() => {
+    if (initial) return undefined;
     let current = true;
     getExpense(id)
       .then((expense) => current && setState({ expense, loading: false, error: "" }))
@@ -32,7 +35,7 @@ const ExpenseSheet = ({ id, getExpense, canCancel, onCancelExpense, onClose }) =
     return () => {
       current = false;
     };
-  }, [id, getExpense]);
+  }, [id, initial, getExpense]);
 
   const { expense, loading, error } = state;
   if (loading) return <p className="sheet__loading">Cargando el gasto…</p>;
@@ -76,6 +79,9 @@ const ExpenseSheet = ({ id, getExpense, canCancel, onCancelExpense, onClose }) =
         )}
       </dl>
 
+      {/* Fase 42 · comprobante de egreso: imprimir o descargar (también el anulado, marcado) */}
+      <ExpenseReceiptActions expense={expense} />
+
       {canCancel && expense.status === "vigente" && counted && (
         <p className="expense-form__note">Salió de una caja cuyo turno ya se contó: no se anula. Si está mal, corrígelo con otro registro.</p>
       )}
@@ -118,10 +124,13 @@ const ExpenseSheet = ({ id, getExpense, canCancel, onCancelExpense, onClose }) =
   );
 };
 
-/** Detalle de un gasto y, con «Anular gastos», anularlo con motivo. id null = cerrado. */
-const ExpenseDetailModal = ({ id, onClose, ...props }) => (
-  <Modal icon="wallet" open={Boolean(id)} title="Gasto" onClose={onClose}>
-    {id && <ExpenseSheet key={id} id={id} onClose={onClose} {...props} />}
+/**
+ * Detalle de un gasto con su comprobante y, con «Anular gastos», anularlo con motivo. id null = cerrado.
+ * initial: el gasto recién registrado (Fase 42: se abre al registrar para imprimir el comprobante).
+ */
+const ExpenseDetailModal = ({ id, initial = null, onClose, ...props }) => (
+  <Modal icon="wallet" open={Boolean(id)} title={initial ? "Gasto registrado" : "Gasto"} onClose={onClose}>
+    {id && <ExpenseSheet key={id} id={id} initial={initial} onClose={onClose} {...props} />}
   </Modal>
 );
 

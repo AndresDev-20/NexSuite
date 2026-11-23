@@ -700,6 +700,14 @@
   }
 }
 
+/* Fase 42 · comprobante de egreso en el detalle del gasto */
+.expense-receipt__title {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #71717a);
+}
+
 /* Fase 41 · Terceros de Gastos: búsqueda, estado y «Nuevo tercero» sobre la lista */
 .third-parties {
   display: grid;
