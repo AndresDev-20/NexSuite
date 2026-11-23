@@ -442,7 +442,7 @@ const ProductsPage = () => {
             <div className="list-page__search">
               <SearchInput
                 label="Buscar productos"
-                placeholder="Nombre, SKU o código de barras"
+                placeholder="Nombre, SKU, código o IMEI"
                 value={query}
                 onChange={setQuery}
               />

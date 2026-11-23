@@ -10,6 +10,7 @@ import { toList } from "../../../utils/apiResponse";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { todayInColombia } from "../../../utils/dates";
 import { stripNonDigits } from "../../../utils/validators";
+import TransferProductPicker from "./TransferProductPicker";
 import "./transfers.css";
 
 const MAX_QUANTITY_LENGTH = 7;
@@ -24,6 +25,7 @@ const loadOriginStock = async (branchId) =>
       productId: row.idproduct,
       name: row.product?.nameproduct ?? "",
       sku: row.product?.sku ?? "",
+      barcode: row.product?.barcode ?? "",
       hasSerial: Boolean(row.product?.hasserial),
       available: row.quantity,
     }))
@@ -162,11 +164,17 @@ const TransferForm = ({ origins, destinations, defaultOriginId, busy, onCancel, 
   const setLine = (line) => setLines((current) => current.map((item) => (item.productId === line.productId ? line : item)));
   const removeLine = (productId) => setLines((current) => current.filter((item) => item.productId !== productId));
 
-  const addProduct = async (event) => {
-    const row = stock.rows.find((item) => item.productId === Number(event.target.value));
-    event.target.value = "";
-    if (!row) return;
-    setLines((current) => [...current, { ...row, quantity: "1", units: [], selected: [], loading: row.hasSerial }]);
+  /** Agrega el producto; con serial (buscado por IMEI, Fase 44) lo deja marcado, y si ya estaba solo marca la unidad. */
+  const addProduct = async (row, serial = null) => {
+    if (chosen.has(row.productId)) {
+      if (serial) {
+        setLines((current) =>
+          current.map((item) => (item.productId === row.productId && !item.selected.includes(serial) ? { ...item, selected: [...item.selected, serial] } : item))
+        );
+      }
+      return;
+    }
+    setLines((current) => [...current, { ...row, quantity: "1", units: [], selected: serial ? [serial] : [], loading: row.hasSerial }]);
     if (row.hasSerial) {
       try {
         const units = await loadUnits(row.productId, fromId);
@@ -260,14 +268,14 @@ const TransferForm = ({ origins, destinations, defaultOriginId, busy, onCancel, 
         <h3 className="transfer-products__title" id="transfer-products-title">
           Mercancía
         </h3>
-        <Select
-          label="Agregar producto"
-          placeholder={available.length ? "Elige un producto de la sucursal" : "No hay más productos para agregar"}
-          options={available.map((row) => ({ value: String(row.productId), label: `${row.name} · hay ${row.available}` }))}
-          disabled={available.length === 0}
-          hint={productHint}
-          defaultValue=""
-          onChange={addProduct}
+        <TransferProductPicker
+          fromId={fromId}
+          rows={stock.rows}
+          chosenIds={chosen}
+          disabled={stock.rows.length === 0}
+          hint={productHint ?? (available.length === 0 ? "Ya agregaste todo lo que hay; con un IMEI puedes marcar más unidades." : undefined)}
+          onPickProduct={(row) => addProduct(row)}
+          onPickUnit={(row, serial) => addProduct(row, serial)}
         />
 
         {lines.length > 0 && (

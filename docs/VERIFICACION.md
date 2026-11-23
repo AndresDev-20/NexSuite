@@ -567,6 +567,19 @@ Migración `20261219000000-sale-order-discounts` (ver `PLAN-DESCUENTO-PEDIDO.md`
 - [ ] Si el cajero no está de acuerdo, rechaza el pedido con motivo y el vendedor lo ve en «Últimos pedidos».
 - [ ] Un pedido sin descuento funciona igual que antes.
 
+## 14.28 Buscar por número de venta e IMEI (Fase 44)
+
+Sin migraciones.
+
+- [ ] La tirilla y la carta de una venta llevan el número arriba y también al pie: «Para cambios, garantías o anulaciones presente el número …».
+- [ ] En Ventas, al escribir el número de una venta de **otro día** (ej. `MOV-000050`) aparece; Desde/Hasta se apagan y el conteo dice «en todas las fechas».
+- [ ] Al borrar la búsqueda vuelven las fechas de antes (hoy, si no las cambiaste).
+- [ ] En Ventas, buscar el IMEI de un celular vendido encuentra su venta, aunque sea de otro día.
+- [ ] En Productos, escribir un IMEI, IMEI 2 o serial (completo o al menos 5 caracteres) muestra el producto de esa unidad, aunque esté vendida o en otra sucursal.
+- [ ] En Nuevo traslado, «Agregar producto» busca por nombre, SKU o código de barras (ej. «cargador samsung») y al elegir lo agrega.
+- [ ] Escanear o escribir un IMEI en «Agregar producto» agrega el celular con esa unidad ya marcada; otro IMEI del mismo celular la marca también, sin repetir el producto.
+- [ ] Un IMEI que no está disponible en la sucursal de origen dice «Nada en esta sucursal coincide…».
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

@@ -77,19 +77,22 @@ const SalesPage = () => {
   const sellerFilter = searchParams.get("iduser") ?? "";
   const [viewing, setViewing] = useState(null);
 
+  // Fase 44: al buscar (número, cliente o IMEI) se busca en todas las fechas; las fechas vuelven al borrar la búsqueda
+  const searching = Boolean(query.trim());
+
   useEffect(() => {
     const params = {
       page: currentPage,
-      ...(query.trim() && { search: query.trim() }),
-      ...(from && { from }),
-      ...(to && { to }),
+      ...(searching && { search: query.trim() }),
+      ...(!searching && from && { from }),
+      ...(!searching && to && { to }),
       ...(activeBranchId && { idbranch: activeBranchId }),
       // Desde Reportes, filtrado por un vendedor (solo aplica con "Consultar ventas de todos")
       ...(seesAll && sellerFilter && { iduser: sellerFilter }),
     };
     const timer = setTimeout(() => getSales(params), SEARCH_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [query, from, to, activeBranchId, currentPage, getSales, seesAll, sellerFilter, reload]);
+  }, [query, searching, from, to, activeBranchId, currentPage, getSales, seesAll, sellerFilter, reload]);
 
   const columns = useMemo(() => buildColumns(showProfit), [showProfit]);
   // Las anuladas no suman
@@ -113,7 +116,7 @@ const SalesPage = () => {
     }
     if (items.length === 0) {
       return (
-        <StateMessage icon="cart" title="No hay ventas" text="No encontramos ventas con esa búsqueda o fechas.">
+        <StateMessage icon="cart" title="No hay ventas" text={searching ? "Ninguna venta de esta sucursal coincide con lo buscado, en ninguna fecha." : "No encontramos ventas en esas fechas."}>
           {can("sales.create") && (
             <Link className="pos-new-sale" to="/ventas/vender">
               Ir a Vender
@@ -170,9 +173,25 @@ const SalesPage = () => {
               }}
             />
           </div>
-          <Field label="Desde" type="date" max={today} value={from} onChange={(event) => (setFrom(event.target.value), setCurrentPage(1))} />
-          <Field label="Hasta" type="date" max={today} value={to} onChange={(event) => (setTo(event.target.value), setCurrentPage(1))} />
-          {(from !== today || to !== today) && (
+          <Field
+            label="Desde"
+            type="date"
+            max={today}
+            value={from}
+            disabled={searching}
+            title={searching ? "Al buscar se busca en todas las fechas" : undefined}
+            onChange={(event) => (setFrom(event.target.value), setCurrentPage(1))}
+          />
+          <Field
+            label="Hasta"
+            type="date"
+            max={today}
+            value={to}
+            disabled={searching}
+            title={searching ? "Al buscar se busca en todas las fechas" : undefined}
+            onChange={(event) => (setTo(event.target.value), setCurrentPage(1))}
+          />
+          {!searching && (from !== today || to !== today) && (
             <Button
               variant="outline"
               onClick={() => {
@@ -187,6 +206,7 @@ const SalesPage = () => {
           {!loading && !error && (
             <span className="list-page__count">
               {total} {total === 1 ? "venta" : "ventas"}
+              {searching && " en todas las fechas"}
               {items.length > 0 && ` · ${formatCurrency(pageTotal)} en esta página`}
             </span>
           )}

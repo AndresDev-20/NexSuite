@@ -169,6 +169,120 @@
   accent-color: var(--red-600, var(--danger));
 }
 
+/* ---------- Buscador de productos (Fase 44) ---------- */
+.transfer-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.transfer-picker__box {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 0 12px;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.transfer-picker__box:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+.transfer-picker__box--disabled {
+  opacity: 0.6;
+}
+
+.transfer-picker__box .icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-muted);
+}
+
+.transfer-picker__input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  font: inherit;
+  color: var(--color-text);
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+
+.transfer-picker__hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.transfer-picker__results {
+  display: flex;
+  flex-direction: column;
+  max-height: 320px;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 16px 30px -22px rgba(15, 23, 42, 0.6);
+}
+
+.transfer-picker__results button {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 8px 10px;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+}
+
+.transfer-picker__results button:hover,
+.transfer-picker__results button:focus-visible {
+  background: var(--color-primary-soft);
+}
+
+.transfer-picker__results button > span:first-child {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.transfer-picker__results small {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+}
+
+.transfer-picker__serial {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+.transfer-picker__tag {
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.transfer-picker__results .icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--color-primary);
+}
+
 /* ---------- Detalle ---------- */
 .transfer-detail {
   display: flex;
