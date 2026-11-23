@@ -9,7 +9,7 @@ import { normalizeSale } from "../sales/sales/useSales";
 const LATEST_SALES = 6;
 const TOP_DEBTORS = 4;
 
-const shiftDay = (day, days) => {
+export const shiftDay = (day, days) => {
   const date = new Date(`${day}T00:00:00Z`);
   date.setUTCDate(date.getUTCDate() + days);
   return date.toISOString().slice(0, 10);
@@ -29,14 +29,35 @@ const monthYear = new Intl.DateTimeFormat("es-CO", { month: "long", year: "numer
 const asDate = (day) => new Date(`${day}T00:00:00Z`);
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1).replace(".", "");
 
-/** Periodos del inicio: el rango, el anterior (para la tendencia) y cómo se agrupa la gráfica. */
+/**
+ * Periodos del inicio: el rango, el anterior (para la tendencia) y cómo se agrupa la gráfica. Hoy, Ayer y un día
+ * elegido en el calendario (period "day") son de un solo día: se comparan con el día anterior y la gráfica muestra
+ * los 7 días que terminan en él.
+ */
 export const DASHBOARD_PERIODS = {
+  today: { label: "Hoy", subtitle: "hoy" },
+  yesterday: { label: "Ayer", subtitle: "ayer" },
   week: { label: "7 días", subtitle: "últimos 7 días" },
   month: { label: "30 días", subtitle: "últimos 30 días" },
   year: { label: "12 meses", subtitle: "últimos 12 meses" },
 };
 
-const rangesOf = (period, today) => {
+const SINGLE_DAY = ["today", "yesterday", "day"];
+export const isSingleDay = (period) => SINGLE_DAY.includes(period);
+
+/** El día de un periodo de un solo día (AAAA-MM-DD). */
+const dayOf = (period, day, today) => (period === "today" ? today : period === "yesterday" ? shiftDay(today, -1) : day);
+
+/** Cómo se nombra el periodo debajo de las cifras: «hoy», «el 20 nov.», «últimos 7 días»… */
+export const periodSubtitle = (period, day) =>
+  period === "day" ? `el ${dayMonth.format(asDate(day))}` : DASHBOARD_PERIODS[period]?.subtitle ?? "";
+
+const rangesOf = (period, today, day) => {
+  if (isSingleDay(period)) {
+    const target = dayOf(period, day, today);
+    const before = shiftDay(target, -1);
+    return { from: target, to: target, previous: { from: before, to: before }, chart: { from: shiftDay(target, -6), to: target } };
+  }
   if (period === "year") {
     const from = monthStart(today, 11);
     return { from, to: today, previous: { from: monthStart(today, 23), to: shiftDay(from, -1) } };
@@ -84,7 +105,7 @@ const bucketsOf = (period, { from, to }, byDay) => {
 const trendOf = (current, previous) => (previous > 0 ? ((current - previous) / previous) * 100 : null);
 
 /**
- * Ventas del inicio: getSalesDashboard({ period, idbranch, canReceivables }). Trae el reporte del
+ * Ventas del inicio: getSalesDashboard({ period, day, idbranch, canReceivables }); day solo con period "day". Trae el reporte del
  * periodo y del anterior (tendencias reales), las últimas ventas y, con permiso de cartera, lo que
  * deben los clientes. Lo que falle aparte (ventas recientes o cartera) no tumba el resto.
  */
@@ -94,32 +115,35 @@ const useSalesDashboard = () => {
   const [error, setError] = useState("");
   const lastRequest = useRef(0);
 
-  const getSalesDashboard = useCallback(async ({ period, idbranch, canReceivables }) => {
+  const getSalesDashboard = useCallback(async ({ period, day, idbranch, canReceivables }) => {
     const request = ++lastRequest.current;
     const today = todayInColombia();
-    const range = rangesOf(period, today);
+    const range = rangesOf(period, today, day);
     const branch = idbranch ? { idbranch } : {};
     setLoading(true);
     setError("");
 
     const optional = (promise) => promise.then(unwrap).catch(() => null);
     try {
-      const [current, previous, latest, debtors, receivables] = await Promise.all([
+      const [current, previous, latest, debtors, receivables, week] = await Promise.all([
         api.get("/reports/sales", { params: { from: range.from, to: range.to, ...branch } }).then(unwrap),
         optional(api.get("/reports/sales", { params: { ...range.previous, ...branch } })),
         optional(api.get("/sales", { params: { limit: LATEST_SALES, ...branch } })),
         canReceivables ? optional(api.get("/receivables", { params: { limit: TOP_DEBTORS } })) : null,
         canReceivables ? optional(api.get("/receivables/summary")) : null,
+        // Un solo día: la gráfica muestra los 7 días que terminan en él
+        range.chart ? optional(api.get("/reports/sales", { params: { ...range.chart, ...branch } })) : null,
       ]);
       if (request !== lastRequest.current) return;
 
       const report = normalizeReport(current);
       const before = previous && normalizeReport(previous);
-      const buckets = bucketsOf(period, range, report.byDay);
+      const buckets = range.chart ? bucketsOf("week", range.chart, week ? normalizeReport(week).byDay : report.byDay) : bucketsOf(period, range, report.byDay);
       const ticket = (totals) => (totals.count > 0 ? totals.total / totals.count : 0);
 
       setData({
         period,
+        day: period === "day" ? day : null,
         report,
         buckets,
         trends: before && {

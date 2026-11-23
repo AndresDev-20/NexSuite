@@ -580,6 +580,14 @@ Sin migraciones.
 - [ ] Escanear o escribir un IMEI en «Agregar producto» agrega el celular con esa unidad ya marcada; otro IMEI del mismo celular la marca también, sin repetir el producto.
 - [ ] Un IMEI que no está disponible en la sucursal de origen dice «Nada en esta sucursal coincide…».
 
+## 14.29 Inicio: Hoy, Ayer y un día del calendario (Fase 45)
+
+- [ ] En Inicio, el periodo tiene Hoy, Ayer, 7 días, 30 días y 12 meses, y al lado un calendario.
+- [ ] Hoy muestra solo las ventas de hoy (dice «hoy» debajo del total) y Ayer las de ayer.
+- [ ] Elegir un día en el calendario muestra las cifras de ese día; la gráfica dice «7 días hasta el …» y termina en ese día.
+- [ ] El calendario no deja elegir días futuros; elegir hoy o ayer marca su botón.
+- [ ] La flecha de tendencia de un día compara con el día anterior.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

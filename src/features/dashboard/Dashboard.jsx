@@ -11,7 +11,8 @@ import { dueLabel } from "../purchases/orders/paymentOptions";
 import { AnimatedNumber, AreaChart, DonutChart, Sparkline } from "./charts";
 import formatCompact from "./formatCompact";
 import useDashboard from "./useDashboard";
-import useSalesDashboard, { DASHBOARD_PERIODS } from "./useSalesDashboard";
+import useSalesDashboard, { DASHBOARD_PERIODS, isSingleDay, periodSubtitle, shiftDay } from "./useSalesDashboard";
+import { todayInColombia } from "../../utils/dates";
 import "./styles/dashboard.css";
 
 /*
@@ -19,7 +20,8 @@ import "./styles/dashboard.css";
  * envía su sección, es decir, si el usuario tiene permiso de consultar ese módulo; todo se
  * limita a sus sucursales y sigue la sucursal activa del encabezado. Sin cifras inventadas: las
  * ventas son las registradas (las suyas o las de todos, según su permiso; la ganancia con "Ver costos"),
- * con gráficas animadas por periodo (7 días, 30 días, 12 meses) y tendencia contra el periodo anterior.
+ * con gráficas animadas por periodo (hoy, ayer, un día del calendario, 7 días, 30 días, 12 meses) y tendencia contra
+ * el periodo anterior.
  */
 
 /* ---------- Iconos ---------- */
@@ -585,17 +587,31 @@ function Dashboard() {
   const canSales = can(["sales.read", "sales.read-all"]);
   const canReceivables = can(["receivables.read", "receivables.pay"]);
   const [period, setPeriod] = useState("week");
+  // Día elegido en el calendario (period "day")
+  const [day, setDay] = useState("");
+  const [todayIso] = useState(todayInColombia);
+  const yesterdayIso = shiftDay(todayIso, -1);
+  const pickDay = (value) => {
+    if (!value || value > todayIso) return;
+    if (value === todayIso) return setPeriod("today");
+    if (value === yesterdayIso) return setPeriod("yesterday");
+    setDay(value);
+    setPeriod("day");
+  };
+  const pickedDay = period === "day" ? day : period === "today" ? todayIso : period === "yesterday" ? yesterdayIso : "";
+  const periodHint = periodSubtitle(period, day);
+  const chartHint = isSingleDay(period) ? `7 días hasta ${periodHint}` : periodHint;
 
   useEffect(() => {
     if (branchStatus === "ready") getDashboard({ idbranch: activeBranchId });
   }, [branchStatus, activeBranchId, getDashboard]);
 
   useEffect(() => {
-    if (branchStatus === "ready" && canSales) getSalesDashboard({ period, idbranch: activeBranchId, canReceivables });
-  }, [branchStatus, activeBranchId, period, canSales, canReceivables, getSalesDashboard]);
+    if (branchStatus === "ready" && canSales) getSalesDashboard({ period, day, idbranch: activeBranchId, canReceivables });
+  }, [branchStatus, activeBranchId, period, day, canSales, canReceivables, getSalesDashboard]);
 
   // Las animaciones se repiten al cambiar de periodo o de sucursal
-  const animKey = `${activeBranchId ?? "all"}-${period}`;
+  const animKey = `${activeBranchId ?? "all"}-${period}${period === "day" ? `-${day}` : ""}`;
   const reportLink = useMemo(() => {
     if (!salesData) return "/ventas/reportes";
     const { from, to } = salesData.report;
@@ -621,7 +637,7 @@ function Dashboard() {
 
     const { lowStock, counts, transfers, drafts, payables, cash, myCash } = sections;
     // Ventas del periodo (las de este periodo; si el usuario cambia rápido, se muestran al llegar)
-    const sold = salesData?.period === period ? salesData : null;
+    const sold = salesData?.period === period && (period !== "day" || salesData.day === day) ? salesData : null;
     const own = sold?.report.scope === "propias";
     const kpis = [
       sold && {
@@ -630,7 +646,7 @@ function Dashboard() {
         label: own ? "Tus ventas" : "Ventas totales",
         value: sold.report.totals.total,
         format: formatCompact,
-        hint: DASHBOARD_PERIODS[period].subtitle,
+        hint: periodHint,
         trend: sold.trends?.total ?? null,
         spark: sold.buckets.map((bucket) => bucket.total),
         to: reportLink,
@@ -709,7 +725,7 @@ function Dashboard() {
     ].filter(Boolean);
 
     const panels = [
-      sold && ((index) => <SalesChartPanel key="chart" data={sold} subtitle={`${activeBranch ? activeBranch.name : "Todas tus sucursales"} · ${DASHBOARD_PERIODS[period].subtitle}`} animKey={animKey} index={index} />),
+      sold && ((index) => <SalesChartPanel key="chart" data={sold} subtitle={`${activeBranch ? activeBranch.name : "Todas tus sucursales"} · ${chartHint}`} animKey={animKey} index={index} />),
       sold && ((index) => <BranchesPanel key={`branches-${animKey}`} report={sold.report} index={index} />),
       sold && !own && ((index) => <SellersPanel key="sellers" report={sold.report} animKey={animKey} reportLink={reportLink} index={index} />),
       sold && ((index) => <ProductsPanel key="products" report={sold.report} animKey={animKey} reportLink={reportLink} index={index} />),
@@ -763,6 +779,7 @@ function Dashboard() {
             {activeBranch ? activeBranch.name : "Todas tus sucursales"}
           </p>
           {canSales && (
+            <div className="dashboard__period">
             <div className="segmented" role="group" aria-label="Periodo de las ventas">
               {Object.entries(DASHBOARD_PERIODS).map(([key, item]) => (
                 <button
@@ -775,6 +792,17 @@ function Dashboard() {
                   {item.label}
                 </button>
               ))}
+            </div>
+            {/* Cualquier día (hasta hoy): las ventas de ese día */}
+            <input
+              type="date"
+              className={`dashboard__day ${period === "day" ? "dashboard__day--active" : ""}`.trim()}
+              aria-label="Elegir un día"
+              title="Ver las ventas de un día"
+              max={todayIso}
+              value={pickedDay}
+              onChange={(event) => pickDay(event.target.value)}
+            />
             </div>
           )}
         </div>

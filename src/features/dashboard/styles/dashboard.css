@@ -159,6 +159,26 @@
   box-shadow: 0 2px 8px rgba(26, 26, 26, 0.1);
 }
 
+/* Periodo: los botones y el calendario para elegir un día */
+.dashboard__period { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.dashboard__period .segmented { flex: 1 1 auto; }
+.dashboard__day {
+  flex: 0 1 170px;
+  min-width: 150px;
+  height: 46px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--gray-100);
+  border: 2px solid transparent;
+  border-radius: 14px;
+  cursor: pointer;
+}
+.dashboard__day:focus-visible { outline: 3px solid rgba(214, 24, 46, 0.35); outline-offset: 2px; }
+.dashboard__day--active { color: var(--red-600); border-color: var(--red-600); }
+
 /* ==========================================================================
    BLOQUE: kpi (tarjetas de indicadores)
    ========================================================================== */
@@ -599,7 +619,7 @@ a.kpi:focus-visible { outline: 2px solid var(--red-600); outline-offset: 2px; }
   .dashboard__kpis { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   .dashboard__filters { flex-direction: row; }
   .dashboard__filters .select { flex: 1; }
-  .dashboard__filters .segmented { flex: 1.2; }
+  .dashboard__filters .dashboard__period { flex: 1.2; }
 }
 
 /* ==========================================================================
@@ -612,7 +632,7 @@ a.kpi:focus-visible { outline: 2px solid var(--red-600); outline-offset: 2px; }
   .dashboard__title { font-size: 2.2rem; }
   .dashboard__filters { flex: 0 0 auto; }
   .dashboard__filters .select { flex: none; width: 220px; }
-  .dashboard__filters .segmented { flex: none; }
+  .dashboard__filters .dashboard__period { flex: none; }
 
   .dashboard__kpis { margin-bottom: 20px; }
   .kpi { padding: 18px; }
