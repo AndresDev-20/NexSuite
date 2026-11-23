@@ -506,6 +506,22 @@ Ojo: en la tarjeta del pedido en la lista de «Pedidos por cobrar» y en «Mis p
 - [ ] Al dar «Recibir», se abre el turno con «Imprimir cuadre del administrador»: dice «CUADRE DE CAJA · ADMINISTRADOR» y trae la ganancia por vendedor y la utilidad; la del cajero no.
 - [ ] Un cajero (aunque tenga «Ver turnos» o «Ver costos», como en la empresa de Carlos) que abre un turno ya recibido en Caja → Turnos ve «Imprimir cuadre» y le sale la tirilla del cajero, sin ganancias ni utilidad.
 
+## 14.23 Comprobante por correo (Fase 39)
+
+- [ ] Con `bash ~/set-mail.sh carlos` (y armando) el script dice «Gmail aceptó la cuenta».
+- [ ] En una venta, «Enviar por correo» a tu propio correo: llega con el PDF adjunto y el remitente con el nombre del negocio.
+- [ ] Si respondes ese correo, la respuesta va al correo de la sucursal.
+
+## 14.24 Medios de pago del negocio (Fase 40)
+
+- [ ] Configuración → Medios de pago: crea «Bancolombia» (Transferencia) y aparece en la lista.
+- [ ] Al vender (POS y cobrar pedido) sale Bancolombia en «Medio»; la venta se registra y no suma a la caja.
+- [ ] En el cuadre del turno, la tirilla y Caja → Pagos sale «Bancolombia» con su valor.
+- [ ] En un abono de crédito y en uno de apartado se puede elegir Bancolombia; Addi, Sistecrédito y Alocrédito no salen ahí.
+- [ ] Oculta Daviplata: ya no aparece al cobrar; las ventas viejas con Daviplata siguen diciendo «Daviplata».
+- [ ] Renombra Bancolombia: las ventas viejas muestran el nombre nuevo.
+- [ ] Un usuario sin «Configurar medios de pago» no ve la sección en Configuración.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

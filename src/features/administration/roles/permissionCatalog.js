@@ -343,6 +343,11 @@ export const PERMISSION_CATALOG = [
         label: "Configurar el negocio",
         description: "Cambiar el nombre, NIT, teléfono, correo, dirección y pie de los comprobantes (Configuración → Datos del negocio).",
       },
+      {
+        code: "payment-methods.manage",
+        label: "Configurar medios de pago",
+        description: "Crear medios de pago como «Bancolombia», cambiarles el nombre y ocultar los que no se usan, también los del sistema (Configuración → Medios de pago).",
+      },
     ],
   },
   {

@@ -11,7 +11,8 @@ import usePermissions from "../../auth/usePermissions";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { formatCurrency } from "../../../utils/money";
 import { sanitizeDecimal } from "../../../utils/validators";
-import { PAYMENT_METHODS, getMethodLabel } from "../receivables/useReceivables";
+import { getMethodLabel } from "../receivables/useReceivables";
+import PaymentMethodSelect from "../sales/PaymentMethodSelect";
 import useOpenRegisters, { pickSession, rememberSession, sessionOptions } from "../sales/useOpenRegisters";
 import {
   STATUS_LABELS,
@@ -59,7 +60,7 @@ const MoneyFields = ({ value, onChange, registers, amountLabel, maxAmount, showA
           }
         />
       )}
-      <Select label="Medio" required options={PAYMENT_METHODS} value={value.method} onChange={(event) => onChange({ ...value, method: event.target.value })} />
+      <PaymentMethodSelect use="pay" label="Medio" required value={value.method} onChange={(event) => onChange({ ...value, method: event.target.value })} />
     </div>
     {value.method === "efectivo" ? (
       registers.sessions.length === 0 ? (

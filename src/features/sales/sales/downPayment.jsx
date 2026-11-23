@@ -1,14 +1,11 @@
 import Field from "../../../components/forms/Field/Field";
-import Select from "../../../components/forms/Select/Select";
 import { formatCurrency } from "../../../utils/money";
 import { sanitizeDecimal } from "../../../utils/validators";
 import InstallmentsEditor from "./InstallmentsEditor";
-import { FINANCED_METHODS, PAYMENT_METHODS } from "./useSales";
+import PaymentMethodSelect from "./PaymentMethodSelect";
 
 const cents = (value) => Math.round(Number(value || 0) * 100);
 const pesos = (value) => value / 100;
-// La cuota inicial no se paga con una financiera (Fase 34)
-const DOWN_METHODS = PAYMENT_METHODS.filter((method) => method.value !== "credito" && !FINANCED_METHODS.includes(method.value));
 
 /** Cuota inicial de lo fiado (Fase 19.3): lo que el cliente paga hoy y con qué medio. */
 export const emptyDown = () => ({ method: "efectivo", amount: "", received: "", reference: "" });
@@ -80,7 +77,8 @@ export const CreditPanel = ({ customer, overLimit, credit, showDown = true, down
           <span className="credit-panel__step-number">1</span> Cuota inicial <span className="credit-panel__step-hint">lo que paga hoy (opcional)</span>
         </p>
         <div className="credit-panel__row">
-          <Select label="Medio" options={DOWN_METHODS} value={down.method} onChange={(event) => onDownChange({ ...down, method: event.target.value, received: "", reference: "" })} />
+          {/* La cuota inicial no se paga con una financiera (Fase 34); los medios, los configurados (Fase 40) */}
+          <PaymentMethodSelect use="pay" label="Medio" value={down.method} onChange={(event) => onDownChange({ ...down, method: event.target.value, received: "", reference: "" })} />
           <Field
             label="Valor"
             inputMode="decimal"

@@ -1,0 +1,81 @@
+/* Medios de pago (Fase 40): Configuración → Medios de pago */
+.pay-methods {
+  display: grid;
+  gap: 16px;
+}
+
+.pay-methods__note {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.pay-methods__new {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.pay-methods__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pay-methods__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.pay-methods__row--off {
+  opacity: 0.65;
+}
+
+.pay-methods__info {
+  display: grid;
+  flex: 1 1 240px;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pay-methods__name {
+  font-size: 0.98rem;
+  color: var(--color-text);
+}
+
+.pay-methods__meta {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.pay-methods__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.pay-methods__rename {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: end;
+}
+
+@media (max-width: 640px) {
+  .pay-methods__new,
+  .pay-methods__rename {
+    grid-template-columns: 1fr;
+  }
+}

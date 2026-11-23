@@ -16,7 +16,8 @@ import { emptyPlan, planPayload, planProblems } from "../sales/InstallmentsEdito
 import { CreditPanel, buildPayments, creditAccess, downProblems, emptyDown } from "../sales/downPayment";
 import useOpenRegisters, { pickSession, rememberSession, sessionOptions } from "../sales/useOpenRegisters";
 import { useReservedQuantities } from "../../saleOrders/useSaleOrders";
-import useSales, { FINANCED_METHODS, FINANCED_PROBLEM, PAYMENT_METHODS, newSaleKey } from "../sales/useSales";
+import useSales, { FINANCED_METHODS, FINANCED_PROBLEM, newSaleKey } from "../sales/useSales";
+import { usePaymentMethods } from "../sales/paymentMethods";
 import { unwrap } from "../../../utils/apiResponse";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { formatCurrency } from "../../../utils/money";
@@ -215,7 +216,9 @@ const PosPage = () => {
   const customer = customers.find((item) => String(item.id) === customerId) ?? null;
   // Con cupo, o sin cupo con «Fiar sin cupo» (19.3)
   const { canCredit, overLimit, problem: creditProblem } = creditAccess(customer, can("sales.credit-override"));
-  const methods = PAYMENT_METHODS.filter((method) => method.value !== "credito" || canCredit);
+  // Fase 40: los medios configurados (Efectivo, los activos y Crédito)
+  const { saleMethods } = usePaymentMethods();
+  const methods = saleMethods.filter((method) => method.value !== "credito" || canCredit);
 
   const updatePayment = (key, changes) => setPayments((current) => current.map((payment) => (payment.key === key ? { ...payment, ...changes } : payment)));
   // Al pasar de uno a varios medios, el primero conserva el total para que se reparta a mano

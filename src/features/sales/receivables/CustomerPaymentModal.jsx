@@ -9,7 +9,8 @@ import getErrorMessage from "../../../utils/getErrorMessage";
 import { formatCurrency } from "../../../utils/money";
 import { formatDay } from "../../purchases/orders/orderOptions";
 import { sanitizeDecimal } from "../../../utils/validators";
-import { PAYMENT_METHODS, newPaymentKey } from "./useReceivables";
+import { newPaymentKey } from "./useReceivables";
+import PaymentMethodSelect from "../sales/PaymentMethodSelect";
 import { pickSession, rememberSession, sessionOptions } from "../sales/useOpenRegisters";
 import "../../purchases/orders/paymentModals.css";
 import "./receivables.css";
@@ -118,7 +119,7 @@ const PaymentForm = ({ target, registers, busy, onCancel, onSubmit }) => {
             },
           })}
         />
-        <Select label="Medio de pago" required options={PAYMENT_METHODS} {...register("method")} />
+        <PaymentMethodSelect use="pay" label="Medio de pago" required {...register("method")} />
       </div>
 
       {method === "efectivo" ? (

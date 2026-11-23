@@ -6,7 +6,8 @@ import Select from "../../../components/forms/Select/Select";
 import Modal from "../../../components/feadback/Modal/Modal";
 import { FormActions } from "../../../components/forms/FormLayout/FormLayout";
 import { pickSession, rememberSession, sessionOptions } from "../../sales/sales/useOpenRegisters";
-import { FINANCED_METHODS, FINANCED_PROBLEM, PAYMENT_METHODS, newSaleKey } from "../../sales/sales/useSales";
+import { FINANCED_METHODS, FINANCED_PROBLEM, newSaleKey } from "../../sales/sales/useSales";
+import { usePaymentMethods } from "../../sales/sales/paymentMethods";
 import { emptyPlan, planPayload, planProblems } from "../../sales/sales/InstallmentsEditor";
 import { CreditPanel, buildPayments, creditAccess, downProblems, emptyDown } from "../../sales/sales/downPayment";
 import usePermissions from "../../auth/usePermissions";
@@ -52,7 +53,9 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
 
   const customer = customers.find((item) => String(item.id) === customerId) ?? null;
   const { canCredit, overLimit, problem: creditProblem } = creditAccess(customer, can("sales.credit-override"));
-  const methods = PAYMENT_METHODS.filter((method) => method.value !== "credito" || canCredit);
+  // Fase 40: los medios configurados (Efectivo, los activos y Crédito)
+  const { saleMethods } = usePaymentMethods();
+  const methods = saleMethods.filter((method) => method.value !== "credito" || canCredit);
 
   const updatePayment = (key, changes) => setPayments((current) => current.map((payment) => (payment.key === key ? { ...payment, ...changes } : payment)));
   const addPayment = () => setPayments([...effectivePayments, emptyPayment("transferencia", pending > 0 ? String(pesos(pending)) : "")]);

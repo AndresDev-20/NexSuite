@@ -574,7 +574,8 @@
 
 .cash-bills {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  /* Cada grupo necesita espacio para «$ 100.000 · cantidad · $ 9.900.000»; si no cabe, uno debajo del otro */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
 }
 
@@ -601,20 +602,23 @@
 
 .cash-bills__row {
   display: grid;
-  grid-template-columns: 1fr 72px 1fr;
-  gap: 8px;
+  /* Valor a su ancho, cantidad fija y el subtotal con el resto (nunca se sale del recuadro) */
+  grid-template-columns: 70px 48px minmax(0, 1fr);
+  gap: 6px;
   align-items: center;
   font-size: 0.88rem;
 }
 
 .cash-bills__value {
+  font-size: 0.82rem;
   font-weight: 600;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
 .cash-bills__count {
   width: 100%;
-  padding: 6px 8px;
+  padding: 6px 4px;
   font: inherit;
   font-weight: 600;
   text-align: center;
@@ -631,8 +635,12 @@
 }
 
 .cash-bills__subtotal {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
   text-align: right;
+  text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--color-text-muted);
 }

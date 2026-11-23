@@ -12,6 +12,7 @@ import { formatDateTime } from "../../administration/audit/auditOptions";
 import { PERIODS, periodRange } from "../../sales/reports/useSalesReport";
 // Nombres de todos los medios de una venta (incluye Sistecrédito, Addi y Alocrédito, Fase 34)
 import { getMethodLabel } from "../../sales/sales/useSales";
+import { usePaymentMethods } from "../../sales/sales/paymentMethods";
 import { AnimatedNumber } from "../../dashboard/charts";
 import { useCashRegisters } from "../useCash";
 import { unwrap } from "../../../utils/apiResponse";
@@ -24,15 +25,6 @@ import "../../sales/ReportsPage/reportsPage.css";
 import "../cash.css";
 
 const PAGE_SIZE = 50;
-const METHODS = [
-  { value: "tarjeta", label: "Tarjeta" },
-  { value: "nequi", label: "Nequi" },
-  { value: "daviplata", label: "Daviplata" },
-  { value: "transferencia", label: "Transferencia" },
-  { value: "sistecredito", label: "Sistecrédito" },
-  { value: "addi", label: "Addi" },
-  { value: "alocredito", label: "Alocrédito" },
-];
 
 const normalize = (data) => ({
   total: toNumber(data.total),
@@ -112,6 +104,8 @@ const columns = [
 const PaymentsPage = () => {
   const today = todayInColombia();
   const { data, loading, error, getPayments } = usePayments();
+  // Fase 40: los medios configurados que no pasan por la caja
+  const { outsideMethods } = usePaymentMethods();
   const { registers, getRegisters } = useCashRegisters();
   const { status: branchStatus, hasBranches, activeBranchId, activeBranch } = useActiveBranch();
   const [range, setRange] = useState(() => periodRange("hoy", today));
@@ -209,7 +203,7 @@ const PaymentsPage = () => {
         <div>
           <h1 className="list-page__title">Pagos por medio</h1>
           <p className="list-page__subtitle">
-            Tarjeta, Nequi, Daviplata, transferencia, Sistecrédito, Addi y Alocrédito{activeBranch ? ` en ${activeBranch.name}` : ""}: no entran a la caja, se cuadran con el banco.
+            Tarjetas, transferencias, billeteras y financieras{activeBranch ? ` en ${activeBranch.name}` : ""}: no entran a la caja, se cuadran con el banco.
           </p>
         </div>
       </header>
@@ -232,7 +226,7 @@ const PaymentsPage = () => {
           <Select
             label="Medio"
             placeholder="Todos"
-            options={METHODS}
+            options={outsideMethods}
             value={method}
             onChange={(event) => {
               setMethod(event.target.value);

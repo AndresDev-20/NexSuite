@@ -4,30 +4,17 @@ import { unwrap } from "../../../utils/apiResponse";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { toNumber } from "../../../utils/money";
 import { getFullName } from "../../../utils/userDisplay";
+import { paymentLabel } from "./paymentMethods";
 
 const SALES_PATH = "/sales";
-
-/** Medios de pago (mismos del servidor). "credito" es la parte fiada al cliente. */
-export const PAYMENT_METHODS = [
-  { value: "efectivo", label: "Efectivo" },
-  { value: "transferencia", label: "Transferencia" },
-  { value: "nequi", label: "Nequi" },
-  { value: "daviplata", label: "Daviplata" },
-  { value: "tarjeta", label: "Tarjeta" },
-  // Fase 34: financieras; como la tarjeta, el dinero lo consignan después (solo al vender)
-  { value: "sistecredito", label: "Sistecrédito" },
-  { value: "addi", label: "Addi" },
-  { value: "alocredito", label: "Alocrédito" },
-  { value: "credito", label: "Crédito (fiado)" },
-];
 
 /** Sistecrédito, Addi y Alocrédito (Fase 34): no se combinan con una venta fiada. */
 export const FINANCED_METHODS = ["sistecredito", "addi", "alocredito"];
 export const FINANCED_PROBLEM = "Sistecrédito, Addi y Alocrédito no se combinan con una venta fiada.";
 
+// Fase 40: los nombres salen de Configuración → Medios de pago (también «Bancolombia» y los que cree el negocio);
 // «apartado» (Fase 30): la venta que entrega un apartado, pagada con sus abonos
-const METHOD_LABELS = { ...Object.fromEntries(PAYMENT_METHODS.map((method) => [method.value, method.label])), apartado: "Abonos del apartado" };
-export const getMethodLabel = (value) => METHOD_LABELS[value] ?? value;
+export const getMethodLabel = (value) => paymentLabel(value);
 
 /** Clave única de una venta: la misma venta enviada dos veces se registra una sola vez. */
 export const newSaleKey = () =>

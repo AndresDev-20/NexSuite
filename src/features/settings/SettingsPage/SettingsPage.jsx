@@ -3,6 +3,7 @@ import Icon from "../../../components/ui/Icon/Icon";
 import useToast from "../../../components/feadback/Toast/useToast";
 import usePermissions from "../../auth/usePermissions";
 import BusinessSettings from "../BusinessSettings";
+import PaymentMethodsSettings from "../PaymentMethodsSettings";
 import StorageArchive from "../StorageArchive";
 import { DEFAULT_PREFERENCES, resetPreferences, savePreferences, usePreferences } from "../preferences";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -308,6 +309,12 @@ const SettingsPage = () => {
       {can("settings.manage") && (
         <Section icon="store" title="Datos del negocio" subtitle="Para todos: salen en los comprobantes y documentos del sistema." index={7}>
           <BusinessSettings />
+        </Section>
+      )}
+
+      {can("payment-methods.manage") && (
+        <Section icon="wallet" title="Medios de pago" subtitle="Para todos: crea los tuyos (Bancolombia…) y oculta los que no usas." index={8}>
+          <PaymentMethodsSettings />
         </Section>
       )}
     </section>

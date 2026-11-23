@@ -7,7 +7,7 @@ import { FormActions, FormLayout } from "../../../components/forms/FormLayout/Fo
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { formatCurrency } from "../../../utils/money";
 import { sanitizeDecimal } from "../../../utils/validators";
-import { PAYMENT_METHODS } from "../receivables/useReceivables";
+import PaymentMethodSelect from "../sales/PaymentMethodSelect";
 import { createLayaway, daysFromToday, formatLongDay, newLayawayKey } from "./layawayApi";
 import "./layaways.css";
 
@@ -105,7 +105,7 @@ const LayawayForm = ({ cart, session, sellerId, customers, initialCustomerId, on
           value={values.amount}
           onChange={(event) => set({ amount: event.target.value })}
         />
-        <Select label="Medio" required options={PAYMENT_METHODS} value={values.method} onChange={(event) => set({ method: event.target.value })} />
+        <PaymentMethodSelect use="pay" label="Medio" required value={values.method} onChange={(event) => set({ method: event.target.value })} />
       </div>
       {values.method === "efectivo" ? (
         <p className="layaway-note">

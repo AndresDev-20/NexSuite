@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import { paymentLabel } from "../sales/paymentMethods";
 import api from "../../../api/client";
 import { unwrap } from "../../../utils/apiResponse";
 import getErrorMessage from "../../../utils/getErrorMessage";
@@ -8,17 +9,8 @@ const RECEIVABLES_PATH = "/receivables";
 
 const EMPTY = { items: [], total: 0, page: 1, pages: 1 };
 
-/** Medios de un abono (mismos del servidor): un abono no se fía. */
-export const PAYMENT_METHODS = [
-  { value: "efectivo", label: "Efectivo" },
-  { value: "transferencia", label: "Transferencia" },
-  { value: "nequi", label: "Nequi" },
-  { value: "daviplata", label: "Daviplata" },
-  { value: "tarjeta", label: "Tarjeta" },
-];
-
-const METHOD_LABELS = Object.fromEntries(PAYMENT_METHODS.map((method) => [method.value, method.label]));
-export const getMethodLabel = (value) => METHOD_LABELS[value] ?? value;
+// Fase 40: los nombres salen de Configuración → Medios de pago
+export const getMethodLabel = (value) => paymentLabel(value);
 
 /** Clave única de un abono: el mismo abono enviado dos veces se registra una sola vez. */
 export const newPaymentKey = () =>

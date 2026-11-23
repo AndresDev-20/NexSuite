@@ -12,6 +12,16 @@ import { SeasonScene } from "../features/seasons/SeasonScene";
 import { getUser } from "../utils/session";
 import { getShortName } from "../utils/userDisplay";
 import "./mainLayout.css";
+import { useEffect } from "react";
+import { loadPaymentMethods } from "../features/sales/sales/paymentMethods";
+
+/** Medios de pago configurados (Fase 40): se piden al entrar para que los nombres salgan bien en todo el sistema. */
+const LoadPaymentMethods = () => {
+  useEffect(() => {
+    loadPaymentMethods();
+  }, []);
+  return null;
+};
 
 const MainLayout = () => (
   <ToastProvider>
@@ -34,6 +44,7 @@ const MainLayout = () => (
             </Suspense>
           </main>
         </div>  
+        <LoadPaymentMethods />
         <DemoBadge />
         <WelcomeGreeting mode="system" name={getShortName(getUser()) || ""} />
       </div>
