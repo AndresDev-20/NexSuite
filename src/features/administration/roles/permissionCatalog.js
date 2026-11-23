@@ -137,6 +137,11 @@ export const PERMISSION_CATALOG = [
         description: "Contar o dejar de vender en cualquier caja de sus sucursales, abrir a mano una caja que abre sola y registrar ingresos y retiros de la caja.",
       },
       {
+        code: "cash-sessions.resume",
+        label: "Volver a vender un turno por contar",
+        description: "Poner a vender otra vez una caja de hoy que quedó por contar (por la hora de cierre o porque dejó de vender). Es el mismo turno y luego se cierra a mano.",
+      },
+      {
         code: "cash-sessions.receive",
         label: "Recibir el dinero de las cajas",
         description: "Confirmar cuánto le entregaron al contar una caja (lo que sobra después de dejar la base del día siguiente).",

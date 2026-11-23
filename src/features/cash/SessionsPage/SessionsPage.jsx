@@ -11,11 +11,12 @@ import NoBranchesMessage from "../../../features/branches/NoBranchesMessage";
 import useActiveBranch from "../../../features/branches/useActiveBranch";
 import { formatDateTime } from "../../../features/administration/audit/auditOptions";
 import SessionView from "../../../features/cash/sessions/SessionView";
+import ResumeSalesDialog from "../../../features/cash/sessions/ResumeSalesDialog";
 import PrintClosingButton from "../PrintClosingButton";
 import CloseSessionModal from "../../../features/cash/sessions/CloseSessionModal";
 import ReceiveHandoverModal from "../../../features/cash/sessions/ReceiveHandoverModal";
 import ReopenSessionModal from "../../../features/cash/sessions/ReopenSessionModal";
-import { useCashSessions } from "../../../features/cash/useCash";
+import { openedToday, useCashSessions } from "../../../features/cash/useCash";
 import usePermissions from "../../../features/auth/usePermissions";
 import useToast from "../../../components/feadback/Toast/useToast";
 import { getUser } from "../../../utils/session";
@@ -93,13 +94,14 @@ const columns = [
 ];
 
 const SessionsPage = () => {
-  const { items, total, page, pages, loading, error, getSessions, getSession, closeSession, stopSales, receiveHandover, reopenSession } = useCashSessions();
+  const { items, total, page, pages, loading, error, getSessions, getSession, closeSession, stopSales, receiveHandover, reopenSession, resumeSession } = useCashSessions();
   const { can } = usePermissions();
   const toast = useToast();
   const currentUserId = getUser()?.id;
   const [closing, setClosing] = useState(null); // turno que se está contando
   const [receiving, setReceiving] = useState(null); // turno cuyo dinero se recibe
   const [reopening, setReopening] = useState(null); // turno contado que se reabre (12.2)
+  const [resuming, setResuming] = useState(null); // turno por contar que vuelve a vender (Fase 37)
 
   // Contar: el propio quien opera caja; el de la caja (sin dueño) ya por contar, quien opera caja;
   // cualquiera, quien tiene "Cerrar turnos de otros" (el servidor también lo exige)
@@ -108,6 +110,8 @@ const SessionsPage = () => {
     (can("cash-sessions.close-any") ||
       (can("cash-sessions.operate") && (session.userId === currentUserId || (session.userId === null && session.status === "por_contar"))));
   const canStop = (session) => session.status === "abierta" && can("cash-sessions.close-any");
+  // Fase 37: por contar, de hoy y con «Volver a vender un turno por contar»
+  const canResume = (session) => session.status === "por_contar" && can("cash-sessions.resume") && openedToday(session);
   const canReceive = (session) => session.status === "cerrada" && session.handoverAmount > 0 && !session.receivedAt && can("cash-sessions.receive");
   // Reabrir (12.2): contado y sin recibir la entrega; si no había nada que entregar, el servidor revisa
   // que su caja no haya abierto otro turno
@@ -179,6 +183,14 @@ const SessionsPage = () => {
     setReceiving(null);
     if (detail.session?.id === updated.id) setDetail({ open: true, session: updated, loading: false, error: "" });
     toast.success(`Recibiste ${formatCurrency(updated.receivedAmount)} de ${updated.registerName}.`);
+    getSessions(params);
+  };
+
+  const handleResume = async () => {
+    const updated = await resumeSession(resuming.id);
+    setResuming(null);
+    if (detail.session?.id === updated.id) setDetail({ open: true, session: updated, loading: false, error: "" });
+    toast.success(`${updated.registerName} vuelve a vender.`);
     getSessions(params);
   };
 
@@ -277,10 +289,15 @@ const SessionsPage = () => {
           <SessionView
             session={detail.session}
             actions={
-              (canClose(detail.session) || canStop(detail.session) || canReceive(detail.session) || canReopen(detail.session) || detail.session.status === "cerrada") && (
+              (canClose(detail.session) || canStop(detail.session) || canReceive(detail.session) || canReopen(detail.session) || canResume(detail.session) || detail.session.status === "cerrada") && (
                 <div className="my-cash__actions">
                   {/* Fase 35: la tirilla del cuadre de un turno contado */}
                   {detail.session.status === "cerrada" && <PrintClosingButton sessionId={detail.session.id} />}
+                  {canResume(detail.session) && (
+                    <Button variant="outline" icon="refresh" onClick={() => setResuming(detail.session)}>
+                      Volver a vender
+                    </Button>
+                  )}
                   {canStop(detail.session) && (
                     <Button variant="outline" icon="lock" onClick={() => handleStop(detail.session)}>
                       Dejar de vender
@@ -311,6 +328,7 @@ const SessionsPage = () => {
       <CloseSessionModal session={closing} base={closing?.registerBase ?? null} onClose={() => setClosing(null)} onSubmit={handleClose} />
       <ReceiveHandoverModal session={receiving} onClose={() => setReceiving(null)} onSubmit={handleReceive} />
       <ReopenSessionModal session={reopening} onClose={() => setReopening(null)} onSubmit={handleReopen} />
+      <ResumeSalesDialog session={resuming} onClose={() => setResuming(null)} onConfirm={handleResume} />
     </section>
   );
 };

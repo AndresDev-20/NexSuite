@@ -10,6 +10,12 @@ import { sanitizeDecimal } from "../../../utils/validators";
 
 const toCents = (value) => Math.round(Number(value) * 100);
 
+// Fase 38: billetes y monedas de Colombia (los mismos del servidor)
+const BILLS = [100000, 50000, 20000, 10000, 5000, 2000];
+const COINS = [1000, 500, 200, 100, 50];
+const countOf = (counts, value) => Number(counts[value]) || 0;
+const sumOf = (counts) => [...BILLS, ...COINS].reduce((total, value) => total + value * countOf(counts, value), 0);
+
 /** "Cuadra", "Sobran $…" o "Faltan $…" según lo contado frente a lo esperado (null si no hay conteo). */
 const differenceText = (counted, expected) => {
   if (counted === "" || !Number.isFinite(Number(counted))) return null;
@@ -36,8 +42,24 @@ const CloseForm = ({ session, base, busy, onCancel, onSubmit }) => {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({ defaultValues: { countedamount: "", closingnotes: "" } });
+
+  // Fase 38: contar por billetes y monedas (opcional); la suma llena «Efectivo contado»
+  const [byBills, setByBills] = useState(false);
+  const [counts, setCounts] = useState({});
+  const setCount = (value, raw) => {
+    const next = { ...counts, [value]: raw.replace(/\D/g, "").slice(0, 6) };
+    setCounts(next);
+    setValue("countedamount", String(sumOf(next)), { shouldValidate: true });
+  };
+  const toggleBills = () => {
+    const next = !byBills;
+    setByBills(next);
+    setCounts({});
+    setValue("countedamount", next ? "0" : "", { shouldValidate: false });
+  };
 
   const counted = watch("countedamount");
   const result = blind ? null : differenceText(counted, expected);
@@ -47,7 +69,14 @@ const CloseForm = ({ session, base, busy, onCancel, onSubmit }) => {
     setServerError("");
     const notes = values.closingnotes.trim();
     try {
-      await onSubmit({ countedamount: Number(values.countedamount), ...(notes && { closingnotes: notes }) });
+      const denominations = byBills
+        ? [...BILLS, ...COINS].filter((value) => countOf(counts, value) > 0).map((value) => ({ value, count: countOf(counts, value) }))
+        : null;
+      await onSubmit({
+        countedamount: Number(values.countedamount),
+        ...(denominations && { denominations }),
+        ...(notes && { closingnotes: notes }),
+      });
     } catch (error) {
       setServerError(getErrorMessage(error, "No se pudo cerrar el turno. Inténtalo de nuevo."));
     }
@@ -67,8 +96,41 @@ const CloseForm = ({ session, base, busy, onCancel, onSubmit }) => {
           {formatCurrency(session.totals.withdrawals)}).
         </p>
       )}
+      <div className="cash-bills__toggle">
+        <Button variant="outline" icon={byBills ? "edit" : "wallet"} onClick={toggleBills} disabled={busy}>
+          {byBills ? "Escribir el total" : "Contar por billetes y monedas"}
+        </Button>
+      </div>
+      {byBills && (
+        <div className="cash-bills">
+          {[
+            ["Billetes", BILLS],
+            ["Monedas", COINS],
+          ].map(([title, values]) => (
+            <fieldset className="cash-bills__group" key={title}>
+              <legend>{title}</legend>
+              {values.map((value) => (
+                <label className="cash-bills__row" key={value}>
+                  <span className="cash-bills__value">{formatCurrency(value)}</span>
+                  <input
+                    className="cash-bills__count"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder="0"
+                    aria-label={`Cuántos de ${formatCurrency(value)}`}
+                    value={counts[value] ?? ""}
+                    onChange={(event) => setCount(value, event.target.value)}
+                  />
+                  <span className="cash-bills__subtotal">{countOf(counts, value) > 0 ? formatCurrency(value * countOf(counts, value)) : "—"}</span>
+                </label>
+              ))}
+            </fieldset>
+          ))}
+        </div>
+      )}
       <Field
-        label="Efectivo contado"
+        label={byBills ? "Efectivo contado (suma de billetes y monedas)" : "Efectivo contado"}
+        readOnly={byBills}
         required
         inputMode="decimal"
         autoComplete="off"

@@ -478,6 +478,8 @@ Ojo: en la tarjeta del pedido en la lista de «Pedidos por cobrar» y en «Mis p
 - [ ] Con el turno todavía vendiendo no deja imprimir el cuadre (primero se cuenta).
 - [ ] La sección **TOTALES** sigue la cascada de tu tirilla anterior: venta neta − electrónicos − crédito = saldo efectivo, − gastos, − proveedores (día), + abonos = **Efectivo disponible**; efectivo final (contado); costo real, % y $ utilidad.
 - [ ] Las cifras de TOTALES cuadran con un día real que conozcas.
+- [ ] Las tirillas terminan con «Facturado por NEXOON».
+- [ ] La tirilla que se imprime al contar la caja **no** trae costo, % ni utilidad; después de que el administrador da «Recibir», al reimprimirla desde Caja → Turnos sí los trae.
 
 ## 14.20 Precio de compra al vender, paginación y orden de productos (Fase 36)
 
@@ -486,6 +488,20 @@ Ojo: en la tarjeta del pedido en la lista de «Pedidos por cobrar» y en «Mis p
 - [ ] Un vendedor **sin** «Ver costos» no ve el precio de compra en ningún lado.
 - [ ] **Productos** muestra 50 por página con «Anterior / Siguiente» y el total.
 - [ ] «Ordenar»: Nombre A→Z, Z→A, primero el más antiguo y primero el más reciente; al buscar o filtrar vuelve a la página 1.
+
+## 14.21 Volver a vender un turno por contar (Fase 37)
+
+- [ ] Una caja de hoy que quedó «por contar» tiene «Volver a vender» (Mi caja de hoy y Caja → Turnos); al confirmarlo vuelve a «Vendiendo» con lo vendido antes.
+- [ ] Pasada su hora de cierre, el reloj ya no la detiene: se cierra con «Contar y cerrar ya», y la tirilla trae todo el turno.
+- [ ] Un turno de ayer por contar no deja volver a vender; si la caja ya tiene otro turno vendiendo, tampoco.
+- [ ] En Roles aparece «Volver a vender un turno por contar», marcado en todos los roles; al quitárselo a uno, ese rol ya no ve el botón.
+
+## 14.22 Conteo por denominaciones (Fase 38)
+
+- [ ] En «Contar la caja», «Contar por billetes y monedas» abre la tabla; al escribir cuántos hay de cada valor sale el subtotal y el total llena «Efectivo contado».
+- [ ] «Escribir el total» vuelve a escribir el total a mano (sin detalle).
+- [ ] Al guardar, la tirilla del cuadre trae «CONTEO POR DENOMINACIÓN» y el detalle del turno (Caja → Turnos) lo muestra.
+- [ ] Al reabrir el conteo, el detalle anterior se borra (queda en la auditoría).
 
 ## 15. Producción (cuando montes el VPS)
 

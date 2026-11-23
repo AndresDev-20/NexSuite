@@ -11,7 +11,8 @@ import NoBranchesMessage from "../../../features/branches/NoBranchesMessage";
 import useActiveBranch from "../../../features/branches/useActiveBranch";
 import CashMovementModal from "../../../features/cash/sessions/CashMovementModal";
 import CloseSessionModal from "../../../features/cash/sessions/CloseSessionModal";
-import { useCashRegisters, useMyCash, useTodayCash } from "../../../features/cash/useCash";
+import ResumeSalesDialog from "../../../features/cash/sessions/ResumeSalesDialog";
+import { openedToday, useCashRegisters, useMyCash, useTodayCash } from "../../../features/cash/useCash";
 import usePermissions from "../../../features/auth/usePermissions";
 import { getUser } from "../../../utils/session";
 import getErrorMessage from "../../../utils/getErrorMessage";
@@ -97,7 +98,7 @@ const OpenSessionForm = ({ registers, onOpen }) => {
 };
 
 /** Una caja de hoy: si está vendiendo o por contar, desde cuándo y (con permiso) cuánto debería haber. */
-const TodayCard = ({ session, index = 0, canCount, canMove, onCount, onMovement }) => {
+const TodayCard = ({ session, index = 0, canCount, canMove, canResume, onCount, onMovement, onResume }) => {
   const selling = session.status === "abierta";
   return (
     <article className={`today-cash ${selling ? "today-cash--open" : "today-cash--pending"}`} style={{ "--i": Math.min(index, 8) }}>
@@ -119,7 +120,10 @@ const TodayCard = ({ session, index = 0, canCount, canMove, onCount, onMovement 
 
       {selling ? (
         <p className="today-cash__note">
-          {session.registerCloseTime ? `A las ${session.registerCloseTime} deja de vender` : "Cuando deje de vender"}; después se cuenta el efectivo.
+          {/* Fase 37: un turno que volvió a vender ya no se detiene a su hora */}
+          {session.salesResumedAt
+            ? `Volvió a vender a las ${timeOf(session.salesResumedAt)}: ya no se detiene sola; cuando terminen, cuenta con «Contar y cerrar ya».`
+            : `${session.registerCloseTime ? `A las ${session.registerCloseTime} deja de vender` : "Cuando deje de vender"}; después se cuenta el efectivo.`}
         </p>
       ) : (
         <p className="today-cash__note today-cash__note--pending">
@@ -145,8 +149,14 @@ const TodayCard = ({ session, index = 0, canCount, canMove, onCount, onMovement 
         </dl>
       )}
 
-      {(canCount || canMove) && (
+      {(canCount || canMove || canResume) && (
         <div className="my-cash__actions">
+          {/* Fase 37: un turno por contar de hoy vuelve a vender */}
+          {canResume && (
+            <Button variant="outline" icon="refresh" onClick={() => onResume(session)}>
+              Volver a vender
+            </Button>
+          )}
           {canMove && (
             <>
               <Button variant="outline" icon="plus" onClick={() => onMovement(session, "ingreso")}>
@@ -170,7 +180,7 @@ const TodayCard = ({ session, index = 0, canCount, canMove, onCount, onMovement 
 };
 
 const MyCashPage = () => {
-  const { sessions, loading, error, getToday, countSession } = useTodayCash();
+  const { sessions, loading, error, getToday, countSession, resumeSession } = useTodayCash();
   const { openSession, addMovement } = useMyCash();
   const { registers, getRegisters } = useCashRegisters();
   const { status: branchStatus, hasBranches, activeBranchId } = useActiveBranch();
@@ -180,6 +190,7 @@ const MyCashPage = () => {
   const canReadRegisters = can("cash-registers.read");
   const canCloseAny = can("cash-sessions.close-any");
   const [counting, setCounting] = useState(null);
+  const [resuming, setResuming] = useState(null);
   const [movement, setMovement] = useState(null); // { session, type }
   const [lastCount, setLastCount] = useState(null);
 
@@ -206,6 +217,8 @@ const MyCashPage = () => {
   const canCount = (session) => canCloseAny || session.userId === me || (session.userId === null && session.status === "por_contar");
   // A la mitad del día (aún vendiendo) solo cierra antes de hora su dueño o un administrador
   const canCountNow = (session) => (session.status === "abierta" ? canCloseAny || session.userId === me : canCount(session));
+  // Fase 37: por contar, de hoy y con «Volver a vender un turno por contar»
+  const canResume = (session) => session.status === "por_contar" && can("cash-sessions.resume") && openedToday(session);
   const canMove = (session) => session.status === "abierta" && (session.userId ? session.userId === me : canCloseAny);
 
   const refresh = () => {
@@ -265,7 +278,9 @@ const MyCashPage = () => {
             session={session}
             canCount={canCountNow(session)}
             canMove={canMove(session)}
+            canResume={canResume(session)}
             onCount={setCounting}
+            onResume={setResuming}
             onMovement={(target, type) => setMovement({ session: target, type })}
           />
         ))}
@@ -334,6 +349,17 @@ const MyCashPage = () => {
       />
 
       <CloseSessionModal session={counting} base={counting?.registerBase ?? null} onClose={() => setCounting(null)} onSubmit={handleCount} />
+      <ResumeSalesDialog
+        session={resuming}
+        onClose={() => setResuming(null)}
+        onConfirm={async () => {
+          const message = await resumeSession(resuming.id);
+          setResuming(null);
+          // La caja vuelve a estar ocupada: ya no se ofrece para abrir a mano
+          if (canReadRegisters) getRegisters();
+          toast.success(message ?? "La caja vuelve a vender.");
+        }}
+      />
 
     </section>
   );

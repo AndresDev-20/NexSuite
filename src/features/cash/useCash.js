@@ -45,6 +45,10 @@ const normalizeTotals = (totals = {}) => ({
   expected: toNumber(totals.expected),
 });
 
+/** ¿El turno abrió hoy (hora de Colombia)? Solo esos vuelven a vender (Fase 37; el servidor también lo revisa). */
+const colombiaDay = (value) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota" }).format(new Date(value));
+export const openedToday = (session) => Boolean(session?.openedAt) && colombiaDay(session.openedAt) === colombiaDay(new Date());
+
 export const normalizeSession = (session) => ({
   id: session.id,
   status: session.status,
@@ -61,9 +65,13 @@ export const normalizeSession = (session) => ({
   openedAt: session.openedat,
   closedAt: session.closedat ?? null,
   salesClosedAt: session.salesclosedat ?? null,
+  // Fase 37: volvió a vender después de quedar por contar (se cierra a mano)
+  salesResumedAt: session.salesresumedat ?? null,
   // Cierre (null mientras está abierto): esperado, contado, diferencia (+ sobrante, − faltante)
   expectedAmount: session.expectedamount != null ? toNumber(session.expectedamount) : null,
   countedAmount: session.countedamount != null ? toNumber(session.countedamount) : null,
+  // Fase 38: el conteo billete por billete, si se contó así ([{ value, count }])
+  countDenominations: Array.isArray(session.countdenominations) ? session.countdenominations : [],
   difference: session.difference != null ? toNumber(session.difference) : null,
   closingNotes: session.closingnotes ?? "",
   closedByName: session.closer ? getFullName(session.closer) : "",
@@ -208,7 +216,17 @@ export const useTodayCash = () => {
     [getToday]
   );
 
-  return { sessions, loading, error, getToday, countSession };
+  /** Volver a vender un turno por contar de hoy (Fase 37). Devuelve el mensaje del servidor. */
+  const resumeSession = useCallback(
+    async (id) => {
+      const { data } = await api.post(`${SESSIONS_PATH}/${id}/resume`);
+      await getToday({ silent: true });
+      return data.message;
+    },
+    [getToday]
+  );
+
+  return { sessions, loading, error, getToday, countSession, resumeSession };
 };
 
 /** Mi turno abierto (null si no tengo) y sus acciones. */
@@ -303,5 +321,8 @@ export const useCashSessions = () => {
     []
   );
 
-  return { ...result, loading, error, getSessions, getSession, closeSession, stopSales, receiveHandover, reopenSession };
+  /** Volver a vender un turno por contar de hoy (Fase 37). Devuelve el turno. */
+  const resumeSession = useCallback(async (id) => normalizeSession(unwrap(await api.post(`${SESSIONS_PATH}/${id}/resume`))), []);
+
+  return { ...result, loading, error, getSessions, getSession, closeSession, stopSales, receiveHandover, reopenSession, resumeSession };
 };

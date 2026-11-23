@@ -106,6 +106,22 @@ const SessionView = ({ session, actions }) => (
             )}
           </div>
         )}
+        {session.countDenominations.length > 0 && (
+          <dl className="cash-split cash-denominations">
+            {session.countDenominations.map((row) => (
+              <div key={row.value}>
+                <dt>
+                  {row.count} × {formatCurrency(row.value)} {row.value >= 2000 ? "(billete)" : "(moneda)"}
+                </dt>
+                <dd>{formatCurrency(row.value * row.count)}</dd>
+              </div>
+            ))}
+            <div className="cash-split__main">
+              <dt>Contado por billetes y monedas</dt>
+              <dd>{formatCurrency(session.countedAmount)}</dd>
+            </div>
+          </dl>
+        )}
         <p className="my-cash__since">
           Contado el {formatDateTime(session.closedAt)}
           {session.closedByName && ` por ${session.closedByName}`}
