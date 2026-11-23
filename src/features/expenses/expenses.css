@@ -1,8 +1,11 @@
 /* Gastos (Fase 13.1): lista con filtros, registrar, detalle y categorías */
 
 /* Los botones del encabezado no se parten en dos líneas */
+/* Fase 41: con «Terceros» son cuatro botones; si no caben, bajan de línea en vez de salirse */
 .expenses-actions {
-  flex-shrink: 0;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .expenses-actions .btn {
@@ -694,5 +697,23 @@
   .expense-form *::after {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* Fase 41 · Terceros de Gastos: búsqueda, estado y «Nuevo tercero» sobre la lista */
+.third-parties {
+  display: grid;
+  gap: 16px;
+}
+
+.third-parties__toolbar {
+  display: grid;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .third-parties__toolbar {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
   }
 }

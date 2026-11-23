@@ -12,7 +12,7 @@ import { EXPENSE_METHODS, getExpenseMethodLabel, useFixedExpenses } from "./useE
 import "./expenses.css";
 
 const GENERAL = "general";
-const EMPTY = { name: "", idcategory: "", idbranch: "", amount: "", dayofmonth: "", method: "", payee: "" };
+const EMPTY = { name: "", idcategory: "", idbranch: "", amount: "", dayofmonth: "", method: "", idthirdparty: "", payee: "" };
 
 const toForm = (item) => ({
   name: item.name,
@@ -21,11 +21,12 @@ const toForm = (item) => ({
   amount: String(item.amount),
   dayofmonth: String(item.dayOfMonth),
   method: item.method ?? "",
+  idthirdparty: item.thirdPartyId ? String(item.thirdPartyId) : "",
   payee: item.payee,
 });
 
 /** Crear o editar un gasto fijo (editing null = nuevo). */
-const FixedForm = ({ editing, branches, canGeneral, categories, onCancel, onSave }) => {
+const FixedForm = ({ editing, branches, canGeneral, categories, thirdParties, onCancel, onSave }) => {
   const [values, setValues] = useState(editing ? toForm(editing) : EMPTY);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -49,6 +50,8 @@ const FixedForm = ({ editing, branches, canGeneral, categories, onCancel, onSave
         amount: Number(values.amount),
         dayofmonth: day,
         ...(values.method && { method: values.method }),
+        // Fase 41: al editar se envía null para poder quitarlo
+        ...(values.idthirdparty ? { idthirdparty: Number(values.idthirdparty) } : editing && { idthirdparty: null }),
         ...(values.payee.trim() && { payee: values.payee.trim() }),
       });
     } catch (err) {
@@ -97,6 +100,21 @@ const FixedForm = ({ editing, branches, canGeneral, categories, onCancel, onSave
         />
         <Field label="A quién se le paga" maxLength={120} placeholder="Opcional" value={values.payee} onChange={(event) => set("payee", event.target.value)} />
       </div>
+      {thirdParties.length > 0 && (
+        <Select
+          label="Tercero"
+          placeholder="No es un tercero registrado"
+          // Los activos y, al editar, el que ya tenía aunque se haya desactivado
+          options={[
+            ...thirdParties.filter((item) => item.isActive).map((item) => ({ value: String(item.id), label: item.companyname })),
+            ...(editing?.thirdPartyId && !thirdParties.some((item) => item.isActive && item.id === editing.thirdPartyId)
+              ? [{ value: String(editing.thirdPartyId), label: `${editing.thirdPartyName} (inactivo)` }]
+              : []),
+          ]}
+          value={values.idthirdparty}
+          onChange={(event) => set("idthirdparty", event.target.value)}
+        />
+      )}
       {error && (
         <p className="expense-form__error" role="alert">
           {error}
@@ -120,7 +138,7 @@ const FixedForm = ({ editing, branches, canGeneral, categories, onCancel, onSave
  * Gastos fijos (con «Configurar gastos»): agregar, editar, activar o desactivar y eliminar los que
  * nunca se pagaron. onChanged: para refrescar «Por pagar este mes».
  */
-const FixedExpensesModal = ({ open, branches, canGeneral, categories, onClose, onChanged }) => {
+const FixedExpensesModal = ({ open, branches, canGeneral, categories, thirdParties = [], onClose, onChanged }) => {
   const toast = useToast();
   const { items, loading, error, getFixed, createFixed, updateFixed, deleteFixed } = useFixedExpenses();
   const [editing, setEditing] = useState(null);
@@ -166,6 +184,7 @@ const FixedExpensesModal = ({ open, branches, canGeneral, categories, onClose, o
                   <span>
                     {formatCurrency(item.amount)} · día {item.dayOfMonth} · {item.categoryName} · {item.branchName}
                     {item.method && ` · ${getExpenseMethodLabel(item.method)}`}
+                    {(item.thirdPartyName || item.payee) && ` · ${item.thirdPartyName || item.payee}`}
                   </span>
                 </div>
                 <div className="expense-category__actions">
@@ -194,6 +213,7 @@ const FixedExpensesModal = ({ open, branches, canGeneral, categories, onClose, o
           branches={branches}
           canGeneral={canGeneral}
           categories={categories}
+          thirdParties={thirdParties}
           onCancel={() => setEditing(null)}
           onSave={async (payload) => {
             const message = editing ? await updateFixed(editing.id, payload) : await createFixed(payload);

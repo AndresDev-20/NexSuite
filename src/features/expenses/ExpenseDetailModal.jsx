@@ -65,7 +65,7 @@ const ExpenseSheet = ({ id, getExpense, canCancel, onCancelExpense, onClose }) =
           {expense.registerName && ` · ${expense.registerName}`}
           {expense.reference && ` · ref. ${expense.reference}`}
         </Fact>
-        <Fact label="A quién se le pagó">{expense.supplierName || expense.payee}</Fact>
+        <Fact label="A quién se le pagó">{expense.thirdPartyName || expense.payee}</Fact>
         <Fact label="Factura o recibo">{expense.invoiceNumber}</Fact>
         <Fact label="Registró">{[expense.userName, formatDateTime(expense.createdAt)].filter(Boolean).join(" · ")}</Fact>
         {expense.status === "anulado" && (

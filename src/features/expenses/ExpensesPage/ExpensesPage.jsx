@@ -11,7 +11,6 @@ import { RowAction, RowActions } from "../../../components/tables/RowActions/Row
 import usePermissions from "../../auth/usePermissions";
 import NoBranchesMessage from "../../branches/NoBranchesMessage";
 import useActiveBranch from "../../branches/useActiveBranch";
-import useSuppliers from "../../purchases/suppliers/useSuppliers";
 import { formatDay } from "../../purchases/orders/orderOptions";
 import { PERIODS, periodRange } from "../../sales/reports/useSalesReport";
 import { AnimatedNumber } from "../../dashboard/charts";
@@ -22,6 +21,8 @@ import DueThisMonth from "../DueThisMonth";
 import FixedExpensesModal from "../FixedExpensesModal";
 import ExpenseDetailModal from "../ExpenseDetailModal";
 import ExpenseFormModal from "../ExpenseFormModal";
+import ThirdPartiesModal from "../thirdParties/ThirdPartiesModal";
+import useThirdParties from "../thirdParties/useThirdParties";
 import { EXPENSE_METHODS, getExpenseMethodLabel, useExpenseCategories, useExpenses, useFixedExpenses } from "../useExpenses";
 import "../../../styles/listPage.css";
 import "../../../styles/sheet.css";
@@ -66,7 +67,7 @@ const columns = [
     render: (expense) => (
       <div className="expense-cell">
         <span>{getExpenseMethodLabel(expense.method)}</span>
-        <span>{expense.registerName || expense.supplierName || expense.payee || " "}</span>
+        <span>{expense.registerName || expense.thirdPartyName || expense.payee || " "}</span>
       </div>
     ),
   },
@@ -86,7 +87,10 @@ const ExpensesPage = () => {
   const { items, total, page, pages, summary, loading, error, getExpenses, getExpense, createExpense, cancelExpense } = useExpenses();
   const categoriesHook = useExpenseCategories();
   const { categories, getCategories } = categoriesHook;
-  const { suppliers, getAllSuppliers } = useSuppliers();
+  // Fase 41: los terceros de Gastos (a quién se le pagan); los cambia «Configurar gastos»
+  const thirdPartiesHook = useThirdParties();
+  const { thirdParties, getThirdParties } = thirdPartiesHook;
+  const activeThirdParties = useMemo(() => thirdParties.filter((item) => item.isActive), [thirdParties]);
   const { status: branchStatus, branches, hasBranches, activeBranchId, activeBranch } = useActiveBranch();
   const { can } = usePermissions();
   const toast = useToast();
@@ -96,7 +100,6 @@ const ExpensesPage = () => {
   const canCancel = can("expenses.cancel");
   const canConfigure = can("expenses.configure");
   const canGeneral = can("branches.all-access");
-  const canReadSuppliers = can("suppliers.read");
 
   const [range, setRange] = useState(() => periodRange("mes", today));
   const [filters, setFilters] = useState({ idcategory: "", method: "", status: "vigente", scope: "" });
@@ -112,11 +115,12 @@ const ExpensesPage = () => {
   const [dueMonth, setDueMonth] = useState(today.slice(0, 7));
   const [paying, setPaying] = useState(null);
   const [configuringFixed, setConfiguringFixed] = useState(false);
+  const [managingThirdParties, setManagingThirdParties] = useState(false);
 
   useEffect(() => {
     getCategories();
-    if (canReadSuppliers) getAllSuppliers();
-  }, [getCategories, getAllSuppliers, canReadSuppliers]);
+    getThirdParties();
+  }, [getCategories, getThirdParties]);
 
   // La búsqueda espera a que se deje de escribir
   useEffect(() => {
@@ -240,6 +244,17 @@ const ExpensesPage = () => {
               <Button variant="outline" icon="bell" onClick={() => setConfiguringFixed(true)}>
                 Gastos fijos
               </Button>
+              <Button
+                variant="outline"
+                icon="users"
+                onClick={() => {
+                  // Al abrir se recarga: los conteos de gastos cambian al registrar
+                  getThirdParties({ silent: true });
+                  setManagingThirdParties(true);
+                }}
+              >
+                Terceros
+              </Button>
             </>
           )}
           {canCreate && (
@@ -329,7 +344,7 @@ const ExpensesPage = () => {
         defaultBranchId={activeBranchId}
         canGeneral={canGeneral}
         categories={categories}
-        suppliers={canReadSuppliers ? suppliers : []}
+        thirdParties={activeThirdParties}
         onClose={() => {
           setCreating(false);
           setPaying(null);
@@ -341,6 +356,7 @@ const ExpensesPage = () => {
         branches={branches}
         canGeneral={canGeneral}
         categories={categories}
+        thirdParties={thirdParties}
         onClose={() => setConfiguringFixed(false)}
         onChanged={() => getFixed(dueParams)}
       />
@@ -363,6 +379,18 @@ const ExpensesPage = () => {
         createCategory={categoriesHook.createCategory}
         updateCategory={categoriesHook.updateCategory}
         deleteCategory={categoriesHook.deleteCategory}
+      />
+      <ThirdPartiesModal
+        open={managingThirdParties}
+        thirdParties={thirdParties}
+        loading={thirdPartiesHook.loading}
+        error={thirdPartiesHook.error}
+        canConfigure={canConfigure}
+        onReload={() => getThirdParties()}
+        createThirdParty={thirdPartiesHook.createThirdParty}
+        updateThirdParty={thirdPartiesHook.updateThirdParty}
+        deleteThirdParty={thirdPartiesHook.deleteThirdParty}
+        onClose={() => setManagingThirdParties(false)}
       />
     </section>
   );

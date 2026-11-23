@@ -522,6 +522,23 @@ Ojo: en la tarjeta del pedido en la lista de «Pedidos por cobrar» y en «Mis p
 - [ ] Renombra Bancolombia: las ventas viejas muestran el nombre nuevo.
 - [ ] Un usuario sin «Configurar medios de pago» no ve la sección en Configuración.
 
+## 14.25 Terceros de Gastos (Fase 41)
+
+Antes de probar en desarrollo hay que aplicar la migración `20261218000000-expense-third-parties`
+(ver `PLAN-TERCEROS.md`).
+
+- [ ] Gastos → «Terceros» (con «Configurar gastos»): abre la lista con búsqueda y Activos / Inactivos / Todos.
+- [ ] «Nuevo tercero»: pide los mismos datos del proveedor (tipo de organización, documento, nombre, teléfono, correo, dirección, departamento, ciudad; contacto opcional). Con NIT, el DV sale solo.
+- [ ] Crear otro tercero con el mismo tipo y número de documento: avisa «Ya existe un tercero con …».
+- [ ] Editar un tercero: los cambios se ven en la lista y en su ficha (ojito).
+- [ ] Registrar gasto: el selector se llama «Tercero» (ya no «Proveedor») y solo muestra los activos; si no se elige, sale «A quién se le pagó».
+- [ ] El gasto registrado muestra el tercero en la lista y en su detalle; la búsqueda de gastos lo encuentra por el nombre del tercero.
+- [ ] Gastos fijos: se puede elegir un tercero; al pagar el mes, el gasto ya trae ese tercero.
+- [ ] Un tercero con gastos no se puede eliminar (botón apagado); se desactiva y deja de salir al registrar.
+- [ ] Un tercero sin gastos se elimina.
+- [ ] Un usuario que registra gastos pero no tiene «Configurar gastos» no ve el botón «Terceros», pero sí elige terceros al registrar.
+- [ ] Los proveedores de Compras ya no aparecen en Gastos y siguen igual en Compras.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

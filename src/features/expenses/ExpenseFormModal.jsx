@@ -24,7 +24,7 @@ const METHOD_ICONS = { efectivo_caja: "wallet", efectivo: "home", transferencia:
  * de pago (en efectivo: de una caja abierta o fuera de caja) y soporte. La clave del envío se crea
  * una vez por formulario: un doble clic o un reintento no lo registra dos veces.
  */
-const ExpenseForm = ({ branches, defaultBranchId, canGeneral, categories, suppliers, fixed, busy, onCancel, onSubmit }) => {
+const ExpenseForm = ({ branches, defaultBranchId, canGeneral, categories, thirdParties, fixed, busy, onCancel, onSubmit }) => {
   const today = todayInColombia();
   const [key] = useState(() => crypto.randomUUID());
   // Pagar el mes de un gasto fijo: el gasto ya viene lleno (se confirma el monto real y el medio)
@@ -39,7 +39,8 @@ const ExpenseForm = ({ branches, defaultBranchId, canGeneral, categories, suppli
           method: fixed.method ?? "transferencia",
           idsession: "",
           reference: "",
-          idsupplier: fixed.supplierId ? String(fixed.supplierId) : "",
+          // El tercero del gasto fijo, si sigue activo (uno inactivo ya no se elige)
+          idthirdparty: fixed.thirdPartyId && thirdParties.some((item) => item.id === fixed.thirdPartyId) ? String(fixed.thirdPartyId) : "",
           payee: fixed.payee,
           invoicenumber: "",
         }
@@ -53,7 +54,7 @@ const ExpenseForm = ({ branches, defaultBranchId, canGeneral, categories, suppli
           method: "transferencia",
           idsession: "",
           reference: "",
-          idsupplier: "",
+          idthirdparty: "",
           payee: "",
           invoicenumber: "",
         }
@@ -110,7 +111,7 @@ const ExpenseForm = ({ branches, defaultBranchId, canGeneral, categories, suppli
         method: values.method,
         ...(fromRegister && { idsession: Number(chosenSession) }),
         ...(ELECTRONIC.includes(values.method) && optional("reference")),
-        ...(values.idsupplier ? { idsupplier: Number(values.idsupplier) } : optional("payee")),
+        ...(values.idthirdparty ? { idthirdparty: Number(values.idthirdparty) } : optional("payee")),
         ...optional("invoicenumber"),
         ...(fixed && { idfixedexpense: fixed.id, period: fixed.period }),
       });
@@ -125,7 +126,7 @@ const ExpenseForm = ({ branches, defaultBranchId, canGeneral, categories, suppli
   const branchName = branchOptions.find((option) => option.value === values.idbranch)?.label ?? "";
   const methodLabel = EXPENSE_METHODS.find((method) => method.value === values.method)?.label ?? "";
   const sessionLabel = fromRegister ? sessionOptions(registerSessions).find((option) => option.value === chosenSession)?.label ?? "" : "";
-  const paidTo = values.idsupplier ? suppliers.find((supplier) => String(supplier.id) === values.idsupplier)?.companyname ?? "" : values.payee.trim();
+  const paidTo = values.idthirdparty ? thirdParties.find((item) => String(item.id) === values.idthirdparty)?.companyname ?? "" : values.payee.trim();
 
   return (
     <FormLayout onSubmit={submit} error={serverError}>
@@ -242,16 +243,16 @@ const ExpenseForm = ({ branches, defaultBranchId, canGeneral, categories, suppli
             )}
 
             <div className="form-layout__row">
-              {suppliers.length > 0 && (
+              {thirdParties.length > 0 && (
                 <Select
-                  label="Proveedor"
-                  placeholder="No es un proveedor registrado"
-                  options={suppliers.map((supplier) => ({ value: String(supplier.id), label: supplier.companyname }))}
-                  value={values.idsupplier}
-                  onChange={(event) => set("idsupplier", event.target.value)}
+                  label="Tercero"
+                  placeholder="No es un tercero registrado"
+                  options={thirdParties.map((item) => ({ value: String(item.id), label: item.companyname }))}
+                  value={values.idthirdparty}
+                  onChange={(event) => set("idthirdparty", event.target.value)}
                 />
               )}
-              {!values.idsupplier && (
+              {!values.idthirdparty && (
                 <Field label="A quién se le pagó" maxLength={120} placeholder="Opcional. Ej: Don Pedro (arrendador)" value={values.payee} onChange={(event) => set("payee", event.target.value)} />
               )}
             </div>
