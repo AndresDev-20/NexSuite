@@ -39,10 +39,18 @@ const OrderCard = ({ order, showBranch, onCharge, onReject }) => {
         {order.items.map((item) => (
           <li key={item.id}>
             {item.quantity} × {item.name}
+            {item.discount > 0 && <span className="orders-discount__line"> − {formatCurrency(item.discount)}</span>}
             {item.serials.length > 0 && <span className="pos-mono orders-card__serials">{item.serials.map((unit) => unit.serial).join(", ")}</span>}
           </li>
         ))}
       </ul>
+      {/* Fase 43: el descuento que dio el vendedor (la caja lo cobra así o rechaza) */}
+      {order.discountTotal > 0 && (
+        <p className="orders-discount__note">
+          Descuento del vendedor <strong>− {formatCurrency(order.discountTotal)}</strong>
+          {order.discountReason && ` · ${order.discountReason}`}
+        </p>
+      )}
       {order.notes && <p className="orders-card__notes">{order.notes}</p>}
       <div className="orders-card__foot">
         <strong className="orders-card__total">{formatCurrency(order.total)}</strong>

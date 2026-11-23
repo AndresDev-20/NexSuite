@@ -25,6 +25,8 @@ const normalizeItem = (item) => ({
   hasSerial: Boolean(item.hasserial),
   quantity: item.quantity,
   unitPrice: toNumber(item.unitprice),
+  // Fase 43: descuento a mano de la línea (pesos)
+  discount: toNumber(item.discount ?? 0),
   serials: (item.serials ?? []).map((unit) => ({ id: unit.id, serial: unit.serial, imei2: unit.imei2 ?? null })),
 });
 
@@ -37,6 +39,11 @@ export const normalizeOrder = (order) => ({
   sellerName: getFullName(order.seller) || "",
   closerName: getFullName(order.closer) || "",
   saleNumber: order.sale?.number ?? null,
+  // Fase 43: subtotal de lista, descuentos a mano (líneas + pedido) y total con ellos (sin ofertas)
+  subtotal: toNumber(order.subtotal ?? order.total),
+  discountTotal: toNumber(order.discounttotal ?? 0),
+  orderDiscount: toNumber(order.discount ?? 0),
+  discountReason: order.discountreason ?? "",
   total: toNumber(order.total),
   reason: order.reason ?? "",
   notes: order.notes ?? "",

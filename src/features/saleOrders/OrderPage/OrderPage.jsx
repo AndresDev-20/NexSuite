@@ -15,10 +15,12 @@ import { OfferBadge, OffersSummary } from "../../sales/offers/cartOffers";
 import { useCartOffers } from "../../sales/offers/cartOffersLogic";
 import NewCustomerButton from "../../sales/customers/NewCustomerButton";
 import { newSaleKey } from "../../sales/sales/useSales";
+import usePermissions from "../../auth/usePermissions";
 import useSaleOrders, { ORDER_STATUS_LABELS, formatLeft, useReservedQuantities, useSecondsLeft } from "../useSaleOrders";
 import { unwrap } from "../../../utils/apiResponse";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { formatCurrency } from "../../../utils/money";
+import { sanitizeDecimal } from "../../../utils/validators";
 import normalizeText from "../../../utils/normalizeText";
 import "../../../styles/listPage.css";
 import "../../sales/PosPage/pos.css";
@@ -45,6 +47,7 @@ const MyOrder = ({ order, onCancel }) => {
       </p>
       <div className="orders-mine__foot">
         <strong>{formatCurrency(order.total)}</strong>
+        {order.discountTotal > 0 && <span className="pos__hint">Descuento − {formatCurrency(order.discountTotal)}</span>}
         {pending && left > 0 && <span className="orders-left">Vence en {formatLeft(left)}</span>}
         {order.status === "cobrado" && order.saleNumber && <span className="pos__hint">Venta {order.saleNumber}</span>}
         {order.status === "rechazado" && order.reason && <span className="pos__hint">Motivo: {order.reason}</span>}
@@ -91,6 +94,9 @@ const OrderPage = () => {
   const { items: mine, getOrders, createOrder, cancelOrder } = useSaleOrders();
   // Los últimos que ya se cerraron: si se cobró, se rechazó (con el motivo), se canceló o venció
   const { items: recent, getOrders: getRecent } = useSaleOrders();
+  // Fase 43: descuento por producto y al pedido, como en Vender, solo con «Dar descuentos»
+  const { can } = usePermissions();
+  const canDiscount = can("sales.discount");
 
   const [chosenBranch, setChosenBranch] = useState("");
   const branchId = activeBranchId ?? (Number(chosenBranch) || (branches.length === 1 ? branches[0].id : null));
@@ -102,6 +108,8 @@ const OrderPage = () => {
   const [lines, setLines] = useState([]);
   const [picking, setPicking] = useState(null);
   const [notes, setNotes] = useState("");
+  const [discount, setDiscount] = useState("");
+  const [discountReason, setDiscountReason] = useState("");
   const [orderKey, setOrderKey] = useState(newSaleKey);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -180,7 +188,16 @@ const OrderPage = () => {
   // Ofertas (Fase 31): se muestran para que el total cuadre con el de caja; la caja las aplica al cobrar y agrega el regalo
   const bought = useMemo(() => lines.map((line) => ({ idproduct: line.productId, quantity: lineQuantity(line) })), [lines]);
   const { offers } = useCartOffers(branchId, bought);
-  const total = Math.max(lines.reduce((sum, line) => sum + cents(line.price) * lineQuantity(line), 0) - offers.savings, 0);
+  const lineGross = (line) => cents(line.price) * lineQuantity(line);
+  // Lo que queda de la línea después de su oferta: hasta ahí llega el descuento a mano
+  const lineRoom = (line) => Math.max(lineGross(line) - (offers.lines.get(line.productId)?.discount ?? 0), 0);
+  const lineDiscount = (line) => (canDiscount ? cents(line.discount) : 0);
+  const subtotal = lines.reduce((sum, line) => sum + lineGross(line), 0);
+  const lineDiscounts = lines.reduce((sum, line) => sum + Math.min(lineDiscount(line), lineRoom(line)), 0);
+  const orderDiscount = canDiscount ? cents(discount) : 0;
+  const afterLines = Math.max(subtotal - offers.savings - lineDiscounts, 0);
+  const discounts = lineDiscounts + orderDiscount;
+  const total = Math.max(afterLines - orderDiscount, 0);
 
   const problems = [];
   if (lines.length === 0) problems.push("Agrega al menos un producto.");
@@ -188,11 +205,15 @@ const OrderPage = () => {
     const quantity = lineQuantity(line);
     if (quantity < 1) problems.push(`${line.name}: ${line.hasSerial ? "elige los IMEI" : "escribe la cantidad"}.`);
     else if (!line.hasSerial && quantity > line.available) problems.push(`${line.name}: solo hay ${line.available} libres.`);
+    if (lineDiscount(line) > lineRoom(line)) problems.push(`${line.name}: el descuento pasa lo que vale${offers.lines.get(line.productId) ? " después de la oferta" : ""} (${formatCurrency(lineRoom(line) / 100)}).`);
   });
+  if (orderDiscount > afterLines) problems.push(`El descuento al pedido pasa lo que queda por cobrar (${formatCurrency(afterLines / 100)}).`);
 
   const reset = () => {
     setLines([]);
     setNotes("");
+    setDiscount("");
+    setDiscountReason("");
     setOrderKey(newSaleKey());
     setError("");
   };
@@ -205,8 +226,14 @@ const OrderPage = () => {
       const { order, message } = await createOrder({
         idempotencykey: orderKey,
         idbranch: branchId,
-        items: lines.map((line) => ({ idproduct: line.productId, ...(line.hasSerial ? { unitIds: line.units.map((unit) => unit.id) } : { quantity: Number(line.quantity) }) })),
+        items: lines.map((line) => ({
+          idproduct: line.productId,
+          ...(line.hasSerial ? { unitIds: line.units.map((unit) => unit.id) } : { quantity: Number(line.quantity) }),
+          ...(lineDiscount(line) > 0 && { discount: Number(line.discount) }),
+        })),
         ...(notes.trim() && { notes: notes.trim() }),
+        ...(orderDiscount > 0 && { discount: Number(discount) }),
+        ...(discounts > 0 && discountReason.trim() && { discountreason: discountReason.trim() }),
       });
       toast.success(message ?? `Pedido #${order.id} enviado a caja.`);
       // Con las ofertas el total es el que cobra la caja (Fase 31)
@@ -394,8 +421,22 @@ const OrderPage = () => {
                       <span className="pos__hint">de {line.available} libres</span>
                     </div>
                   )}
+                  {canDiscount && (
+                    <Field
+                      label="Descuento ($)"
+                      inputMode="decimal"
+                      autoComplete="off"
+                      maxLength={12}
+                      placeholder="0"
+                      onInput={sanitizeDecimal}
+                      value={line.discount ?? ""}
+                      onChange={(event) => updateLine(line.productId, { discount: event.target.value })}
+                    />
+                  )}
                   <p className="pos__line-total">
-                    {lineQuantity(line)} × {formatCurrency(line.price)} = <strong>{formatCurrency((cents(line.price) * lineQuantity(line)) / 100)}</strong>
+                    {lineQuantity(line)} × {formatCurrency(line.price)}
+                    {lineDiscount(line) > 0 && ` − ${formatCurrency(Number(line.discount))}`} ={" "}
+                    <strong>{formatCurrency(Math.max(lineGross(line) - lineDiscount(line), 0) / 100)}</strong>
                   </p>
                   <OfferBadge offer={offers.lines.get(line.productId) ?? null} />
                 </li>
@@ -410,7 +451,50 @@ const OrderPage = () => {
             </p>
           )}
 
+          {canDiscount && lines.length > 0 && (
+            <div className="orders-discount">
+              <Field
+                label="Descuento al pedido ($)"
+                inputMode="decimal"
+                autoComplete="off"
+                maxLength={12}
+                placeholder="0"
+                onInput={sanitizeDecimal}
+                value={discount}
+                onChange={(event) => setDiscount(event.target.value)}
+              />
+              {discounts > 0 && (
+                <Field
+                  label="Motivo del descuento"
+                  maxLength={255}
+                  placeholder="Opcional. Ej: cliente frecuente"
+                  hint="La caja lo ve al cobrar."
+                  value={discountReason}
+                  onChange={(event) => setDiscountReason(event.target.value)}
+                />
+              )}
+            </div>
+          )}
+
           <dl className="pos__totals">
+            {(offers.savings > 0 || discounts > 0) && (
+              <div>
+                <dt>Subtotal</dt>
+                <dd>{formatCurrency(subtotal / 100)}</dd>
+              </div>
+            )}
+            {offers.savings > 0 && (
+              <div className="pos__offers-total">
+                <dt>Ofertas</dt>
+                <dd>− {formatCurrency(offers.savings / 100)}</dd>
+              </div>
+            )}
+            {discounts > 0 && (
+              <div>
+                <dt>Descuentos</dt>
+                <dd>− {formatCurrency(discounts / 100)}</dd>
+              </div>
+            )}
             <div className="pos__grand">
               <dt>Total</dt>
               <dd>{formatCurrency(total / 100)}</dd>

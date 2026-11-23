@@ -120,11 +120,20 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
         {order.items.map((item) => (
           <li key={item.id}>
             {item.quantity} × {item.name}
+            {item.discount > 0 && <span className="orders-discount__line"> − {formatCurrency(item.discount)}</span>}
             {item.serials.length > 0 && <span className="pos-mono orders-card__serials">{item.serials.map((unit) => unit.serial).join(", ")}</span>}
             <OfferBadge offer={offers.lines.get(item.productId) ?? null} />
           </li>
         ))}
       </ul>
+      {/* Fase 43: el descuento del vendedor ya va en el total; si no se está de acuerdo, se rechaza el pedido */}
+      {order.discountTotal > 0 && (
+        <p className="orders-discount__note">
+          Descuento del vendedor <strong>− {formatCurrency(order.discountTotal)}</strong>
+          {order.orderDiscount > 0 && order.orderDiscount !== order.discountTotal && ` (al pedido ${formatCurrency(order.orderDiscount)})`}
+          {order.discountReason && ` · ${order.discountReason}`}
+        </p>
+      )}
       <GiftLines
         gifts={offers.gifts}
         choices={giftChoices}
@@ -282,7 +291,7 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
 };
 
 /**
- * Cobrar un pedido a caja tal como lo armó el vendedor: la caja, el cliente y la forma de pago.
+ * Cobrar un pedido a caja tal como lo armó el vendedor (con su descuento, Fase 43): la caja, el cliente y la forma de pago.
  * order: el pedido o null (cerrado). onCharge(payload, change) async; lanza el error del servidor.
  */
 const ChargeOrderModal = ({ order, onClose, ...props }) => (

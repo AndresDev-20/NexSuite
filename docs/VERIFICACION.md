@@ -554,6 +554,19 @@ Sin migración (ver `PLAN-COMPROBANTE-GASTO.md`).
 - [ ] Un gasto anulado se imprime marcado ANULADO, con el motivo, quién y cuándo.
 - [ ] Quien solo registra gastos puede imprimir el comprobante del gasto que acaba de registrar.
 
+## 14.27 Descuento en el pedido a caja (Fase 43)
+
+Migración `20261219000000-sale-order-discounts` (ver `PLAN-DESCUENTO-PEDIDO.md`). Para que el vendedor ponga descuentos, dale «Dar descuentos» a su rol en Roles.
+
+- [ ] Con «Dar descuentos», en Pedido a caja cada producto tiene «Descuento ($)» y abajo «Descuento al pedido ($)»; al poner uno aparece «Motivo del descuento» (opcional).
+- [ ] Los totales muestran Subtotal, Ofertas (si hay), Descuentos y Total, y el botón «Enviar a caja» lleva el total con descuento.
+- [ ] Un descuento mayor que el producto (o que lo que queda después de su oferta) o que el pedido no deja enviar y dice por qué.
+- [ ] Un vendedor sin «Dar descuentos» no ve los campos de descuento.
+- [ ] En Pedidos a caja la tarjeta muestra el descuento de cada producto y «Descuento del vendedor − $… · motivo», con el total ya rebajado.
+- [ ] El cajero (sin «Dar descuentos») cobra el pedido por el total con descuento; la venta, el comprobante y los reportes muestran ese descuento.
+- [ ] Si el cajero no está de acuerdo, rechaza el pedido con motivo y el vendedor lo ve en «Últimos pedidos».
+- [ ] Un pedido sin descuento funciona igual que antes.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

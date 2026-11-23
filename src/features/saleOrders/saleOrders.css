@@ -197,6 +197,27 @@
   border-radius: 8px;
 }
 
+/* Fase 43: descuento del vendedor */
+.orders-discount {
+  display: grid;
+  gap: 8px;
+}
+
+.orders-discount__line {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.orders-discount__note {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  color: var(--success);
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+
 .orders-card__total,
 .orders-charge__total {
   font-size: 1.25rem;
