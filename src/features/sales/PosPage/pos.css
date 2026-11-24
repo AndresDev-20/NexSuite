@@ -1090,3 +1090,48 @@
   font-weight: 700;
   color: #db2777;
 }
+
+/* Celulares con cliente (2026-11-24): con un IMEI en la venta, el cliente es obligatorio y se nota */
+.pos__customer-alert {
+  display: flex;
+  flex-basis: 100%;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--warning-strong);
+  background: var(--warning-soft);
+  border-radius: 12px;
+  animation: pos-customer-alert-in 320ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+.pos__customer-alert .icon {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+.pos__customer--required select {
+  border-color: var(--warning-strong);
+  box-shadow: 0 0 0 3px var(--warning-soft);
+}
+
+@keyframes pos-customer-alert-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pos__customer-alert {
+    animation: none;
+  }
+}

@@ -659,6 +659,14 @@ En **Administrativo → Roles → Permisos** de un rol que no sea del sistema:
 - [ ] El buscador encuentra en todo el sistema (por ejemplo «anular») y cada grupo dice de qué módulo es.
 - [ ] En un rol del sistema (Administrador) todo se ve pero no se puede cambiar, y no salen los botones «Activar todos / Quitar todos».
 
+## 14.34 Celulares con cliente obligatorio (Fase 50)
+
+- [ ] En **Vender**, al agregar un celular (por IMEI o eligiéndolo) aparece el aviso amarillo y el cliente dice «Elige el cliente»; «Cobrar» no deja seguir hasta elegirlo.
+- [ ] Con «Nuevo cliente» lo creas ahí mismo, queda elegido y la venta se registra a su nombre.
+- [ ] Un cargador o un producto sin IMEI se sigue vendiendo a consumidor final, sin aviso.
+- [ ] En **Pedidos a caja**, un pedido con celular pide el cliente al cobrarlo; uno sin celular, no.
+- [ ] La tirilla y la carta de la venta del celular salen con el nombre del cliente.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

@@ -50,7 +50,7 @@ const Picker = ({ line, branchId, verb, onCancel, onConfirm }) => {
     }
   };
 
-  const confirm = () => onConfirm(state.units.filter((unit) => selected.has(unit.id)).map(({ id, serial, imei2 }) => ({ id, serial, imei2 })));
+  const confirm = () => onConfirm(state.units.filter((unit) => selected.has(unit.id)).map(({ id, serial, imei2, serialtype }) => ({ id, serial, imei2, serialtype })));
 
   return (
     <div className="pos-picker">

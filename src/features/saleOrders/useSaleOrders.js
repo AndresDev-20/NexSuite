@@ -27,7 +27,7 @@ const normalizeItem = (item) => ({
   unitPrice: toNumber(item.unitprice),
   // Fase 43: descuento a mano de la línea (pesos)
   discount: toNumber(item.discount ?? 0),
-  serials: (item.serials ?? []).map((unit) => ({ id: unit.id, serial: unit.serial, imei2: unit.imei2 ?? null })),
+  serials: (item.serials ?? []).map((unit) => ({ id: unit.id, serial: unit.serial, imei2: unit.imei2 ?? null, serialtype: unit.serialtype ?? null })),
 });
 
 export const normalizeOrder = (order) => ({

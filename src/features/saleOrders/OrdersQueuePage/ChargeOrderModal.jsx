@@ -18,6 +18,7 @@ import { sanitizeDecimal } from "../../../utils/validators";
 import UnitPickerModal from "../../sales/PosPage/UnitPickerModal";
 import { GiftLines, OfferBadge, OffersSummary } from "../../sales/offers/cartOffers";
 import { giftLinesOf, useCartOffers } from "../../sales/offers/cartOffersLogic";
+import { IMEI_NEEDS_CUSTOMER, countPhones } from "../../sales/sales/imeiCustomer";
 
 const cents = (value) => Math.round(Number(value || 0) * 100);
 const pesos = (value) => value / 100;
@@ -65,7 +66,12 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
   const change = cashPayment && cashPayment.received ? cents(cashPayment.received) - cents(cashPayment.amount) : 0;
   const credit = effectivePayments.filter((payment) => payment.method === "credito").reduce((sum, payment) => sum + cents(payment.amount), 0);
 
+  // Celulares (2026-11-24): si el pedido lleva un IMEI (o un regalo con IMEI), el cliente es obligatorio
+  const phones = countPhones([...order.items.flatMap((item) => item.serials), ...Object.values(giftChoices).flatMap((choice) => choice?.units ?? [])]);
+  const needsCustomer = phones > 0 && !customer;
+
   const problems = [];
+  if (needsCustomer) problems.push(IMEI_NEEDS_CUSTOMER);
   if (!offersReady) problems.push("Calculando las ofertas… un momento.");
   problems.push(...gifts.problems);
   if (!sessionId) problems.push("Elige la caja donde se cobra.");
@@ -148,10 +154,19 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
         <Select label="Caja" required options={sessionOptions(branchSessions)} value={sessionId} hint="El efectivo entra a esta caja." onChange={(event) => setSessionId(event.target.value)} />
       )}
 
+      {needsCustomer && (
+        <p className="pos__customer-alert" role="alert">
+          <Icon name="alert" />
+          <span>
+            {phones === 1 ? "El pedido lleva un celular" : `El pedido lleva ${phones} celulares`}: elige el cliente o créalo con «Nuevo cliente».
+          </span>
+        </p>
+      )}
       {canReadCustomers ? (
         <Select
           label="Cliente"
-          placeholder="Consumidor final"
+          placeholder={phones > 0 ? "Elige el cliente" : "Consumidor final"}
+          required={phones > 0}
           options={customers.filter((item) => item.isActive).map((item) => ({ value: String(item.id), label: `${item.name}${item.document ? ` · ${item.document}` : ""}` }))}
           value={customerId}
           hint={customer && customer.creditLimit > 0 ? `Cupo de crédito ${formatCurrency(customer.creditLimit)} a ${customer.creditDays} días` : undefined}
@@ -162,7 +177,9 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
           }}
         />
       ) : (
-        <p className="pos__hint">Cliente: consumidor final.</p>
+        <p className="pos__hint">
+          {phones > 0 ? "Para cobrar celulares hace falta «Ver clientes»: pídele a un administrador que te lo dé." : "Cliente: consumidor final."}
+        </p>
       )}
       <NewCustomerButton
         onCreated={async (created) => {

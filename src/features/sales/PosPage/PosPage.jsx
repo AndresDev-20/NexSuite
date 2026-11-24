@@ -29,6 +29,7 @@ import LayawayCreateModal from "../layaways/LayawayCreateModal";
 import LayawayDetailModal from "../layaways/LayawayDetailModal";
 import { GiftLines, OfferBadge, OffersSummary } from "../offers/cartOffers";
 import { giftLinesOf, useCartOffers } from "../offers/cartOffersLogic";
+import { IMEI_NEEDS_CUSTOMER, countPhones } from "../sales/imeiCustomer";
 import "../../../styles/listPage.css";
 import "./pos.css";
 
@@ -173,7 +174,7 @@ const PosPage = () => {
       const units = unwrap(await api.get("/product-units", { params: { search: text.replace(/\s+/g, ""), idbranch: branchId, status: "disponible" } })) ?? [];
       const unit = units.find((candidate) => !candidate.reserved && (candidate.serial === text.replace(/\s+/g, "").toUpperCase() || candidate.imei2 === text.replace(/\s+/g, "")));
       const product = unit && products.items.find((item) => item.id === unit.idproduct);
-      if (product) return addProduct(product, [{ id: unit.id, serial: unit.serial, imei2: unit.imei2 ?? null }]);
+      if (product) return addProduct(product, [{ id: unit.id, serial: unit.serial, imei2: unit.imei2 ?? null, serialtype: unit.serialtype }]);
     } catch {
       // Sin permiso de consultar unidades: se queda la búsqueda por nombre
     }
@@ -233,8 +234,13 @@ const PosPage = () => {
   const credit = effectivePayments.filter((payment) => payment.method === "credito").reduce((sum, payment) => sum + cents(payment.amount), 0);
 
   /* ---------- Revisión antes de cobrar (el servidor vuelve a revisar todo) ---------- */
+  // Celulares (2026-11-24): con un IMEI en la venta (también un regalo de oferta), el cliente es obligatorio
+  const phones = countPhones([...lines.flatMap((line) => line.units), ...Object.values(giftChoices).flatMap((choice) => choice?.units ?? [])]);
+  const needsCustomer = phones > 0 && !customer;
+
   const problems = [];
   if (lines.length === 0) problems.push("Agrega al menos un producto.");
+  if (needsCustomer) problems.push(IMEI_NEEDS_CUSTOMER);
   lines.forEach((line) => {
     const quantity = lineQuantity(line);
     if (quantity < 1) problems.push(`${line.name}: ${line.hasSerial ? "elige los IMEI" : "escribe la cantidad"}.`);
@@ -633,11 +639,20 @@ const PosPage = () => {
             onPickUnits={({ gift, option, units }) => setPicking({ productId: option.idproduct, name: option.name, hasSerial: true, units, giftOffer: gift.idoffer })}
           />
 
-          <div className="pos__row pos__customer">
+          <div className={`pos__row pos__customer ${needsCustomer ? "pos__customer--required" : ""}`.trim()}>
+            {needsCustomer && (
+              <p className="pos__customer-alert" role="alert">
+                <Icon name="alert" />
+                <span>
+                  {phones === 1 ? "Hay un celular en la venta" : `Hay ${phones} celulares en la venta`}: elige el cliente o créalo con «Nuevo cliente».
+                </span>
+              </p>
+            )}
             {canReadCustomers ? (
               <Select
                 label="Cliente"
-                placeholder="Consumidor final"
+                placeholder={phones > 0 ? "Elige el cliente" : "Consumidor final"}
+                required={phones > 0}
                 options={customers.filter((item) => item.isActive).map((item) => ({ value: String(item.id), label: `${item.name}${item.document ? ` · ${item.document}` : ""}` }))}
                 value={customerId}
                 hint={customer && customer.creditLimit > 0 ? `Cupo de crédito ${formatCurrency(customer.creditLimit)} a ${customer.creditDays} días` : undefined}
@@ -648,7 +663,9 @@ const PosPage = () => {
                 }}
               />
             ) : (
-              <p className="pos__hint">Cliente: consumidor final.</p>
+              <p className="pos__hint">
+                {phones > 0 ? "Para vender celulares hace falta «Ver clientes»: pídele a un administrador que te lo dé." : "Cliente: consumidor final."}
+              </p>
             )}
             {/* Fase 19: crear el cliente ahí mismo y dejarlo elegido */}
             <div className="pos__new-customer">
