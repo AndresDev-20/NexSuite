@@ -92,6 +92,13 @@ const NAV_ITEMS = [
         to: "/inventario/toma-fisica",
         permission: "stock-counts.read",
       },
+      // Fase 47: solo si la bodega está activa (Datos del negocio → «Usar la bodega»)
+      {
+        label: "Bodega",
+        to: "/inventario/bodega",
+        permission: "warehouse.read",
+        feature: "warehouse",
+      },
     ],
   },
   {
@@ -103,6 +110,8 @@ const NAV_ITEMS = [
       { label: "Pedido a caja", to: "/ventas/pedido", permission: "sale-orders.create" },
       { label: "Pedidos por cobrar", to: "/ventas/pedidos", permission: "sales.create" },
       { label: "Ventas", to: "/ventas/historial", permission: ["sales.read", "sales.read-all"] },
+      // Fase 46: lo devuelto (se devuelve desde el detalle de la venta)
+      { label: "Devoluciones", to: "/ventas/devoluciones", permission: ["sales.return", "sales.read-all"] },
       { label: "Clientes", to: "/ventas/clientes", permission: "customers.read" },
       { label: "Cartera", to: "/ventas/cartera", permission: ["receivables.read", "receivables.pay"] },
       { label: "Apartados", to: "/ventas/apartados", permission: "layaways.read" },

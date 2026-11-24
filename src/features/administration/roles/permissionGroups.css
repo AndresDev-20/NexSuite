@@ -1,26 +1,68 @@
+/* Grupos de permisos (rediseño 2026-11-24): tarjetas plegables, avance y acciones por grupo */
 .permission-groups {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 14px;
+}
+
+.permission-groups__group {
+  padding: 14px;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  animation: permission-groups-in 260ms ease both;
 }
 
 .permission-groups__header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--color-border);
+  gap: 8px 12px;
+}
+
+.permission-groups__toggle {
+  display: flex;
+  flex: 1 1 220px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.permission-groups__toggle:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 3px;
+}
+
+.permission-groups__chevron {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-muted);
+  transition: transform 200ms ease;
+}
+
+.permission-groups__group--closed .permission-groups__chevron {
+  transform: rotate(-90deg);
 }
 
 .permission-groups__title {
-  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: 1rem;
   font-weight: 700;
 }
 
 .permission-groups__count {
+  flex-shrink: 0;
   padding: 3px 10px;
   font-size: 0.75rem;
   font-weight: 700;
@@ -29,21 +71,136 @@
   border-radius: 999px;
 }
 
+.permission-groups__count--full {
+  color: var(--on-accent);
+  background: var(--red-600);
+}
+
+.permission-groups__bulk {
+  display: flex;
+  gap: 6px;
+}
+
+.permission-groups__bulk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--red-700);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--red-600) 40%, var(--color-border));
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 150ms ease, transform 120ms ease;
+}
+
+.permission-groups__bulk-btn .icon {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.4;
+}
+
+.permission-groups__bulk-btn:hover:not(:disabled) {
+  background: var(--red-50);
+}
+
+.permission-groups__bulk-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.permission-groups__bulk-btn--off {
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+
+.permission-groups__bulk-btn--off:hover:not(:disabled) {
+  background: var(--gray-100);
+}
+
+.permission-groups__bulk-btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.permission-groups__bulk-btn:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 2px;
+}
+
+.permission-groups__meter {
+  height: 4px;
+  margin: 10px 0 12px;
+  overflow: hidden;
+  background: var(--gray-100);
+  border-radius: 999px;
+}
+
+.permission-groups__meter span {
+  display: block;
+  height: 100%;
+  background: var(--red-600);
+  border-radius: inherit;
+  transition: width 300ms ease;
+}
+
+.permission-groups__group--closed .permission-groups__meter {
+  margin-bottom: 0;
+}
+
 .permission-groups__list {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
+  animation: permission-groups-in 200ms ease both;
 }
 
 .permission-groups__item {
   min-width: 0;
 }
 
+/* Interruptores más compactos que en el resto del sistema: aquí hay muchos */
+.permission-groups__item .switch {
+  min-height: 0;
+  height: 100%;
+  padding: 10px 12px;
+}
+
 @media (min-width: 768px) {
+  .permission-groups__group {
+    padding: 16px 18px;
+  }
+
   .permission-groups__list {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+}
+
+@keyframes permission-groups-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .permission-groups__group,
+  .permission-groups__list {
+    animation: none;
+  }
+
+  .permission-groups__chevron,
+  .permission-groups__meter span {
+    transition: none;
   }
 }

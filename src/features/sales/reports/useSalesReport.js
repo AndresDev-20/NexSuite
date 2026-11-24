@@ -39,7 +39,7 @@ export const PERIODS = [
   { value: "mes-anterior", label: "Mes anterior" },
 ];
 
-/** Cifras de un grupo de ventas. cost y profit quedan en null sin "Ver costos". */
+/** Cifras de un grupo de ventas. cost y profit quedan en null sin "Ver ganancias". */
 const normalizeFigures = (row) => ({
   count: row.count,
   subtotal: toNumber(row.subtotal),
@@ -57,6 +57,8 @@ const normalizeFigures = (row) => ({
 const normalizeTotals = (row) => ({
   ...normalizeFigures(row),
   refunds: toNumber(row.refunds),
+  // Devoluciones de venta (Fase 46): restan de lo vendido (net); su costo volvió al inventario
+  returns: toNumber(row.returns ?? 0),
   net: row.net === undefined ? toNumber(row.total) : toNumber(row.net),
   exchangeCost: row.exchangeCost === undefined ? null : toNumber(row.exchangeCost),
   netProfit: row.netProfit === undefined ? (row.profit === undefined ? null : toNumber(row.profit)) : toNumber(row.netProfit),
@@ -96,6 +98,15 @@ const normalizeWarranties = (data) => ({
 
 const normalizeMethod = (row) => ({ method: row.method, count: row.count, amount: toNumber(row.amount) });
 
+/** Devoluciones de venta del periodo (Fase 46): valor, deuda rebajada, costo (con costos) y dinero por medio. */
+const normalizeReturns = (data) => ({
+  count: data?.count ?? 0,
+  amount: toNumber(data?.amount),
+  credit: toNumber(data?.credit),
+  cost: data?.cost === undefined ? null : toNumber(data.cost),
+  byMethod: (data?.byMethod ?? []).map((row) => ({ method: row.method, label: row.label, amount: toNumber(row.amount) })),
+});
+
 export const normalizeReport = (report) => ({
   from: report.from,
   to: report.to,
@@ -103,6 +114,7 @@ export const normalizeReport = (report) => ({
   costs: report.costs,
   totals: normalizeTotals(report.totals),
   warranties: normalizeWarranties(report.warranties),
+  returns: normalizeReturns(report.returns),
   expenses: normalizeExpenses(report.expenses),
   byMethod: report.byMethod.map(normalizeMethod),
   // null cuando se filtra por sucursal (los abonos no son de una sucursal)

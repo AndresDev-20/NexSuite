@@ -35,6 +35,11 @@
   gap: 12px;
 }
 
+/* Sin «Ver ganancias» (Fase 48): 3 cifras. En celular la primera ocupa la fila; en escritorio, 3 columnas */
+.reports-kpis--three > :first-child {
+  grid-column: 1 / -1;
+}
+
 .reports-kpi {
   display: flex;
   flex-direction: column;
@@ -149,6 +154,14 @@
 
   .reports-kpis {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .reports-kpis--three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .reports-kpis--three > :first-child {
+    grid-column: auto;
   }
 }
 

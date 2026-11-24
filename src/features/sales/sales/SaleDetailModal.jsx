@@ -11,13 +11,21 @@ import { formatDateTime } from "../../administration/audit/auditOptions";
 import { formatDay } from "../../purchases/orders/orderOptions";
 import ReceiptActions from "./ReceiptActions";
 import { getMethodLabel } from "./useSales";
+import ReturnWizard from "../returns/ReturnWizard";
+import ReturnDetailModal from "../returns/ReturnDetailModal";
 import "../../../styles/sheet.css";
+import "../returns/returns.css";
 import "./saleDetail.css";
 
+const RETURN_LABELS = { devuelta: "Devuelta", "devuelta-parcial": "Devuelta en parte" };
+
 /* ---------- Contenido (se monta por venta) ---------- */
-const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onClose }) => {
+const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onReturned, onClose }) => {
   const [state, setState] = useState({ sale: null, loading: true, error: "" });
   const [voiding, setVoiding] = useState(null);
+  const [returning, setReturning] = useState(false);
+  const [viewingReturn, setViewingReturn] = useState(null);
+  const [version, setVersion] = useState(0);
   const { can } = usePermissions();
   const toast = useToast();
 
@@ -29,14 +37,17 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onClose }) => {
     return () => {
       current = false;
     };
-  }, [saleId, getSale]);
+  }, [saleId, getSale, version]);
 
   const { sale, loading, error } = state;
   if (loading) return <p className="sheet__loading">Cargando la venta…</p>;
   if (error) return <p className="sheet__error">{error}</p>;
 
   // Anular: con el permiso, venta completada y su turno de caja abierto (el servidor lo vuelve a revisar)
-  const canVoid = Boolean(voidSale) && can("sales.void") && !sale.isVoided && sale.sessionOpen !== false;
+  // Con devoluciones ya no se anula (Fase 46)
+  const canVoid = Boolean(voidSale) && can("sales.void") && !sale.isVoided && sale.sessionOpen !== false && sale.returnedTotal === 0;
+  // Devolver (Fase 46): con «Hacer devoluciones», venta completada y algo por devolver (el servidor lo vuelve a revisar)
+  const canReturn = can("sales.return") && !sale.isVoided && sale.returnState !== "devuelta";
   const handleVoid = async (reason) => {
     const { sale: voided, message } = await voidSale(sale.id, reason);
     setState({ sale: voided, loading: false, error: "" });
@@ -58,9 +69,19 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onClose }) => {
           <span className="sale-voided__note">No cuenta en caja, cartera ni reportes; sus productos volvieron al inventario.</span>
         </div>
       )}
+      {sale.returnState && (
+        <div className="sale-returned" role="status">
+          <strong>{RETURN_LABELS[sale.returnState]}</strong>
+          <span>
+            Se devolvieron {formatCurrency(sale.returnedTotal)} de {formatCurrency(sale.total)}
+            {sale.returns.length > 1 ? ` en ${sale.returns.length} devoluciones` : ""}. Lo devuelto volvió al inventario y el dinero salió por sus medios.
+          </span>
+        </div>
+      )}
       <header className="sheet__head">
         <p className="sheet__name sheet__mono">
           {sale.number} {sale.isVoided && <span className="sheet__badge sheet__badge--empty">Anulada</span>}
+          {sale.returnState && <span className={`return-badge ${sale.returnState === "devuelta" ? "return-badge--full" : ""}`.trim()}>{RETURN_LABELS[sale.returnState]}</span>}
         </p>
         <ul className="sheet__facts">
           <li>{formatDateTime(sale.createdAt)}</li>
@@ -115,6 +136,13 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onClose }) => {
                   {item.sku} · {item.quantity} × {formatCurrency(item.unitPrice)}
                   {!item.gift && item.discount - item.offerDiscount > 0 && ` − ${formatCurrency(item.discount - item.offerDiscount)}`}
                 </span>
+                {item.returnedQty > 0 && (
+                  <span className="sheet__row-meta">
+                    <span className={`return-badge ${item.returnedQty >= item.quantity ? "return-badge--full" : ""}`.trim()}>
+                      {item.returnedQty >= item.quantity ? "Devuelto" : `${item.returnedQty} devuelta${item.returnedQty === 1 ? "" : "s"}`}
+                    </span>
+                  </span>
+                )}
                 {item.gift && <span className="sheet__row-meta sheet__offer">🎁 Obsequio · {item.offerName}</span>}
                 {!item.gift && item.offerDiscount > 0 && (
                   <span className="sheet__row-meta sheet__offer">
@@ -159,6 +187,32 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onClose }) => {
         </ul>
       </section>
 
+      {sale.returns.length > 0 && (
+        <section className="sheet__section">
+          <h3 className="sheet__section-title">
+            Devoluciones <span className="sheet__section-count">{sale.returns.length}</span>
+          </h3>
+          <ul className="sheet__rows">
+            {sale.returns.map((item) => (
+              <li className="sheet__row sale-return-item" key={item.id} onClick={() => setViewingReturn(item.id)}>
+                <div className="sheet__row-main">
+                  <span className="sheet__row-title sheet__mono">{item.number}</span>
+                  <span className="sheet__row-meta">
+                    {formatDateTime(item.createdAt)}
+                    {item.userName && ` · ${item.userName}`}
+                    {item.credit > 0 && ` · deuda − ${formatCurrency(item.credit)}`}
+                  </span>
+                  {item.reason && <span className="sheet__row-meta">Motivo: {item.reason}</span>}
+                </div>
+                <div className="sheet__row-side">
+                  <span className="sheet__number">− {formatCurrency(item.total)}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {sale.notes && <p className="sheet__more">Notas: {sale.notes}</p>}
 
       <section className="sheet__section">
@@ -167,6 +221,11 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onClose }) => {
       </section>
 
       <FormActions>
+        {canReturn && (
+          <Button icon="refresh" className="sale-return-button" onClick={() => setReturning(true)}>
+            Devolver
+          </Button>
+        )}
         {canVoid && (
           <Button
             variant="outline"
@@ -189,19 +248,29 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onClose }) => {
         </Button>
       </FormActions>
       <CancelReasonModal request={voiding} onClose={() => setVoiding(null)} onSubmit={handleVoid} />
+      <ReturnWizard
+        saleId={returning ? sale.id : null}
+        onDone={(saleReturn) => {
+          setVersion((value) => value + 1);
+          onReturned?.(saleReturn);
+        }}
+        onClose={() => setReturning(false)}
+      />
+      <ReturnDetailModal returnId={viewingReturn} onClose={() => setViewingReturn(null)} />
     </div>
   );
 };
 
 /**
- * Detalle de una venta: productos, IMEI y garantía, pagos y (con "Ver costos") la ganancia.
- * Desde aquí se reimprime el comprobante, se descarga en PDF o se envía por correo, y (con
- * "Anular ventas") se anula mientras su turno siga abierto. saleId null = cerrado.
- * voidSale(id, reason) y onVoided(venta) son opcionales: sin voidSale no aparece el botón.
+ * Detalle de una venta: productos, IMEI y garantía, pagos y (con "Ver ganancias") la ganancia.
+ * Desde aquí se reimprime el comprobante, se descarga en PDF o se envía por correo, (con
+ * "Anular ventas") se anula mientras su turno siga abierto y (con «Hacer devoluciones», Fase 46) se devuelve.
+ * saleId null = cerrado. voidSale(id, reason), onVoided(venta) y onReturned(devolución) son opcionales: sin
+ * voidSale no aparece Anular.
  */
-const SaleDetailModal = ({ saleId, getSale, voidSale, onVoided, onClose }) => (
+const SaleDetailModal = ({ saleId, getSale, voidSale, onVoided, onReturned, onClose }) => (
   <Modal icon="cart" open={Boolean(saleId)} title="Detalle de la venta" size="wide" onClose={onClose}>
-    {saleId && <SaleSheet key={saleId} saleId={saleId} getSale={getSale} voidSale={voidSale} onVoided={onVoided} onClose={onClose} />}
+    {saleId && <SaleSheet key={saleId} saleId={saleId} getSale={getSale} voidSale={voidSale} onVoided={onVoided} onReturned={onReturned} onClose={onClose} />}
   </Modal>
 );
 

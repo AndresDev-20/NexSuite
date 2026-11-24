@@ -336,6 +336,16 @@ const Pyg = ({ pyg }) => {
     { label: "Cuentas por cobrar (a hoy)", value: pyg.receivables },
     { label: "Cuentas por pagar (a hoy)", value: pyg.payables },
     { label: "Efectivo disponible", value: pyg.cashAvailable, strong: true },
+    // Bodega (Fase 47): aparte, no suman en las ventas ni en la utilidad de arriba
+    ...(pyg.related
+      ? [
+          { gap: true },
+          { label: "Ventas a relacionados (aparte, no suman arriba)", value: pyg.related.total },
+          { label: "Utilidad de ventas a relacionados", value: pyg.related.profit },
+          { label: "Abonos de relacionados", value: pyg.related.collected },
+          { label: "Por cobrar a relacionados (a hoy)", value: pyg.related.owedNow },
+        ]
+      : []),
   ];
   return (
     <section className="list-page__card balance-results__card balance-pyg" aria-labelledby="balance-pyg-title">

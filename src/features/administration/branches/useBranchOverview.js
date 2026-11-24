@@ -11,7 +11,7 @@ const normalizeStock = (stock) => ({
   units: stock.units,
   empty: stock.empty,
   low: stock.low,
-  // undefined sin "Ver costos": el servidor no lo envía
+  // undefined sin "Ver precio de costo": el servidor no lo envía
   costValue: stock.costValue === undefined ? null : toNumber(stock.costValue),
   items: stock.items.map((item) => ({
     id: item.id,

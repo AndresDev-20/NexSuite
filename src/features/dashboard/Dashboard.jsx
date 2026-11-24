@@ -19,7 +19,7 @@ import "./styles/dashboard.css";
  * Tablero de inicio con datos reales (GET /dashboard). Cada panel aparece solo si el servidor
  * envía su sección, es decir, si el usuario tiene permiso de consultar ese módulo; todo se
  * limita a sus sucursales y sigue la sucursal activa del encabezado. Sin cifras inventadas: las
- * ventas son las registradas (las suyas o las de todos, según su permiso; la ganancia con "Ver costos"),
+ * ventas son las registradas (las suyas o las de todos, según su permiso; la ganancia con "Ver ganancias"),
  * con gráficas animadas por periodo (hoy, ayer, un día del calendario, 7 días, 30 días, 12 meses) y tendencia contra
  * el periodo anterior.
  */
@@ -644,9 +644,13 @@ function Dashboard() {
         key: "sales",
         icon: "cash",
         label: own ? "Tus ventas" : "Ventas totales",
-        value: sold.report.totals.total,
+        // Neto de devoluciones (pedido del 2026-11-24): lo que quedó vendido
+        value: sold.report.totals.net,
         format: formatCompact,
-        hint: periodHint,
+        hint:
+          sold.report.totals.refunds + sold.report.totals.returns > 0
+            ? `${periodHint} · ${formatCurrency(sold.report.totals.refunds + sold.report.totals.returns)} devuelto`
+            : periodHint,
         trend: sold.trends?.total ?? null,
         spark: sold.buckets.map((bucket) => bucket.total),
         to: reportLink,

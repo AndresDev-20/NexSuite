@@ -35,12 +35,14 @@ const normalizeItem = (item) => ({
   gift: Boolean(item.isgift),
   offerName: item.offer?.name ?? "",
   offerDiscount: toNumber(item.offerdiscount ?? 0),
-  // null sin "Ver costos"
+  // null sin "Ver ganancias"
   unitCost: item.unitcost === undefined ? null : toNumber(item.unitcost),
   serials: (item.serials ?? []).map((unit) => ({ id: unit.id, serial: unit.serial, imei2: unit.imei2 ?? null, warrantyMonths: unit.warrantymonths ?? 0 })),
+  // Devoluciones (Fase 46): unidades ya devueltas de la línea
+  returnedQty: item.returnedqty ?? 0,
 });
 
-/** Sirve para la lista y el detalle. Costo y ganancia en null sin "Ver costos". */
+/** Sirve para la lista y el detalle. Costo y ganancia en null sin "Ver ganancias". */
 export const normalizeSale = (sale) => ({
   id: sale.id,
   number: sale.number,
@@ -88,6 +90,18 @@ export const normalizeSale = (sale) => ({
   voidReason: sale.voidreason ?? "",
   voiderName: sale.voider ? getFullName(sale.voider) : "",
   sessionOpen: sale.session?.status ? sale.session.status === "abierta" : null,
+  // Devoluciones (Fase 46): "devuelta", "devuelta-parcial" o null
+  returnState: sale.returnstate ?? null,
+  returnedTotal: toNumber(sale.returnedtotal ?? 0),
+  returns: (sale.returns ?? []).map((item) => ({
+    id: item.id,
+    number: item.number,
+    createdAt: item.createdat,
+    total: toNumber(item.total),
+    credit: toNumber(item.creditamount),
+    reason: item.reason ?? "",
+    userName: item.user ? getFullName(item.user) : "",
+  })),
   items: (sale.items ?? []).map(normalizeItem),
   payments: (sale.payments ?? []).map((payment) => ({
     id: payment.id,

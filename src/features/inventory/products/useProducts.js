@@ -12,7 +12,7 @@ export const normalizeProduct = (product) => ({
   name: product.nameproduct ?? "",
   unit: product.unit ?? "unidad",
   description: product.description ?? "",
-  // null: sin el permiso "Ver costos" el servidor no envía el costo
+  // null: sin el permiso "Ver precio de costo" el servidor no envía el costo
   costPrice: product.cost_price === undefined ? null : toNumber(product.cost_price),
   salePrice: toNumber(product.sale_price),
   hasSerial: Boolean(product.hasserial),

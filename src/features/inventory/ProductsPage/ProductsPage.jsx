@@ -63,7 +63,7 @@ const ProductsPage = () => {
   const canEdit = can("products.update");
   const canDelete = can("products.delete");
   const canAudit = can("audit.read");
-  // Sin "Ver costos" el servidor no envía ni acepta el precio de costo
+  // Sin "Ver precio de costo" el servidor no envía ni acepta el precio de costo
   const showCost = can("costs.read");
   // Ver por sucursal muestra sus existencias: el servidor exige "Ver existencias" y acceso a la sucursal
   const canFilterBranch = can("branch-stock.read") && branches.length > 0;

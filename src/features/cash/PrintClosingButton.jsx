@@ -8,7 +8,7 @@ import { fetchPdf, printPdf } from "../sales/sales/receipt";
  * Tirilla del cuadre (Fase 35), PDF de 80 mm del servidor que se imprime en la térmica:
  * - del turno: sessionId (solo de un turno contado);
  * - del día de la sucursal: day = { date, idbranch? }.
- * El servidor decide qué trae según los permisos (a ciegas sin lo esperado ni la diferencia; ganancia con «Ver costos»).
+ * El servidor decide qué trae según los permisos (a ciegas sin lo esperado ni la diferencia; ganancia con «Ver ganancias»).
  */
 const PrintClosingButton = ({ sessionId, day, label = "Imprimir cuadre", variant = "outline" }) => {
   const toast = useToast();

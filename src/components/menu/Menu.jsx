@@ -3,6 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import usePermissions from "../../features/auth/usePermissions";
 import Icon from "../ui/Icon/Icon";
 import NAV_ITEMS from "./navItems";
+import { useWarehouseEnabled } from "../../features/inventory/warehouse/warehouseApi";
 import "./menu.css";
 
 
@@ -65,6 +66,8 @@ const MenuGroup = ({
 const Menu = ({ onNavigate }) => {
   const { pathname } = useLocation();
   const { can } = usePermissions();
+  // Opciones que dependen de algo que el negocio prende o apaga (la bodega, Fase 47)
+  const warehouseEnabled = useWarehouseEnabled();
   const baseId = useId(); // el Menu se monta en el sidebar y en el drawer: los ids no pueden repetirse
   // Un solo grupo abierto (acordeón). Lo que abre o cierra el usuario vale mientras siga en la misma
   // página; al navegar queda abierto solo el grupo de la página actual y los demás se cierran
@@ -77,13 +80,13 @@ const Menu = ({ onNavigate }) => {
         item.children
           ? {
               ...item,
-              children: item.children.filter((child) => can(child.permission)),
+              children: item.children.filter((child) => can(child.permission) && (!child.feature || (child.feature === "warehouse" && warehouseEnabled === true))),
             }
           : item,
       ).filter((item) =>
         item.children ? item.children.length > 0 : can(item.permission),
       ),
-    [can],
+    [can, warehouseEnabled],
   );
 
   const isGroupActive = (item) =>

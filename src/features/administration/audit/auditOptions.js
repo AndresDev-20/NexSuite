@@ -148,7 +148,7 @@ const MONEY_FIELDS = new Set(["cost_price", "sale_price", "price"]);
 export const formatValue = (field, value) => {
   if (value === null || value === undefined || value === "") return "—";
   if (value === "[protegido]") return "•••• (protegido)";
-  if (value === "[oculto]") return "•••• (requiere Ver costos)";
+  if (value === "[oculto]") return "•••• (oculto por tus permisos)";
   if (typeof value === "boolean") return value ? "Sí" : "No";
   if (MONEY_FIELDS.has(field)) return formatCurrency(value);
   if (field === "status") return getStatusLabel(value);

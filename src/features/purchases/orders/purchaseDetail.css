@@ -41,8 +41,14 @@
   margin: 0;
 }
 
+/* Sin «Ver ganancias» (Fase 48) quedan 4 cifras: una fila de 4 (2 × 2 en celular), sin huecos */
+.purchase-detail__summary--compact {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 @media (max-width: 560px) {
-  .purchase-detail__summary {
+  .purchase-detail__summary,
+  .purchase-detail__summary--compact {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

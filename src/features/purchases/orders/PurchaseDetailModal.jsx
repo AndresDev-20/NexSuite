@@ -98,7 +98,7 @@ const SupplierPart = ({ part, index, draft, confirmed, canEdit, canPay, canCance
 
 /**
  * Compra abierta (Fase 32): sus proveedores con sus productos, el total, lo que vale a precio de venta y la ganancia
- * esperada (con «Ver costos»). En borrador se llena, se edita, se confirma o se anula.
+ * esperada (con «Ver ganancias»). En borrador se llena, se edita, se confirma o se anula.
  * state: { purchase, loading, error }.
  */
 const PurchaseDetailModal = ({
@@ -181,7 +181,7 @@ const PurchaseDetailModal = ({
         )}
         {purchase.notes && <p className="purchase-detail__notes">{purchase.notes}</p>}
 
-        <dl className="purchase-detail__summary" aria-live="polite">
+        <dl className={`purchase-detail__summary ${summary.saleValue === null ? "purchase-detail__summary--compact" : ""}`.trim()} aria-live="polite">
           <div>
             <dt>Proveedores</dt>
             <dd>{summary.suppliers}</dd>
@@ -198,10 +198,12 @@ const PurchaseDetailModal = ({
             <dt>Total de la compra</dt>
             <dd key={summary.total}>{formatCurrency(summary.total)}</dd>
           </div>
-          <div>
-            <dt>A precio de venta</dt>
-            <dd>{formatCurrency(summary.saleValue)}</dd>
-          </div>
+          {summary.saleValue !== null && (
+            <div>
+              <dt>A precio de venta</dt>
+              <dd>{formatCurrency(summary.saleValue)}</dd>
+            </div>
+          )}
           {summary.profit !== null && (
             <div className={`purchase-detail__summary-profit ${summary.profit < 0 ? "purchase-detail__summary-profit--loss" : ""}`.trim()}>
               <dt>Ganancia esperada</dt>

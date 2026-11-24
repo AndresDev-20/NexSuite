@@ -147,7 +147,8 @@ const useSalesDashboard = () => {
         report,
         buckets,
         trends: before && {
-          total: trendOf(report.totals.total, before.totals.total),
+          // Neto de devoluciones (2026-11-24), como el número que se muestra
+          total: trendOf(report.totals.net, before.totals.net),
           count: trendOf(report.totals.count, before.totals.count),
           ticket: trendOf(ticket(report.totals), ticket(before.totals)),
           profit: report.costs ? trendOf(report.totals.finalProfit, before.totals.finalProfit) : null,

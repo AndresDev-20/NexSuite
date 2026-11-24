@@ -48,6 +48,11 @@
   background-color: color-mix(in srgb, var(--warning) 14%, transparent);
 }
 
+.unit-cell__status--prestado {
+  color: var(--color-primary);
+  background-color: var(--red-50);
+}
+
 .unit-cell__status--devuelto_proveedor {
   color: var(--info);
   background-color: color-mix(in srgb, var(--info) 10%, transparent);

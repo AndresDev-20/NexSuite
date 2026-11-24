@@ -53,6 +53,8 @@ const PosPage = () => {
   const { createSale } = useSales();
 
   const canDiscount = can("sales.discount");
+  // Fase 48: «Ganancia / Pierdes» por línea solo con «Ver ganancias»; el precio de compra, con «Ver precio de costo»
+  const showProfit = can("profits.read");
   const canReadCustomers = can("customers.read");
 
   const [products, setProducts] = useState({ items: [], loading: true, error: "" });
@@ -498,7 +500,7 @@ const PosPage = () => {
                       </span>
                       <span className="pos__result-side">
                         <strong>{formatCurrency(product.salePrice)}</strong>
-                        {/* Precio de compra: el servidor solo lo manda con «Ver costos» */}
+                        {/* Precio de compra: el servidor solo lo manda con «Ver precio de costo» */}
                         {product.costPrice !== null && <span className="pos__cost">Compra {formatCurrency(product.costPrice)}</span>}
                         <span className={`pos__stock pos__stock--${tone}`}>{stock > 0 ? `${stock} disp.` : "Agotado"}</span>
                       </span>
@@ -606,13 +608,13 @@ const PosPage = () => {
                     </span>
                     <strong key={lineNet(line)}>{formatCurrency(pesos(lineNet(line)))}</strong>
                   </p>
-                  {/* Con «Ver costos»: lo que costó y lo que queda, para saber hasta dónde se puede descontar */}
+                  {/* Con «Ver precio de costo»: lo que costó; con «Ver ganancias», además lo que queda (hasta dónde descontar) */}
                   {line.cost !== null && line.cost !== undefined && (() => {
                     const profit = lineNet(line) - cents(line.cost) * lineQuantity(line);
                     return (
-                      <p className={`pos__line-cost ${profit < 0 ? "pos__line-cost--loss" : ""}`.trim()}>
+                      <p className={`pos__line-cost ${showProfit && profit < 0 ? "pos__line-cost--loss" : ""}`.trim()}>
                         <span>Precio de compra {formatCurrency(line.cost)} c/u</span>
-                        <span>{profit < 0 ? `Pierdes ${formatCurrency(pesos(-profit))}` : `Ganancia ${formatCurrency(pesos(profit))}`}</span>
+                        {showProfit && <span>{profit < 0 ? `Pierdes ${formatCurrency(pesos(-profit))}` : `Ganancia ${formatCurrency(pesos(profit))}`}</span>}
                       </p>
                     );
                   })()}

@@ -11,10 +11,12 @@ export const UNIT_STATUSES = [
   { value: "garantia", label: "En garantía" },
   { value: "devuelto_proveedor", label: "Devuelto al proveedor" },
   { value: "baja", label: "De baja" },
+  // Bodega (Fase 47): la tiene un relacionado; lo cambian la devolución o la venta del préstamo
+  { value: "prestado", label: "Prestado" },
 ];
 
-/** "Vendido" lo asigna el módulo de Ventas; a mano solo estos. */
-export const MANUAL_STATUSES = UNIT_STATUSES.filter((status) => status.value !== "vendido");
+/** "Vendido" lo asigna el módulo de Ventas y "Prestado" la Bodega; a mano solo estos. */
+export const MANUAL_STATUSES = UNIT_STATUSES.filter((status) => !["vendido", "prestado"].includes(status.value));
 
 export const getStatusLabel = (value) => UNIT_STATUSES.find((status) => status.value === value)?.label ?? value;
 

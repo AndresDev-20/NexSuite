@@ -83,7 +83,7 @@ const buildColumns = (branchName) => [
 /**
  * canEdit: muestra editar y activar/desactivar. Eliminar vive en la ficha "Ver",
  * porque solo aplica a productos sin historia.
- * showCost: permiso "Ver costos".
+ * showCost: permiso "Ver precio de costo".
  * canAssign(product): ¿puede hacer su carga inicial? (onAssign abre Asignar a sucursales)
  * branchName: sucursal del filtro (la columna de existencias muestra la cantidad allí).
  * onRestore: opcional (permiso "Eliminar productos"); en los archivados es la única acción además de Ver.
@@ -91,7 +91,7 @@ const buildColumns = (branchName) => [
 const ProductsTable = ({ products, canEdit, showCost, canAssign, branchName, onView, onEdit, onToggleActive, onAssign, onRestore }) => (
   <DataTable
     caption="Listado de productos"
-    // Sin "Ver costos" la columna de costo no existe (el servidor tampoco lo envía)
+    // Sin "Ver precio de costo" la columna de costo no existe (el servidor tampoco lo envía)
     columns={buildColumns(branchName).filter((column) => showCost || !column.costs)}
     rows={products}
     getRowKey={(product) => product.id}

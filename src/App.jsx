@@ -25,6 +25,8 @@ const BranchStockPage = lazy(() => import("./features/inventory/BranchStockPage/
 const MovementsPage = lazy(() => import("./features/inventory/MovementsPage/MovementsPage"));
 const TransfersPage = lazy(() => import("./features/inventory/TransfersPage/TransfersPage"));
 const StockCountsPage = lazy(() => import("./features/inventory/StockCountsPage/StockCountsPage"));
+// Bodega: préstamos y ventas a relacionados (Fase 47)
+const WarehousePage = lazy(() => import("./features/inventory/WarehousePage/WarehousePage"));
 const MyCashPage = lazy(() => import("./features/cash/MyCashPage/MyCashPage"));
 const SessionsPage = lazy(() => import("./features/cash/SessionsPage/SessionsPage"));
 const RegistersPage = lazy(() => import("./features/cash/RegistersPage/RegistersPage"));
@@ -44,6 +46,7 @@ const ExpensesPage = lazy(() => import("./features/expenses/ExpensesPage/Expense
 const ReportCatalogPage = lazy(() => import("./features/reports/center/ReportCatalogPage"));
 const ReportPage = lazy(() => import("./features/reports/center/ReportPage"));
 const WarrantiesPage = lazy(() => import("./features/sales/WarrantiesPage/WarrantiesPage"));
+const ReturnsPage = lazy(() => import("./features/sales/ReturnsPage/ReturnsPage"));
 const ChatsPage = lazy(() => import("./features/chats/ChatsPage/ChatsPage"));
 const SettingsPage = lazy(() => import("./features/settings/SettingsPage/SettingsPage"));
 const ShopLayout = lazy(() => import("./features/shop/ShopLayout"));
@@ -116,6 +119,11 @@ function App() {
             <Route path="/ventas/historial" element={<SalesPage />} />
           </Route>
 
+          {/* Devoluciones (Fase 46): consultar y reimprimir; se devuelve desde el detalle de la venta */}
+          <Route element={<PermissionRoute permission={["sales.return", "sales.read-all"]} />}>
+            <Route path="/ventas/devoluciones" element={<ReturnsPage />} />
+          </Route>
+
           {/* Reportes: mismo acceso que el historial (las suyas o las de todos) */}
           <Route element={<PermissionRoute permission={["sales.read", "sales.read-all"]} />}>
             <Route path="/ventas/reportes" element={<ReportsPage />} />
@@ -136,8 +144,11 @@ function App() {
           <Route path="/informes/gastos" element={<Navigate to="/informes/expenses" replace />} />
           <Route path="/informes/comparativo" element={<Navigate to="/informes/comparison?periodo=12-meses&agrupar=month" replace />} />
           {/* Balance mensual en pantalla, con tablas y descarga en PDF / Excel */}
+          {/* Fase 48: además pide «Ver ganancias» (el balance es sobre todo el P y G) */}
           <Route element={<PermissionRoute permission="reports.balance" />}>
-            <Route path="/ventas/balance" element={<BalancePage />} />
+            <Route element={<PermissionRoute permission="profits.read" />}>
+              <Route path="/ventas/balance" element={<BalancePage />} />
+            </Route>
           </Route>
 
           {/* Garantías (Fase 11.2): recibir y seguir los casos */}
@@ -200,6 +211,11 @@ function App() {
 
           <Route element={<PermissionRoute permission="transfers.read" />}>
             <Route path="/inventario/traslados" element={<TransfersPage />} />
+          </Route>
+
+          {/* Bodega (Fase 47): con «Consultar bodega»; si está apagada, la página dice cómo prenderla */}
+          <Route element={<PermissionRoute permission="warehouse.read" />}>
+            <Route path="/inventario/bodega" element={<WarehousePage />} />
           </Route>
 
           <Route element={<PermissionRoute permission="product-units.read" />}>

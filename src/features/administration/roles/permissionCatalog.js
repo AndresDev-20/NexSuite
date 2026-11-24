@@ -32,6 +32,16 @@ export const PERMISSION_CATALOG = [
         label: "Anular ventas",
         description: "Anular con motivo una venta mal registrada mientras su turno de caja siga abierto: todo vuelve al inventario, la caja y la cartera.",
       },
+      {
+        code: "sales.return",
+        label: "Hacer devoluciones",
+        description: "Devolver una venta, toda o en parte: el producto vuelve al inventario, primero se rebaja lo que debe y el dinero sale por los mismos medios (el efectivo de una caja abierta de la sucursal).",
+      },
+      {
+        code: "sales.return-late",
+        label: "Devolver fuera de plazo",
+        description: "Hacer devoluciones de ventas que ya pasaron el plazo de Configuración del negocio (quedan marcadas «fuera de plazo»).",
+      },
     ],
   },
   {
@@ -55,12 +65,12 @@ export const PERMISSION_CATALOG = [
     permissions: [
       { code: "products.read", label: "Ver productos", description: "Consultar el catálogo de productos." },
       { code: "products.create", label: "Crear productos", description: "Registrar productos nuevos." },
-      { code: "products.update", label: "Editar productos", description: "Modificar precios, categoría y datos (el costo exige Ver costos)." },
+      { code: "products.update", label: "Editar productos", description: "Modificar precios, categoría y datos (el costo exige Ver precio de costo)." },
       { code: "products.delete", label: "Eliminar productos", description: "Quitar productos del catálogo." },
       {
         code: "costs.read",
-        label: "Ver costos y márgenes",
-        description: "Ver y cambiar el precio de costo y la ganancia. Sin él, el sistema no muestra costos fuera de compras.",
+        label: "Ver precio de costo",
+        description: "Ver y cambiar el precio de costo de los productos y el inventario a costo. Sin él, el sistema no muestra costos fuera de compras. La ganancia va aparte, con «Ver ganancias».",
       },
     ],
   },
@@ -189,9 +199,14 @@ export const PERMISSION_CATALOG = [
     title: "Ventas · Reportes",
     permissions: [
       {
+        code: "profits.read",
+        label: "Ver ganancias",
+        description: "Ver la ganancia en todo el sistema: bruta, neta, después de gastos, margen, % de utilidad y costo de lo vendido (Inicio, reportes, cuadres, ventas, informes y balance). Sin él no aparece en ninguna parte.",
+      },
+      {
         code: "reports.balance",
         label: "Descargar balance mensual",
-        description: "Descargar en PDF o Excel el balance del mes de todo el negocio: ventas, ganancia, compras, inventario, cartera, cuentas por pagar y caja (incluye costos).",
+        description: "Descargar en PDF o Excel el balance del mes de todo el negocio: ventas, ganancia, compras, inventario, cartera, cuentas por pagar y caja. Necesita también «Ver ganancias».",
       },
     ],
   },
@@ -234,6 +249,30 @@ export const PERMISSION_CATALOG = [
         code: "layaways.cancel",
         label: "Cancelar apartados y devolver abonos",
         description: "Cancelar un apartado devolviéndole al cliente lo abonado y registrar la devolución de los vencidos.",
+      },
+    ],
+  },
+  {
+    key: "warehouse",
+    title: "Inventarios · Bodega",
+    // Fase 47: solo se muestra con la bodega activa (Datos del negocio → «Usar la bodega»)
+    feature: "warehouse",
+    permissions: [
+      { code: "warehouse.read", label: "Consultar bodega", description: "Ver lo prestado y vendido a relacionados (el hermano), quién debe y los préstamos vencidos." },
+      {
+        code: "warehouse.manage",
+        label: "Prestar a relacionados y recibir devoluciones",
+        description: "Prestar productos de la sucursal a un relacionado, recibir lo que devuelve, ampliar el plazo y crear o editar relacionados.",
+      },
+      {
+        code: "warehouse.sell",
+        label: "Vender a relacionados y recibir abonos",
+        description: "Vender a precio especial (precio de venta menos un descuento) desde un préstamo o desde la sucursal y recibir sus pagos y abonos.",
+      },
+      {
+        code: "warehouse.void",
+        label: "Anular ventas y abonos de relacionados",
+        description: "Anular con motivo una venta sin abonos (los productos vuelven a la sucursal) o un abono (si entró a caja, sale de una caja abierta).",
       },
     ],
   },
@@ -322,7 +361,7 @@ export const PERMISSION_CATALOG = [
     title: "Informes · Centro de informes",
     permissions: [
       { code: "reports.sales", label: "Informe de ventas", description: "Cuánto se vendió: por periodo, sucursal, vendedor y medio de pago." },
-      { code: "reports.profit", label: "Informe de ganancias", description: "Utilidad bruta, neta y margen. Necesita también «Ver costos»." },
+      { code: "reports.profit", label: "Informe de ganancias", description: "Utilidad bruta, neta y margen. Necesita también «Ver ganancias»." },
       { code: "reports.products", label: "Informe de productos", description: "Qué se vende y qué no: los más y menos vendidos y la mercancía quieta." },
       { code: "reports.inventory", label: "Informe de inventario", description: "Existencias, bajo mínimo y rotación de sus sucursales." },
       { code: "reports.purchases", label: "Informe de compras", description: "Compras por proveedor, producto y sucursal." },

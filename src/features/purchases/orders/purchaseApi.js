@@ -10,7 +10,7 @@ import { normalizeOrder } from "./useOrders";
  */
 const PATH = "/purchases";
 
-/** La compra completa: sus partes por proveedor y el resumen (la ganancia, null sin «Ver costos»). */
+/** La compra completa: sus partes por proveedor y el resumen (la ganancia, null sin «Ver ganancias»). */
 export const normalizePurchase = (data) => ({
   kind: "purchase",
   id: data.id,
@@ -36,7 +36,8 @@ export const normalizePurchase = (data) => ({
     products: data.summary?.products ?? 0,
     units: data.summary?.units ?? 0,
     total: toNumber(data.summary?.total),
-    saleValue: toNumber(data.summary?.saleValue),
+    // null sin «Ver ganancias» (Fase 48): con el total sale la ganancia esperada
+    saleValue: data.summary?.saleValue === undefined ? null : toNumber(data.summary.saleValue),
     profit: data.summary?.profit === undefined ? null : toNumber(data.summary.profit),
     margin: data.summary?.margin ?? null,
   },

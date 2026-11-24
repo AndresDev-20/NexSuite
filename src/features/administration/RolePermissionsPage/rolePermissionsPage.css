@@ -42,3 +42,248 @@
   height: 56px;
   border-radius: 12px;
 }
+/* ==========================================================================
+   Rediseño 2026-11-24: módulos (barra lateral en escritorio, fichas que se
+   deslizan en el celular) + permisos del módulo elegido
+   ========================================================================== */
+.role-perms {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.role-perms__nav {
+  position: sticky;
+  top: calc(var(--header-h) + 1px);
+  z-index: 5;
+  margin: 0 -16px;
+  padding: 8px 16px;
+  background: var(--color-bg);
+}
+
+.role-perms__modules {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 2px 0 6px;
+  overflow-x: auto;
+  list-style: none;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.role-perms__modules::-webkit-scrollbar {
+  display: none;
+}
+
+.role-perms__modules > li {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+.role-perms__module {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 14px;
+  overflow: hidden;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: inherit;
+  white-space: nowrap;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 120ms ease;
+}
+
+.role-perms__module:hover {
+  border-color: color-mix(in srgb, var(--red-600) 35%, var(--color-border));
+}
+
+.role-perms__module:active {
+  transform: scale(0.97);
+}
+
+.role-perms__module:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 2px;
+}
+
+.role-perms__module--current {
+  color: var(--on-accent);
+  background: var(--red-600);
+  border-color: var(--red-600);
+}
+
+.role-perms__module-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.role-perms__module-count {
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--red-700);
+  background: var(--red-50);
+  border-radius: 999px;
+}
+
+.role-perms__module--current .role-perms__module-count {
+  color: var(--red-700);
+  background: var(--on-accent);
+}
+
+/* La barrita de avance solo se ve en la barra lateral */
+.role-perms__module-meter {
+  display: none;
+}
+
+.role-perms__main {
+  min-width: 0;
+}
+
+/* Al cambiar de módulo vuelve aquí, debajo del encabezado y de las fichas fijas */
+.role-perms__main {
+  scroll-margin-top: calc(var(--header-h) + 76px);
+}
+
+@media (min-width: 960px) {
+  .role-perms__main {
+    scroll-margin-top: calc(var(--header-h) + 16px);
+  }
+}
+
+.role-perms__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 14px;
+}
+
+.role-perms__heading {
+  margin: 0;
+  font-family: var(--font-brand);
+  font-style: italic;
+  font-size: 1.35rem;
+}
+
+.role-perms__filters {
+  display: inline-flex;
+  padding: 3px;
+  background: var(--gray-100);
+  border-radius: 999px;
+}
+
+.role-perms__filter {
+  min-height: 34px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.role-perms__filter--on {
+  color: var(--color-text);
+  background: var(--white);
+  box-shadow: 0 1px 4px rgba(26, 26, 26, 0.12);
+}
+
+.role-perms__filter:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 2px;
+}
+
+@media (min-width: 960px) {
+  .role-perms {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    align-items: start;
+    gap: 24px;
+  }
+
+  .role-perms__nav {
+    top: calc(var(--header-h) + 16px);
+    margin: 0;
+    padding: 10px;
+    background: var(--white);
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+  }
+
+  .role-perms__modules {
+    flex-direction: column;
+    gap: 4px;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .role-perms__module {
+    flex-wrap: wrap;
+    width: 100%;
+    padding: 10px 12px;
+    border-color: transparent;
+    border-radius: 12px;
+    background: transparent;
+  }
+
+  .role-perms__module.role-perms__module--current {
+    background: var(--red-600);
+    border-color: var(--red-600);
+  }
+
+  .role-perms__module:hover:not(.role-perms__module--current) {
+    background: var(--gray-100);
+    border-color: transparent;
+  }
+
+  .role-perms__module-name {
+    flex: 1;
+    text-align: left;
+  }
+
+  .role-perms__module-meter {
+    display: block;
+    flex-basis: 100%;
+    height: 3px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--gray-300) 60%, transparent);
+    border-radius: 999px;
+  }
+
+  .role-perms__module-meter span {
+    display: block;
+    height: 100%;
+    background: var(--red-600);
+    border-radius: inherit;
+    transition: width 300ms ease;
+  }
+
+  .role-perms__module--current .role-perms__module-meter {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .role-perms__module--current .role-perms__module-meter span {
+    background: var(--on-accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-perms__module,
+  .role-perms__module-meter span {
+    transition: none;
+  }
+}

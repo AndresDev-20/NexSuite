@@ -5,12 +5,13 @@ import Icon from "../../../components/ui/Icon/Icon";
 import StateMessage from "../../../components/feadback/StateMessage/StateMessage";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { getCatalog } from "./centerApi";
+import { useWarehouseEnabled } from "../../inventory/warehouse/warehouseApi";
 import "../../../styles/listPage.css";
 import "./reportCenter.css";
 
 // Los informes por tema; uno que llegue sin tema va en «Otros»
 const GROUPS = [
-  { title: "Ventas y ganancias", types: ["sales", "profit", "products", "offers", "comparison"] },
+  { title: "Ventas y ganancias", types: ["sales", "profit", "products", "offers", "related", "comparison"] },
   { title: "Mercancía", types: ["inventory", "purchases"] },
   { title: "Dinero", types: ["cash", "receivables", "payables", "expenses"] },
 ];
@@ -22,6 +23,7 @@ const GROUPS = [
 const ReportCatalogPage = () => {
   const [state, setState] = useState({ status: "loading", data: null, error: "" });
   const [attempt, setAttempt] = useState(0);
+  const warehouseEnabled = useWarehouseEnabled();
 
   useEffect(() => {
     let current = true;
@@ -57,13 +59,16 @@ const ReportCatalogPage = () => {
         </StateMessage>
       );
     }
-    const allowed = state.data.reports.filter((report) => report.allowed);
+    // «Ventas a relacionados» (Fase 47) solo con la bodega activa
+    const allowed = state.data.reports.filter((report) => report.allowed && (report.type !== "related" || warehouseEnabled));
     if (allowed.length === 0) {
       return <StateMessage icon="lock" title="No tienes informes asignados" text="Pide a un administrador que te dé permiso para ver algún informe." />;
     }
     const known = GROUPS.flatMap((group) => group.types);
     const groups = [...GROUPS, { title: "Otros", types: allowed.map((report) => report.type).filter((type) => !known.includes(type)) }]
       .map((group) => ({ ...group, reports: group.types.map((type) => allowed.find((report) => report.type === type)).filter(Boolean) }))
+      // Fase 48: sin el informe de Ganancias (sin «Ver ganancias») el tema se llama solo «Ventas»
+      .map((group) => (group.types.includes("profit") && !allowed.some((report) => report.type === "profit") ? { ...group, title: "Ventas" } : group))
       .filter((group) => group.reports.length > 0);
     let order = 0;
 

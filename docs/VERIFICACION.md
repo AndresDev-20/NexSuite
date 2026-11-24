@@ -588,6 +588,77 @@ Sin migraciones.
 - [ ] El calendario no deja elegir días futuros; elegir hoy o ayer marca su botón.
 - [ ] La flecha de tendencia de un día compara con el día anterior.
 
+## 14.31 Bodega: préstamo y venta a relacionados (Fase 47) — verificado el 2026-11-24
+
+Servidor (47.1) y pantallas (47.2); la migración ya está en desarrollo (bodega apagada: se prende en Datos del negocio). Todo está en Inventarios → Bodega.
+
+- [x] Con la bodega apagada no se ve en ningún lado; en Datos del negocio, «Usar la bodega» la prende (solo Administrador o Developer).
+- [x] Prestar un celular por IMEI al hermano: sale de las existencias, el IMEI dice «Prestado» y no aparece para vender ni trasladar.
+- [x] Prestar por cantidad un producto sin serial: no deja prestar lo apartado ni más de lo que hay.
+- [x] El préstamo vence en 30 días; ampliar la fecha funciona hasta 90 días desde que se prestó.
+- [x] Devolver una parte: vuelve a la sucursal y se puede vender; devolver todo cierra el préstamo.
+- [x] Vender al hermano (desde un préstamo y directo): se ve costo y precio de venta, el descuento da el precio especial y avisa si queda por debajo del costo.
+- [x] Pagar una parte en efectivo en una caja: entra a la caja (y sale en la tirilla del cuadre como «Abonos de relacionados»); el resto queda por cobrar.
+- [x] Abonar después (Nequi o efectivo): se aplica a la venta más vieja; el de Nequi sale en Pagos por medio.
+- [x] Anular un abono que entró a caja saca el dinero de una caja abierta; una venta con abonos no se anula.
+- [x] Las ventas a relacionados no suman en Ventas ni en el cuadre del día; sí salen aparte en el P y G del Balance mensual y en el informe «Ventas a relacionados».
+- [x] Comprobantes de préstamo y de venta (tirilla y carta) con las firmas «Entrega» y «Recibe».
+- [x] Al abonar sale «Abono ABR-… registrado» con Imprimir tirilla / carta / PDF; el recibo dice a qué ventas se aplicó, lo que quedó debiendo y lo que debe hoy.
+- [x] Cada abono (en la cuenta del relacionado y en la ficha de la venta) se puede volver a imprimir con «Tirilla» o «Carta»; uno anulado sale «ANULADO».
+- [x] Después de recibir una devolución o ampliar el plazo aparece el comprobante del préstamo al día para imprimir.
+- [x] No deja apagar la bodega con préstamos vigentes o saldo por cobrar.
+- [x] Las animaciones se ven fluidas: números que cuentan, pestañas con subrayado, tarjetas en cascada, barra del plazo, pasos que se deslizan, check al terminar y línea de tiempo; con «Animaciones reducidas» todo queda quieto.
+- [x] En el celular la Bodega se ve completa, sin moverse de lado.
+- [x] Con la bodega apagada no aparecen la entrada del menú, el aviso del encabezado, la tarjeta del informe ni los permisos de bodega en Roles.
+- [x] Un celular prestado dice «Prestado · A … hasta el …» en la ficha del producto y no se puede cambiar de estado a mano.
+
+## 14.30 Devoluciones de venta (Fase 46)
+
+La migración `20261220000000-sale-returns` ya está aplicada en desarrollo (2026-11-24). Usa un usuario con «Hacer devoluciones»
+(Administrador o Gerente) y una caja abierta en la sucursal de la venta.
+
+- [x] Si NexSuite ya estaba abierto antes de la migración, recarga la página (F5) para que tome los permisos nuevos.
+- [x] La tirilla de la devolución imprime en desarrollo (verificado por el usuario el 2026-11-24, tras aplicar la migración de la Bodega).
+- [ ] En **Ventas → Devoluciones** toca **Nueva devolución**, busca una venta del mes pasado por su número, el cliente, el IMEI o el **nombre del producto** (ej.: «cargador 25w») y elígela: se abre el asistente (si pasó el plazo lo avisa).
+- [ ] Vende 2 productos cobrando una parte en **efectivo** y otra por **Nequi**. En Ventas abre la venta y toca **Devolver** → «Devolver todo» → **Siguiente**: propone el efectivo de tu caja y el Nequi por lo que se pagó con cada uno.
+- [ ] Cambia el efectivo a menos: dice «Faltan $…» y no deja seguir. Vuelve a dejarlo como estaba, sigue, escribe el motivo y **Registrar devolución**: sale el check y el comprobante DEV para imprimir (tirilla y carta, con firmas).
+- [ ] En otra venta de efectivo + Nequi, en el paso del dinero toca **Todo en efectivo**: todo sale de la caja y se registra.
+- [ ] En una venta pagada en efectivo, en **Todo por otro medio** elige **Transferencia**: se registra sin pedir caja (sirve con la caja cerrada o sin plata) y sale en Pagos por medio en negativo.
+- [ ] La venta dice **Devuelta**, ya no tiene Anular ni Devolver, y los productos volvieron a Existencias (kárdex «Devolución de venta»).
+- [ ] En **Mi caja / Turnos**, el efectivo esperado bajó lo devuelto; al contar, la tirilla del turno trae «- Devoluciones en efectivo». Un cajero que cuenta a ciegas no ve cuánto había si la caja no alcanza.
+- [ ] En **Pagos por medio** sale «Devolución DEV-…» en negativo por Nequi.
+- [ ] Con un celular vendido por IMEI, devuelve **un solo IMEI**: la venta queda **Devuelta en parte** y ese IMEI se puede vender otra vez.
+- [ ] Una venta **fiada**: primero se rebaja lo que debe (Cartera baja) y solo el resto se entrega en dinero.
+- [ ] Una venta con **oferta de regalo**: al marcar el producto, el regalo se marca solo; no se puede devolver uno sin el otro.
+- [ ] En **Configuración del negocio** cambia «Días para devolver una venta». Una venta más vieja dice «Fuera de plazo» y solo la devuelve quien tenga «Devolver fuera de plazo».
+- [ ] **Ventas → Devoluciones**: totales del periodo por medio, búsqueda por DEV, venta, cliente, IMEI o nombre del producto, y el detalle con su comprobante.
+- [ ] **Ventas → Reportes**, histórico día a día, balance mensual y Excel del cuadre: lo devuelto resta de lo vendido el día en que se devolvió.
+- [x] En Reportes la tarjeta grande dice **«Vendido (neto)»** y baja con las devoluciones (verificado por el usuario el 2026-11-24); en **Inicio**, «Ventas totales» también baja.
+
+## 14.32 Permiso «Ver ganancias» (Fase 48)
+
+Servidor (48.1) y pantallas (48.2) hechos. Con la migración aplicada en desarrollo:
+
+- [ ] En **Roles** aparece «Ver ganancias» y «Ver costos y márgenes» se llama ahora «Ver precio de costo». Administrador y Developer tienen los dos; Gerente, Vendedor, Cajero e Inventario no tienen «Ver ganancias».
+- [ ] Con un usuario **sin** «Ver ganancias» (por ejemplo, el Gerente): en Inicio, Ventas → Reportes, el detalle de una venta, el día a día y el Excel del cuadre no aparece ninguna ganancia, utilidad, margen ni costo de lo vendido.
+- [ ] Ese usuario, aunque tenga «Descargar balance mensual», no puede abrir ni descargar el **Balance mensual**.
+- [ ] En el **Centro de informes** no le sale el informe de Ganancias, y el de Productos no tiene columnas de costo, ganancia ni margen.
+- [ ] Le das «Ver ganancias» a ese rol en Roles y, al volver a entrar, ve todo como el Administrador.
+- [ ] En **Compras**, sin «Ver ganancias», el detalle de una compra muestra lo que costó, pero no «Ganancia esperada» ni lo que vale a precio de venta.
+- [ ] Sin «Ver ganancias», en **Vender** se ve el precio de compra (si tiene «Ver precio de costo») pero no «Ganancia / Pierdes»; en la ficha y el formulario del producto no sale la ganancia por unidad ni el margen.
+- [ ] Sin «Ver ganancias», en Ventas → Reportes no queda un espacio vacío donde estaba la tarjeta Ganancia (en computador y en celular), y en Compras las cifras del detalle quedan parejas.
+
+## 14.33 Permisos del rol: rediseño (Fase 49)
+
+En **Administrativo → Roles → Permisos** de un rol que no sea del sistema:
+
+- [ ] En computador, a la izquierda salen los módulos con «activos/total»; al hacer clic en uno solo se ven sus permisos, y la lista de módulos se queda fija al bajar.
+- [ ] En el celular, los módulos son fichas que se deslizan de lado y se quedan fijas debajo del encabezado; al tocar una, la pantalla vuelve al comienzo de ese módulo.
+- [ ] «Activar todos» en un grupo enciende los que faltaban y avisa cuántos; «Quitar todos» los apaga; los contadores y las barras se mueven.
+- [ ] El filtro «Activos» / «Sin activar» deja ver solo esos; los grupos se pliegan y despliegan con la flecha.
+- [ ] El buscador encuentra en todo el sistema (por ejemplo «anular») y cada grupo dice de qué módulo es.
+- [ ] En un rol del sistema (Administrador) todo se ve pero no se puede cambiar, y no salen los botones «Activar todos / Quitar todos».
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

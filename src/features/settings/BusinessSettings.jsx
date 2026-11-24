@@ -11,8 +11,9 @@ import { unwrap } from "../../utils/apiResponse";
 import getErrorMessage from "../../utils/getErrorMessage";
 import { SIGNATURE, useBrand } from "../brand/brandContext";
 import LogoSettings from "./LogoSettings";
+import WarehouseSetting from "../inventory/warehouse/WarehouseSetting";
 
-const FIELDS = ["name", "tagline", "layawaymaxdays", "nit", "phone", "email", "address", "city", "receiptfooter", "shopwhatsapp"];
+const FIELDS = ["name", "tagline", "layawaymaxdays", "returndays", "nit", "phone", "email", "address", "city", "receiptfooter", "shopwhatsapp"];
 // WhatsApp de la tienda (Fase 24): el servidor guarda solo los dígitos, con el indicativo del país
 const whatsappDigits = (value) => value.replace(/[\s()+-]/g, "");
 const EMPTY = Object.fromEntries(FIELDS.map((field) => [field, ""]));
@@ -134,6 +135,8 @@ const BusinessSettings = () => {
       // Los días máximos de un apartado (Fase 30) van como número; lo demás, texto
       const payload = Object.fromEntries(FIELDS.map((field) => [field, String(form[field] ?? "").trim()]));
       payload.layawaymaxdays = Number(payload.layawaymaxdays) || 90;
+      // Devoluciones (Fase 46): 0 = solo el mismo día
+      payload.returndays = Number(payload.returndays);
       const data = unwrap(await api.put("/settings/business", payload));
       reset(toForm(data));
       setState({ loading: false, error: "", saved: data });
@@ -205,6 +208,18 @@ const BusinessSettings = () => {
             validate: (value) => (Number(value) >= 7 && Number(value) <= 365 && Number.isInteger(Number(value))) || "Escribe un número entero de 7 a 365.",
           })}
         />
+        <Field
+          label="Días para devolver una venta"
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={365}
+          hint="Desde el día de la venta. Pasado el plazo, solo devuelve quien tenga «Devolver fuera de plazo». Entre 0 y 365."
+          error={errors.returndays?.message}
+          {...register("returndays", {
+            validate: (value) => (String(value).trim() !== "" && Number(value) >= 0 && Number(value) <= 365 && Number.isInteger(Number(value))) || "Escribe un número entero de 0 a 365.",
+          })}
+        />
         <ShopAddress />
         <ReceiptPreview values={values} logo={brand.hasLogo ? brand.logoUrl : null} />
         <p className="settings-section__subtitle">
@@ -220,6 +235,8 @@ const BusinessSettings = () => {
           </Button>
         </FormActions>
       </FormLayout>
+      {/* Bodega (Fase 47): opcional, se guarda al tocar el interruptor (no con el formulario) */}
+      <WarehouseSetting />
     </div>
   );
 };

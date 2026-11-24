@@ -61,7 +61,7 @@ const OrdersPage = () => {
   const canCancel = can("orders.cancel");
   const canAudit = can("audit.read");
   const canCreateProduct = can("products.create");
-  // Sin "Ver costos" el servidor no envía el costo actual de los productos
+  // Sin "Ver precio de costo" el servidor no envía el costo actual de los productos
   const showCost = can("costs.read");
   const canCreateSupplier = can("suppliers.create");
   const canPay = can("payables.pay");

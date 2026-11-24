@@ -24,6 +24,11 @@ export const MOVEMENT_TYPES = [
   { value: "venta", label: "Venta" },
   { value: "anulacion", label: "Venta anulada" },
   { value: "garantia", label: "Garantía" },
+  { value: "devolucion", label: "Devolución de venta" },
+  // Bodega (Fase 47)
+  { value: "prestamo", label: "Préstamo a relacionado" },
+  { value: "devolucion_prestamo", label: "Devolución de préstamo" },
+  { value: "venta_relacionado", label: "Venta a relacionado" },
   { value: "compra", label: "Compra" },
   { value: "traslado", label: "Traslado" },
   { value: "ajuste", label: "Ajuste manual" },

@@ -14,6 +14,7 @@ import { SeasonSky } from "../../features/seasons/SeasonScene";
 import { useBrand } from "../../features/brand/brandContext";
 import BrandWordmark from "../../features/brand/BrandWordmark";
 import { useLayawayAlerts } from "../../features/sales/layaways/layawayApi";
+import { useWarehouseAlerts, useWarehouseEnabled } from "../../features/inventory/warehouse/warehouseApi";
 import "./header.css";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
@@ -33,12 +34,16 @@ const Header = () => {
   // Y apartados por vencer o con dinero por devolver (Fase 30); con «Consultar apartados»
   const layawayAlerts = useLayawayAlerts(can("layaways.read"), activeBranchId);
   const layawaysWaiting = layawayAlerts.dueSoon + layawayAlerts.refunds;
-  const notifications = chatsWaiting + ordersWaiting + layawaysWaiting;
+  // Y préstamos de la bodega vencidos (Fase 47); con la bodega activa y «Consultar bodega»
+  const warehouseEnabled = useWarehouseEnabled();
+  const warehouseAlerts = useWarehouseAlerts(warehouseEnabled === true && can("warehouse.read"), activeBranchId);
+  const notifications = chatsWaiting + ordersWaiting + layawaysWaiting + warehouseAlerts.overdue;
   const noticeLabel = [
     ordersWaiting > 0 && `${ordersWaiting} ${ordersWaiting === 1 ? "pedido espera" : "pedidos esperan"} en caja`,
     chatsWaiting > 0 && `${chatsWaiting} ${chatsWaiting === 1 ? "chat espera" : "chats esperan"} vendedor`,
     layawayAlerts.dueSoon > 0 && `${layawayAlerts.dueSoon} ${layawayAlerts.dueSoon === 1 ? "apartado vence" : "apartados vencen"} pronto`,
     layawayAlerts.refunds > 0 && `${layawayAlerts.refunds} ${layawayAlerts.refunds === 1 ? "apartado tiene" : "apartados tienen"} dinero por devolver`,
+    warehouseAlerts.overdue > 0 && `${warehouseAlerts.overdue} ${warehouseAlerts.overdue === 1 ? "préstamo vencido" : "préstamos vencidos"} en la bodega`,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -52,6 +57,8 @@ const Header = () => {
           ? "/ventas/apartados?filtro=por-vencer"
           : layawayAlerts.refunds > 0
             ? "/ventas/apartados?filtro=por-devolver"
+            : warehouseAlerts.overdue > 0
+              ? "/inventario/bodega?filtro=vencido"
             : seesChats
               ? "/ventas/chats"
               : null;

@@ -15,6 +15,7 @@ import { Warranty } from "../productUnits/ProductUnitsTable";
 import { UNIT_STATUSES, formatDate, getStatusLabel } from "../productUnits/productUnitOptions";
 import { getUnitLabel, getUnitShort } from "./productOptions";
 import useProductOverview from "./useProductOverview";
+import { formatShortDay, useLentUnits } from "../warehouse/warehouseApi";
 import "../productUnits/productUnitsTable.css";
 import "./productDetailModal.css";
 
@@ -102,6 +103,9 @@ const StockSection = ({ stock, unit, onAdjust }) => (
 
 /* ---------- Unidades con serial: conteo por estado, búsqueda y lista ---------- */
 const UnitsSection = ({ units, onViewUnits }) => {
+  const { can } = usePermissions();
+  // Bodega (Fase 47): a quién está prestada cada unidad «Prestado»
+  const lent = useLentUnits(can("warehouse.read") && units.items.some((unit) => unit.status === "prestado"));
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
 
@@ -161,6 +165,11 @@ const UnitsSection = ({ units, onViewUnits }) => {
                   </div>
                   <div className="product-detail__row-side">
                     <span className={`unit-cell__status unit-cell__status--${unit.status}`}>{getStatusLabel(unit.status)}</span>
+                    {lent.get(unit.id) && (
+                      <span className="product-detail__row-meta">
+                        A {lent.get(unit.id).related.name} hasta el {formatShortDay(lent.get(unit.id).loan.duedate)} · {lent.get(unit.id).loan.number}
+                      </span>
+                    )}
                     <Warranty unit={unit} />
                   </div>
                 </li>
@@ -278,7 +287,8 @@ const ProductSheet = ({ listed, onChanged, canEdit, canDelete, showCost, onClose
           <Item label="Maneja serial">{product.hasSerial ? "Sí (IMEI o serial por unidad)" : "No"}</Item>
           {showCost && <Item label="Precio de costo">{formatCurrency(product.costPrice)}</Item>}
           <Item label="Precio de venta">{formatCurrency(product.salePrice)}</Item>
-          {showCost && <Item label="Ganancia por unidad">{marginText(product)}</Item>}
+          {/* Fase 48: la ganancia por unidad, además con «Ver ganancias» */}
+          {showCost && can("profits.read") && <Item label="Ganancia por unidad">{marginText(product)}</Item>}
           {showCost && total > 0 && (
             <Item label="Inventario a costo">{formatCurrency((product.costPrice ?? 0) * total)}</Item>
           )}
@@ -400,7 +410,7 @@ const ProductSheet = ({ listed, onChanged, canEdit, canDelete, showCost, onClose
  * movimientos. Cada sección sale solo si el servidor la envía (según los permisos y las
  * sucursales del usuario). Desde aquí se edita, se asigna, se elimina (solo si nunca se usó) y
  * se abre el historial de cambios en la auditoría.
- * product: el de la lista (se muestra mientras carga la ficha). showCost: permiso "Ver costos".
+ * product: el de la lista (se muestra mientras carga la ficha). showCost: permiso "Ver precio de costo".
  * onViewChanges, onAssign(product, { [idbranch]: cantidad }), onViewMovements(product) y
  * onViewUnits(product) son opcionales.
  * onChanged(): opcional; se llama después de ajustar existencias desde la ficha (refrescar la lista).

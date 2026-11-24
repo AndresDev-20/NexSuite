@@ -103,11 +103,46 @@ const WarrantiesSection = ({ warranties, costs, index }) => {
   );
 };
 
+/** Devoluciones de venta del periodo (Fase 46): restan de lo vendido; el dinero salió por cada medio. */
+const ReturnsSection = ({ returns, costs, index }) => (
+  <Section title="Devoluciones de venta" subtitle="Lo que los clientes devolvieron en el periodo; los productos volvieron al inventario." index={index}>
+    <ul className="sheet__rows">
+      <li className="sheet__row reports-rise" style={{ "--i": 0 }}>
+        <div className="sheet__row-main">
+          <span className="sheet__row-title">Valor devuelto</span>
+          <span className="sheet__row-meta">
+            {returns.count} {returns.count === 1 ? "devolución" : "devoluciones"}
+            {returns.credit > 0 && ` · ${formatCurrency(returns.credit)} rebajado de deudas`}
+            {costs && returns.cost !== null && ` · ${formatCurrency(returns.cost)} de costo volvió al inventario`}
+          </span>
+        </div>
+        <div className="sheet__row-side">
+          <span className="sheet__number">−{formatCurrency(returns.amount)}</span>
+        </div>
+      </li>
+      {returns.byMethod.map((row, position) => (
+        <li className="sheet__row reports-rise" style={{ "--i": position + 1 }} key={row.method}>
+          <div className="sheet__row-main">
+            <span className="sheet__row-title">{row.label}</span>
+            <span className="sheet__row-meta">{row.method === "efectivo" ? "Salió de las cajas" : "Salió por fuera de la caja"}</span>
+          </div>
+          <div className="sheet__row-side">
+            <span className="sheet__number">−{formatCurrency(row.amount)}</span>
+          </div>
+        </li>
+      ))}
+    </ul>
+    <Link className="sheet__link" to="/ventas/devoluciones">
+      Ver las devoluciones
+    </Link>
+  </Section>
+);
+
 /** Gastos del periodo por categoría (13.3): se restan de la ganancia. */
-const ExpensesSection = ({ expenses, index }) => {
+const ExpensesSection = ({ expenses, index, costs }) => {
   const max = Math.max(...expenses.byCategory.map((row) => row.amount), 1);
   return (
-    <Section title="Gastos" subtitle={`${expenses.count} ${expenses.count === 1 ? "gasto" : "gastos"} en el periodo: se restan de la ganancia.`} index={index}>
+    <Section title="Gastos" subtitle={`${expenses.count} ${expenses.count === 1 ? "gasto" : "gastos"} en el periodo${costs ? ": se restan de la ganancia." : "."}`} index={index}>
       <ul className="sheet__rows">
         {expenses.byCategory.map((row, position) => (
           <li className="sheet__row reports-rise" key={row.name} style={{ "--i": position }}>
@@ -305,10 +340,11 @@ const ReportsPage = () => {
 
     const { totals, warranties } = report;
     const hasWarranties = warranties.refunds.count + warranties.exchanges.count > 0;
+    const hasReturns = report.returns.count > 0;
     const hasExpenses = Boolean(report.expenses && report.expenses.count > 0);
-    // De la ganancia de las ventas a la que se muestra: menos garantías y menos gastos
+    // De la ganancia de las ventas a la que se muestra: menos garantías y devoluciones (Fase 46) y menos gastos
     const deductions = [
-      hasWarranties && `garantías ${formatCurrency(totals.profit - totals.netProfit)}`,
+      (hasWarranties || hasReturns) && `${hasReturns ? (hasWarranties ? "devoluciones y garantías" : "devoluciones") : "garantías"} ${formatCurrency(totals.profit - totals.netProfit)}`,
       hasExpenses && `gastos ${formatCurrency(totals.expenses)}`,
     ].filter(Boolean);
     const profitDetail = deductions.length
@@ -318,12 +354,18 @@ const ReportsPage = () => {
 
     return (
       <div className={`reports ${loading ? "reports--loading" : ""}`.trim()} aria-busy={loading} key={animKey}>
-        <div className="reports-kpis">
+        {/* Fase 48: sin «Ver ganancias» quedan 3 cifras; la rejilla se acomoda sin hueco */}
+        <div className={`reports-kpis ${costs ? "" : "reports-kpis--three"}`.trim()}>
+          {/* Pedido del 2026-11-24: el número grande es lo que quedó (neto de devoluciones); lo bruto va debajo */}
           <Kpi
             index={0}
-            label="Vendido"
-            value={totals.total}
-            detail={totals.refunds > 0 ? `${salesLabel(totals.count)} · neto ${formatCurrency(totals.net)} tras devoluciones` : salesLabel(totals.count)}
+            label={totals.refunds + totals.returns > 0 ? "Vendido (neto)" : "Vendido"}
+            value={totals.net}
+            detail={
+              totals.refunds + totals.returns > 0
+                ? `${salesLabel(totals.count)} por ${formatCurrency(totals.total)} − ${formatCurrency(totals.refunds + totals.returns)} devuelto`
+                : salesLabel(totals.count)
+            }
           />
           {costs && <Kpi index={1} label="Ganancia" value={totals.finalProfit} detail={profitDetail} tone="ok" />}
           <Kpi index={2} label="Fiado" value={totals.credit} detail="Queda en la cartera" tone={totals.credit > 0 ? "warning" : undefined} />
@@ -331,19 +373,20 @@ const ReportsPage = () => {
         </div>
         {costs && (
           <p className="reports-note">
-            Ganancia = lo vendido menos lo que costó lo vendido, menos lo devuelto y el costo de los cambios por garantía
+            Ganancia = lo vendido menos lo que costó lo vendido, menos lo devuelto (en garantía y devoluciones de venta; lo devuelto en venta recupera su costo) y el costo de los cambios por garantía
             {report.expenses ? ", menos los gastos del negocio." : ". Los gastos del negocio los ve quien tiene «Ver gastos»."}
           </p>
         )}
 
-        {totals.count === 0 && !report.receivablePayments?.total && !hasWarranties && !hasExpenses ? (
+        {totals.count === 0 && !report.receivablePayments?.total && !hasWarranties && !hasReturns && !hasExpenses ? (
           <StateMessage icon="cart" title="No hubo ventas" text={`No hay ventas ${singleDay ? "ese día" : "en ese periodo"}${activeBranch ? ` en ${activeBranch.name}` : ""}.`} />
         ) : (
           <>
             <div className="reports-grid">
               <MoneyIn report={report} branchFiltered={Boolean(activeBranchId)} />
               {hasWarranties && <WarrantiesSection warranties={warranties} costs={costs} index={1} />}
-              {hasExpenses && <ExpensesSection expenses={report.expenses} index={2} />}
+              {hasReturns && <ReturnsSection returns={report.returns} costs={costs} index={1} />}
+              {hasExpenses && <ExpensesSection expenses={report.expenses} index={2} costs={costs} />}
               {report.scope === "todas" && report.bySeller.length > 0 && (
                 <Section title="Por vendedor" subtitle="Quién vendió más primero." index={1}>
                   <ol className="rank">
@@ -432,7 +475,8 @@ const ReportsPage = () => {
           </Button>
           {/* Fase 35: la tirilla del cuadre del día (de un solo día) para la impresora térmica */}
           {singleDay && <PrintClosingButton label="Tirilla del día" day={{ date: from, ...(activeBranchId && { idbranch: activeBranchId }) }} />}
-          {can("reports.balance") && (
+          {/* Fase 48: el balance pide también «Ver ganancias» */}
+          {can("reports.balance") && can("profits.read") && (
             <Link className="pos-new-sale balance-link" to="/ventas/balance">
               Balance mensual
             </Link>

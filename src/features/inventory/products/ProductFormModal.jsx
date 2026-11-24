@@ -57,7 +57,7 @@ const toFormValues = (product) => ({
 /**
  * SKU vacío: al crear lo genera el servidor; al editar se conserva el actual.
  * Código de barras y descripción vacíos: al editar se envían null para borrarlos.
- * Sin "Ver costos" el costo no se envía (el servidor lo rechazaría): al crear queda en 0 y lo
+ * Sin "Ver precio de costo" el costo no se envía (el servidor lo rechazaría): al crear queda en 0 y lo
  * fija la primera compra.
  * Proveedor habitual: solo con «Consultar proveedores» (withSupplier); vacío al editar lo quita.
  */
@@ -266,7 +266,7 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
   });
   const canAssignHere = withBranches && (hasSerial ? branchStep.canUnits : branchStep.canStock);
 
-  // Fase 32.3: «¿A qué compra va?» (con «Editar compras» y «Ver costos»: la compra lleva el costo)
+  // Fase 32.3: «¿A qué compra va?» (con «Editar compras» y «Ver precio de costo»: la compra lleva el costo)
   const canPurchase = withBranches && Boolean(branchStep.canPurchase);
   const [openPurchases, setOpenPurchases] = useState(() => ({ status: canPurchase ? "loading" : "ready", items: [] }));
   const [purchaseId, setPurchaseId] = useState(null);
@@ -513,7 +513,8 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
                     {...register("sale_price", RULES.sale_price)}
                   />
                 </div>
-                {showCost && <MarginCard cost={cost} sale={sale} />}
+                {/* Fase 48: el margen, además con «Ver ganancias» */}
+                {showCost && can("profits.read") && <MarginCard cost={cost} sale={sale} />}
               </FormSection>
 
               <FormSection icon="shield" title="Serial y garantía" description="Cómo se identifica cada unidad y qué garantía tiene el cliente.">
@@ -660,7 +661,7 @@ const ProductForm = ({ product, categories, categoryHint, showCost, branchStep, 
 /**
  * product = null → crear · product = {…} → editar.
  * categoryHint: aviso bajo la categoría (cargando, error o sin categorías).
- * showCost: permiso "Ver costos"; sin él no se muestra ni se envía el precio de costo.
+ * showCost: permiso "Ver precio de costo"; sin él no se muestra ni se envía el precio de costo.
  * branchStep (opcional, al crear desde Productos): { branches, suppliers, suppliersHint, canStock, canUnits }
  *   para asignar a sucursales en el último paso.
  * onSubmit(payload, assignment) debe ser async y lanzar el error si algo falla; assignment es la carga

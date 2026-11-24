@@ -15,6 +15,7 @@ import useSales, { getMethodLabel } from "../sales/useSales";
 import { todayInColombia } from "../../../utils/dates";
 import { formatCurrency } from "../../../utils/money";
 import "../../../styles/listPage.css";
+import "../returns/returns.css";
 import "./salesPage.css";
 
 const SEARCH_DELAY_MS = 300;
@@ -29,6 +30,11 @@ const buildColumns = (showProfit) => [
       <div className="sales-cell">
         <strong className="sales-cell__number">
           {sale.number} {sale.isVoided && <span className="sales-cell__voided">Anulada</span>}
+          {sale.returnState && (
+            <span className={`return-badge ${sale.returnState === "devuelta" ? "return-badge--full" : ""}`.trim()}>
+              {sale.returnState === "devuelta" ? "Devuelta" : "Devuelta en parte"}
+            </span>
+          )}
         </strong>
         <span className="sales-cell__secondary">{formatDateTime(sale.createdAt)}</span>
       </div>
@@ -53,9 +59,14 @@ const buildColumns = (showProfit) => [
   {
     key: "total",
     header: "Total",
-    render: (sale) => <strong className={sale.isVoided ? "sales-cell__struck" : undefined}>{formatCurrency(sale.total)}</strong>,
+    render: (sale) => (
+      <div className="sales-cell">
+        <strong className={sale.isVoided || sale.returnState === "devuelta" ? "sales-cell__struck" : undefined}>{formatCurrency(sale.total)}</strong>
+        {sale.returnedTotal > 0 && <span className="sales-cell__secondary">Devuelto − {formatCurrency(sale.returnedTotal)}</span>}
+      </div>
+    ),
   },
-  ...(showProfit ? [{ key: "profit", header: "Ganancia", render: (sale) => formatCurrency(sale.profit ?? 0) }] : []),
+  ...(showProfit ? [{ key: "profit", header: "Ganancia", render: (sale) => formatCurrency(sale.profit) }] : []),
 ];
 
 const SalesPage = () => {
@@ -67,7 +78,7 @@ const SalesPage = () => {
   const today = todayInColombia();
 
   const seesAll = can("sales.read-all");
-  const showProfit = can("costs.read");
+  const showProfit = can("profits.read");
 
   const [query, setQuery] = useState(searchParams.get("search") ?? "");
   // Por defecto, las de hoy; con un número buscado, sin fechas; desde Reportes llegan from y to
@@ -219,6 +230,7 @@ const SalesPage = () => {
         getSale={getSale}
         voidSale={voidSale}
         onVoided={() => setReload((value) => value + 1)}
+        onReturned={() => setReload((value) => value + 1)}
         onClose={() => setViewing(null)}
       />
     </section>

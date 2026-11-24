@@ -52,6 +52,15 @@ const usePayments = () => {
   return { ...state, getPayments };
 };
 
+/** De dónde viene el movimiento; las devoluciones de venta (Fase 46) salen en negativo. */
+const originOf = (item) => {
+  if (item.source === "devolucion") return `Devolución ${item.saleReturn?.number ?? ""}`.trim();
+  if (item.source === "apartado") return `Apartado ${item.layaway?.number ?? ""}`.trim();
+  // Bodega (Fase 47): abono de un relacionado (el hermano)
+  if (item.source === "relacionado") return "Abono de relacionado";
+  return item.sale ? `Venta ${item.sale.number}` : "Abono de cartera";
+};
+
 const columns = [
   {
     key: "method",
@@ -69,7 +78,7 @@ const columns = [
     header: "De",
     render: (item) => (
       <div className="cash-cell">
-        <span>{item.sale ? `Venta ${item.sale.number}` : "Abono de cartera"}</span>
+        <span>{originOf(item)}</span>
         <span className="cash-cell__secondary">{item.customer ?? "Consumidor final"}</span>
       </div>
     ),
@@ -94,7 +103,15 @@ const columns = [
       </div>
     ),
   },
-  { key: "amount", header: "Monto", render: (item) => <span className="cash-cell__money">{formatCurrency(item.amount)}</span> },
+  {
+    key: "amount",
+    header: "Monto",
+    render: (item) => (
+      <span className="cash-cell__money" style={item.amount < 0 ? { color: "var(--danger)" } : undefined}>
+        {formatCurrency(item.amount)}
+      </span>
+    ),
+  },
 ];
 
 /**
