@@ -24,7 +24,9 @@ const toFormValues = (unit) => ({
 const UnitForm = ({ unit, suppliers, busy, onCancel, onSubmit }) => {
   const [serverError, setServerError] = useState("");
   const isImei = unit.serialType === "imei";
-  const isSold = unit.status === "vendido";
+  // Vendida en Ventas: el estado no se edita. «Vendido» sin venta (ajuste viejo, 2026-11-25) sí: vuelve a Disponible
+  const isSold = unit.status === "vendido" && Boolean(unit.saleId);
+  const soldWithoutSale = unit.status === "vendido" && !unit.saleId;
 
   const {
     register,
@@ -109,7 +111,13 @@ const UnitForm = ({ unit, suppliers, busy, onCancel, onSubmit }) => {
         {isSold ? (
           <Field label="Estado" readOnly tabIndex={-1} value={getStatusLabel(unit.status)} hint="Lo cambia una devolución." />
         ) : (
-          <Select label="Estado" required options={MANUAL_STATUSES} {...register("status")} />
+          <Select
+            label="Estado"
+            required
+            options={soldWithoutSale ? [{ value: "vendido", label: "Vendido (sin venta)" }, ...MANUAL_STATUSES] : MANUAL_STATUSES}
+            hint={soldWithoutSale ? "Salió con un ajuste «Vendido», sin venta: pásala a Disponible si sigue en la tienda." : undefined}
+            {...register("status")}
+          />
         )}
       </div>
 

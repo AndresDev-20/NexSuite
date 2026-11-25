@@ -10,6 +10,8 @@ export const normalizeUnit = (unit) => ({
   imei2: unit.imei2 ?? null,
   serialType: unit.serialtype,
   status: unit.status,
+  // Con venta, el estado lo cambian la anulación o la devolución; «Vendido» sin venta (un ajuste viejo) se corrige editándola
+  saleId: unit.idsale ?? null,
   productId: unit.idproduct,
   productName: unit.product?.nameproduct ?? "",
   branchId: unit.idbranch,

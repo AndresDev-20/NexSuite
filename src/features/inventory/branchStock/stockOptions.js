@@ -2,12 +2,13 @@
  * Motivos del ajuste manual (mismos del backend: services/stock.service.js).
  * sign: 1 solo suma, -1 solo resta, 0 cualquiera de los dos.
  * unitStatus: cómo queda una unidad con serial que sale por ese motivo.
- * "Vendido" es temporal: cuando exista el Punto de venta, lo pondrá la venta.
+ * retired: ya no se ofrece (2026-11-25: «Vendido» dejaba el celular vendido sin venta; lo vendido sale por
+ * Ventas → Vender). Sigue en la lista para nombrar los movimientos viejos.
  */
 export const ADJUSTMENT_REASONS = [
   { value: "inventario_inicial", label: "Inventario que faltó cargar", sign: 1 },
   { value: "devolucion_cliente", label: "Devolución de un cliente", sign: 1 },
-  { value: "venta", label: "Vendido", sign: -1, unitStatus: "Vendida" },
+  { value: "venta", label: "Vendido", sign: -1, unitStatus: "Vendida", retired: true },
   { value: "danio_perdida", label: "Daño o pérdida", sign: -1, unitStatus: "De baja" },
   { value: "devolucion_proveedor", label: "Devuelto al proveedor", sign: -1, unitStatus: "Devuelta al proveedor" },
   { value: "uso_interno", label: "Uso interno o muestra", sign: -1, unitStatus: "De baja" },
@@ -16,7 +17,7 @@ export const ADJUSTMENT_REASONS = [
 
 /** Motivos que sirven para sumar (direction 1) o para restar (direction -1). */
 export const reasonsFor = (direction) =>
-  ADJUSTMENT_REASONS.filter((reason) => reason.sign === 0 || reason.sign === direction);
+  ADJUSTMENT_REASONS.filter((reason) => !reason.retired && (reason.sign === 0 || reason.sign === direction));
 
 const REASON_LABELS = Object.fromEntries(ADJUSTMENT_REASONS.map((reason) => [reason.value, reason.label]));
 

@@ -667,6 +667,14 @@ En **Administrativo → Roles → Permisos** de un rol que no sea del sistema:
 - [ ] En **Pedidos a caja**, un pedido con celular pide el cliente al cobrarlo; uno sin celular, no.
 - [ ] La tirilla y la carta de la venta del celular salen con el nombre del cliente.
 
+## 14.35 Celular «Vendido» sin venta (Fase 51)
+
+- [ ] En **Inventarios → Unidades con serial**, el IMEI 866152088213550 (Honor Magic8, Tienda Movil 2) → Editar: el estado dice «Vendido (sin venta)»; cámbialo a **Disponible** y guarda.
+- [ ] La existencia de ese producto en Tienda Movil 2 sube 1 y en Movimientos sale «Unidad …: Vendido → Disponible».
+- [ ] Ese celular ya se puede vender normal en Vender (con su cliente).
+- [ ] En **Existencias → Ajustar**, al disminuir ya no aparece el motivo «Vendido».
+- [ ] Un celular vendido en una venta real sigue sin dejar cambiar el estado («Lo cambia una devolución»).
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:
