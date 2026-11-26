@@ -26,6 +26,7 @@ import {
 } from "./purchaseForm";
 import { fetchLoadedStock } from "./useOrders";
 import PurchaseProductPicker from "./PurchaseProductPicker";
+import useSerialCheck from "./useSerialCheck";
 import "./orderFormModal.css";
 
 const MAX_QUANTITY_LENGTH = 7; // hasta 1.000.000
@@ -33,6 +34,7 @@ const MAX_COST_LENGTH = 13;
 
 const toOptions = (list, getLabel) => list.map((item) => ({ value: String(item.id), label: getLabel(item) }));
 const unitsText = (count) => `${count} ${count === 1 ? "unidad" : "unidades"}`;
+const MAX_SHOWN_SERIAL_ERRORS = 4;
 
 /* ---------- Un producto de la compra: costo, reparto por sucursal e IMEIs ---------- */
 const ProductLine = ({ line, index, leaving = false, branches, errors, onChange, onRemove }) => {
@@ -41,6 +43,8 @@ const ProductLine = ({ line, index, leaving = false, branches, errors, onChange,
   const setQuantity = (branchId, value) => set({ quantities: { ...line.quantities, [branchId]: value } });
   const setSerials = (branchId, value) => set({ serials: { ...line.serials, [branchId]: value } });
   const serialLabel = line.serialType === "imei" ? "IMEI" : "Seriales";
+  // 2026-11-26: mientras se escriben, avisa si un IMEI no pasa, está repetido o ya está registrado
+  const serialErrors = useSerialCheck(line, allocationsOf(line).map((allocation) => allocation.branchId));
 
   return (
     <li className={`purchase-line ${leaving ? "purchase-line--leaving" : ""}`.trim()}>
@@ -191,6 +195,20 @@ const ProductLine = ({ line, index, leaving = false, branches, errors, onChange,
                   value={line.serials[branchId] ?? ""}
                   onChange={(event) => setSerials(branchId, event.target.value)}
                 />
+              )}
+              {fresh > 0 && (serialErrors[branchId]?.length ?? 0) > 0 && (
+                <ul className="purchase-line__serial-errors" role="alert">
+                  {serialErrors[branchId].slice(0, MAX_SHOWN_SERIAL_ERRORS).map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                  {serialErrors[branchId].length > MAX_SHOWN_SERIAL_ERRORS && <li>Y {serialErrors[branchId].length - MAX_SHOWN_SERIAL_ERRORS} más.</li>}
+                </ul>
+              )}
+              {fresh > 0 && count > 0 && (serialErrors[branchId]?.length ?? 0) === 0 && (
+                <p className="purchase-line__serial-ok">
+                  <Icon name="check" />
+                  {count === 1 ? `El ${serialLabel === "IMEI" ? "IMEI" : "serial"} pasa` : `Los ${count} pasan`}
+                </p>
               )}
             </div>
           );

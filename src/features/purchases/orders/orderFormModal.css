@@ -773,3 +773,41 @@
     animation: none;
   }
 }
+
+/* 2026-11-26: revisión en vivo de los IMEI/seriales (como en Asignar a sucursales) */
+.purchase-line__serial-errors {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 8px 12px 8px 28px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--danger);
+  background-color: var(--red-50);
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+  animation: purchase-loaded-in 220ms ease both;
+}
+
+.purchase-line__serial-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.purchase-line__serial-ok .icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .purchase-line__serial-errors {
+    animation: none;
+  }
+}

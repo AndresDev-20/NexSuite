@@ -681,6 +681,7 @@ En **Administrativo → Roles → Permisos** de un rol que no sea del sistema:
 - [ ] Sin marcarla, la compra solo suma lo nuevo y, al confirmar, el costo del producto queda en el promedio (ej. 1 a 270.000 + 1 a 260.000 → 265.000).
 - [ ] Al marcarla salen las unidades ya cargadas, la cantidad sube sola y aparece el aviso amarillo de que pasan a valer el costo de esta compra.
 - [ ] En «Agregar producto» de la compra escribes parte del nombre (ej. «samsung a15») o el SKU y salen los que coinciden; al tocar uno se agrega a la compra.
+- [ ] En los IMEI de la compra, uno mal escrito, uno repetido o uno que ya existe salen en rojo con su número de línea mientras escribes; si todos están bien dice «Los N pasan».
 
 ## 15. Producción (cuando montes el VPS)
 
