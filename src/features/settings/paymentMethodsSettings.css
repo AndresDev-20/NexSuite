@@ -79,3 +79,14 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Fase 54: % de recargo de cada medio */
+.pay-methods__percent {
+  width: 130px;
+  margin: 0;
+}
+
+.pay-methods__surcharge {
+  font-weight: 700;
+  color: #1d4ed8;
+}

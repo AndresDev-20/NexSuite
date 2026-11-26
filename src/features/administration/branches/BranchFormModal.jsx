@@ -7,6 +7,7 @@ import Modal from "../../../components/feadback/Modal/Modal";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import Icon from "../../../components/ui/Icon/Icon";
 import { useBrand } from "../../brand/brandContext";
+import BranchLogoField from "./BranchLogoField";
 import "./branchFormModal.css";
 
 /*
@@ -26,8 +27,9 @@ const suggestedPrefix = (name) => {
 };
 
 /** Vista previa del encabezado del comprobante (la tirilla): se llena mientras se escribe. */
-const ReceiptPreview = ({ name, address, email, phone, web, prefix, guessed }) => {
-  const brandLogo = useBrand().logoUrl; // logo de la empresa (Fase 29)
+const ReceiptPreview = ({ name, address, email, phone, web, prefix, guessed, nit, logo }) => {
+  const businessLogo = useBrand().logoUrl; // logo de la empresa (Fase 29)
+  const brandLogo = logo ?? businessLogo; // Fase 52.3: el propio de la sucursal, si tiene
   return (
   <aside className="branch-receipt" aria-hidden="true">
     <span className="branch-receipt__label">Así sale en el comprobante</span>
@@ -36,6 +38,7 @@ const ReceiptPreview = ({ name, address, email, phone, web, prefix, guessed }) =
         <img src={brandLogo} alt="" />
       </span>
       <strong className={`branch-receipt__name ${name ? "" : "branch-receipt__name--empty"}`.trim()}>{name || "Nombre de la sucursal"}</strong>
+      {nit && <span className="branch-receipt__line">NIT {nit}</span>}
       {address && <span className="branch-receipt__line">{address}</span>}
       {(phone || email) && <span className="branch-receipt__line">{[phone, email].filter(Boolean).join(" · ")}</span>}
       {web && <span className="branch-receipt__line">{web}</span>}
@@ -79,6 +82,7 @@ const toFormValues = (branch) => ({
   number: branch?.number ?? "",
   web: branch?.web ?? "",
   invoiceprefix: branch?.invoicePrefix ?? "",
+  nit: branch?.nit ?? "",
 });
 
 /**
@@ -113,6 +117,9 @@ const RULES = {
   web: {
     validate: (value) => !value.trim() || isHttpUrl(value.trim()) || "Debe empezar por http:// o https://",
   },
+  nit: {
+    validate: (value) => !value.trim() || /^[0-9][0-9. -]{3,28}[0-9]$/.test(value.trim()) || "Solo números, puntos y guion (ej. 900123456-7).",
+  },
   invoiceprefix: {
     validate: (value) => !value.trim() || /^[A-Za-z0-9]{2,6}$/.test(value.trim()) || "De 2 a 6 letras o números (ej. CEN).",
   },
@@ -129,7 +136,9 @@ const BranchForm = ({ branch, busy, onCancel, onSubmit }) => {
     watch,
     formState: { errors },
   } = useForm({ defaultValues: toFormValues(branch) });
-  const [name, address, email, phone, web, prefix] = watch(["nameBranch", "address", "email", "number", "web", "invoiceprefix"]);
+  const [name, address, email, phone, web, prefix, nit] = watch(["nameBranch", "address", "email", "number", "web", "invoiceprefix", "nit"]);
+  const businessLogo = useBrand().logoUrl;
+  const [ownLogo, setOwnLogo] = useState(null); // Fase 52.3: para la vista previa
   const typedPrefix = String(prefix ?? "").replace(/\s+/g, "").toUpperCase();
 
   const submit = handleSubmit(async (values) => {
@@ -215,6 +224,22 @@ const BranchForm = ({ branch, busy, onCancel, onSubmit }) => {
               error={errors.invoiceprefix?.message}
               {...register("invoiceprefix", RULES.invoiceprefix)}
             />
+            {/* Fase 52.3: NIT y logo propios de la sucursal (sin ellos, los de Datos del negocio) */}
+            <Field
+              label="NIT de la sucursal"
+              autoComplete="off"
+              maxLength={30}
+              inputMode="numeric"
+              placeholder="Opcional · ej. 900123456-7"
+              hint="Sale en sus comprobantes. Vacío: el NIT de Datos del negocio."
+              error={errors.nit?.message}
+              {...register("nit", RULES.nit)}
+            />
+            {isEdit ? (
+              <BranchLogoField branch={branch} fallback={businessLogo} onChange={setOwnLogo} />
+            ) : (
+              <p className="branch-logo__later">El logo propio se sube después de crearla, en «Editar sucursal».</p>
+            )}
           </FormSection>
         </div>
 
@@ -226,6 +251,8 @@ const BranchForm = ({ branch, busy, onCancel, onSubmit }) => {
           web={web.trim()}
           prefix={typedPrefix || (isEdit && branch?.invoicePrefix) || suggestedPrefix(name)}
           guessed={!typedPrefix && !(isEdit && branch?.invoicePrefix)}
+          nit={String(nit ?? "").trim()}
+          logo={ownLogo ?? undefined}
         />
       </div>
 

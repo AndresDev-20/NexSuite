@@ -189,7 +189,23 @@
   }
 
   .branches-page__search {
-    width: 320px;
+    width: min(320px, 100%);
+  }
+
+  /* Título, buscador y botón: si no caben juntos, bajan en vez de salirse */
+  .branches-page__header {
+    flex-wrap: wrap;
+  }
+
+  .branches-page__header > *,
+  .branches-page__toolbar {
+    min-width: 0;
+  }
+
+  .branches-page__actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 100%;
   }
 
   .branches-page__count {

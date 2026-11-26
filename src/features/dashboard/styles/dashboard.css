@@ -645,7 +645,7 @@ a.kpi:focus-visible { outline: 2px solid var(--red-600); outline-offset: 2px; }
 
   .split { flex-direction: row; align-items: center; gap: 24px; }
   .split .donut { flex: 0 0 200px; margin: 0; }
-  .split .legend { flex: 1; }
+  .split .legend { flex: 1; min-width: 0; }
 
   /* La tabla vuelve a ser tabla */
   .table { overflow-x: auto; }
@@ -696,6 +696,29 @@ a.kpi:focus-visible { outline: 2px solid var(--red-600); outline-offset: 2px; }
   .split .donut { flex: none; margin: 0 auto; }
 
   .modules { gap: 12px; }
+}
+
+/* Celular: los cinco periodos caben sin salirse de su barra */
+@media (max-width: 479px) {
+  .dashboard__period .segmented { min-width: 0; max-width: 100%; }
+  .segmented__button { min-width: 0; padding: 0 6px; font-size: 0.8rem; }
+}
+
+/* Encabezado: si el título, la sucursal y el periodo no caben en una fila, los filtros bajan sin salirse */
+@media (min-width: 768px) {
+  .dashboard__top { flex-wrap: wrap; column-gap: 20px; }
+  .dashboard__top > * { min-width: 0; }
+  .dashboard__filters { flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
+  .dashboard__filters .dashboard__period { max-width: 100%; }
+  .dashboard__period .segmented { min-width: 0; flex-wrap: wrap; }
+  .segmented__button { white-space: nowrap; }
+}
+
+/* Portátiles pequeños: menos margen lateral (el contenido ya tiene el suyo) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .dashboard { padding-inline: 24px; padding-top: 24px; }
+  .dashboard__grid { gap: 18px; }
+  .kpi__value { font-size: clamp(1.3rem, 0.6rem + 1.1vw, 1.75rem); overflow-wrap: anywhere; }
 }
 
 /* ==========================================================================

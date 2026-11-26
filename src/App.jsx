@@ -24,6 +24,7 @@ const ProductsPage = lazy(() => import("./features/inventory/ProductsPage/Produc
 const BranchStockPage = lazy(() => import("./features/inventory/BranchStockPage/BranchStockPage"));
 const MovementsPage = lazy(() => import("./features/inventory/MovementsPage/MovementsPage"));
 const TransfersPage = lazy(() => import("./features/inventory/TransfersPage/TransfersPage"));
+const BranchRequestsPage = lazy(() => import("./features/inventory/BranchRequestsPage/BranchRequestsPage"));
 const StockCountsPage = lazy(() => import("./features/inventory/StockCountsPage/StockCountsPage"));
 // Bodega: préstamos y ventas a relacionados (Fase 47)
 const WarehousePage = lazy(() => import("./features/inventory/WarehousePage/WarehousePage"));
@@ -211,6 +212,11 @@ function App() {
 
           <Route element={<PermissionRoute permission="transfers.read" />}>
             <Route path="/inventario/traslados" element={<TransfersPage />} />
+          </Route>
+
+          {/* Fase 52: pedidos entre sucursales (consultar, pedir o atender) */}
+          <Route element={<PermissionRoute permission={["branch-requests.read", "branch-requests.create", "branch-requests.dispatch"]} />}>
+            <Route path="/inventario/pedidos" element={<BranchRequestsPage />} />
           </Route>
 
           {/* Bodega (Fase 47): con «Consultar bodega»; si está apagada, la página dice cómo prenderla */}

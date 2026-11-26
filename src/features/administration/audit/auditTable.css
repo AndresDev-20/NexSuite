@@ -5,6 +5,45 @@
   min-width: 0;
 }
 
+/* Acción: punto de color del tipo + la frase en negrilla y, debajo, el área y la hora */
+.audit-cell--action {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.audit-cell__dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.audit-cell__dot--success { color: var(--success); background: var(--success); }
+.audit-cell__dot--info { color: var(--info); background: var(--info); }
+.audit-cell__dot--danger { color: var(--danger); background: var(--danger); }
+.audit-cell__dot--warning { color: var(--warning); background: var(--warning); }
+.audit-cell__dot--neutral { color: var(--gray-500); background: var(--gray-500); }
+
+.audit-cell__action {
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.audit-cell__ref {
+  align-self: flex-start;
+  padding: 1px 8px;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  background: var(--gray-100);
+  border-radius: 6px;
+}
+
 .audit-cell__secondary {
   font-size: 0.82rem;
   color: var(--color-text-muted);
@@ -54,5 +93,9 @@
   .data-table__cell--primary .audit-cell {
     align-items: flex-start;
     text-align: left;
+  }
+
+  .audit-cell .audit-cell__ref {
+    align-self: flex-end;
   }
 }

@@ -105,6 +105,7 @@
    ========================================================================== */
 .list-page__bar.products-toolbar {
   flex-direction: column;
+  flex-wrap: nowrap; /* en columna, «wrap» estira las filas de filtros */
   align-items: stretch;
   gap: 12px;
 }
@@ -150,8 +151,13 @@
 }
 
 @media (min-width: 768px) {
+  /* Cada filtro con al menos 190px para que «Todas las categorías» no se corte; caben los que quepan por fila */
   .products-toolbar__filters {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  }
+
+  .products-toolbar__filters .list-page__search {
+    grid-column: span 2;
   }
 
   /* Tablet: los botones en columnas parejas a todo el ancho */
@@ -162,13 +168,6 @@
 
 /* Computador: la búsqueda más ancha y todos los filtros en la misma fila */
 @media (min-width: 1100px) {
-  .products-toolbar__filters {
-    grid-template-columns: minmax(240px, 1.6fr) repeat(4, minmax(0, 1fr));
-  }
-
-  .products-toolbar__filters .list-page__search {
-    grid-column: auto;
-  }
 
   /* Computador: el conteo a la izquierda y los botones en una sola fila a la derecha */
   .products-toolbar__summary {

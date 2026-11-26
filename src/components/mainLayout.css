@@ -47,6 +47,21 @@
     padding: 32px;
   }
 }
+
+/*
+ * Portátiles pequeños (1024–1439px, también 1280/1366 con zoom al 110 %): menú un poco más angosto y menos margen
+ * para que las pantallas tengan más ancho útil y no se amontonen.
+ */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .main-layout__menu {
+    width: 236px;
+    padding: 16px 10px;
+  }
+
+  .main-layout__content {
+    padding: clamp(18px, 1.8vw, 26px);
+  }
+}
 /* Mientras se descarga una pantalla (React.lazy, Fase 17.2) */
 .main-layout__loading {
   padding: 24px;

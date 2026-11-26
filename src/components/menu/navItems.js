@@ -87,6 +87,12 @@ const NAV_ITEMS = [
         to: "/inventario/traslados",
         permission: "transfers.read",
       },
+      // Fase 52: pedirle a otra sucursal lo que no hay
+      {
+        label: "Pedidos entre sucursales",
+        to: "/inventario/pedidos",
+        permission: ["branch-requests.read", "branch-requests.create", "branch-requests.dispatch"],
+      },
       {
         label: "Toma física",
         to: "/inventario/toma-fisica",

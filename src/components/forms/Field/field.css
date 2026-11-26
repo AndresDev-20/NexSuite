@@ -34,6 +34,18 @@
   transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
 }
 
+/* Fechas: ancho mínimo para que «26/11/2026» y el ícono del calendario no se corten en filtros angostos */
+.field__input[type="date"],
+.field__input[type="month"] {
+  min-width: min(152px, 100%);
+  padding-right: 10px;
+}
+
+.field__input[type="datetime-local"] {
+  min-width: min(210px, 100%);
+  padding-right: 10px;
+}
+
 .field__input--with-end {
   padding-right: 48px;
 }

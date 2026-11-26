@@ -15,6 +15,7 @@ import { useBrand } from "../../features/brand/brandContext";
 import BrandWordmark from "../../features/brand/BrandWordmark";
 import { useLayawayAlerts } from "../../features/sales/layaways/layawayApi";
 import { useWarehouseAlerts, useWarehouseEnabled } from "../../features/inventory/warehouse/warehouseApi";
+import { useRequestsSummary } from "../../features/inventory/requests/requestsApi";
 import "./header.css";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
@@ -37,13 +38,18 @@ const Header = () => {
   // Y préstamos de la bodega vencidos (Fase 47); con la bodega activa y «Consultar bodega»
   const warehouseEnabled = useWarehouseEnabled();
   const warehouseAlerts = useWarehouseAlerts(warehouseEnabled === true && can("warehouse.read"), activeBranchId);
-  const notifications = chatsWaiting + ordersWaiting + layawaysWaiting + warehouseAlerts.overdue;
+  // Y pedidos entre sucursales (Fase 52): por atender (me pidieron) y envíos por recibir
+  const requests = useRequestsSummary(can("branch-requests.create") || can("branch-requests.dispatch"));
+  const requestsWaiting = requests.toDispatch + requests.toReceive;
+  const notifications = chatsWaiting + ordersWaiting + layawaysWaiting + warehouseAlerts.overdue + requestsWaiting;
   const noticeLabel = [
     ordersWaiting > 0 && `${ordersWaiting} ${ordersWaiting === 1 ? "pedido espera" : "pedidos esperan"} en caja`,
     chatsWaiting > 0 && `${chatsWaiting} ${chatsWaiting === 1 ? "chat espera" : "chats esperan"} vendedor`,
     layawayAlerts.dueSoon > 0 && `${layawayAlerts.dueSoon} ${layawayAlerts.dueSoon === 1 ? "apartado vence" : "apartados vencen"} pronto`,
     layawayAlerts.refunds > 0 && `${layawayAlerts.refunds} ${layawayAlerts.refunds === 1 ? "apartado tiene" : "apartados tienen"} dinero por devolver`,
     warehouseAlerts.overdue > 0 && `${warehouseAlerts.overdue} ${warehouseAlerts.overdue === 1 ? "préstamo vencido" : "préstamos vencidos"} en la bodega`,
+    requests.toDispatch > 0 && `${requests.toDispatch} ${requests.toDispatch === 1 ? "pedido de otra sucursal por atender" : "pedidos de otras sucursales por atender"}`,
+    requests.toReceive > 0 && `${requests.toReceive} ${requests.toReceive === 1 ? "envío en camino por recibir" : "envíos en camino por recibir"}`,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -59,6 +65,10 @@ const Header = () => {
             ? "/ventas/apartados?filtro=por-devolver"
             : warehouseAlerts.overdue > 0
               ? "/inventario/bodega?filtro=vencido"
+            : requests.toDispatch > 0
+              ? "/inventario/pedidos?bandeja=incoming"
+            : requests.toReceive > 0
+              ? "/inventario/pedidos?bandeja=mine"
             : seesChats
               ? "/ventas/chats"
               : null;

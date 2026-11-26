@@ -19,9 +19,10 @@
   opacity: 0.55;
 }
 
+/* Los filtros caben según el ancho real (con el menú lateral): en un portátil pequeño quedan los cuatro en una fila */
 @media (min-width: 768px) {
   .orders-page__filters {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   }
 }
 

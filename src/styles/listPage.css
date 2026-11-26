@@ -116,6 +116,7 @@
 @media (min-width: 768px) {
   .list-page__header {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: flex-end;
     justify-content: space-between;
     gap: 24px;
@@ -128,18 +129,24 @@
 
   .list-page__actions {
     flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     align-items: center;
     gap: 16px;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .list-page__toolbar {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     gap: 16px;
+    min-width: 0;
   }
 
   .list-page__search {
-    width: 300px;
+    width: min(300px, 100%);
   }
 
   .list-page__count {
@@ -160,7 +167,8 @@
   }
    .list-page__bar {
     flex-direction: row;
-    align-items: center;
+    flex-wrap: wrap;
+    align-items: flex-end; /* la búsqueda (sin etiqueta) queda a la altura de los campos con etiqueta, como las fechas */
     gap: 16px;
     margin-bottom: 20px;
   }

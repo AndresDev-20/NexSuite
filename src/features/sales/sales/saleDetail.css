@@ -32,3 +32,47 @@
   background: var(--danger);
   border-color: var(--danger);
 }
+
+/* Fase 54: recargo de la financiera */
+.sale-surcharge__tag {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.sale-surcharge__open {
+  align-self: flex-start;
+  padding: 0;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--red-600);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.sale-surcharge {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 10px;
+  background: var(--gray-50);
+  border: 1px dashed var(--color-border);
+  border-radius: 10px;
+}
+
+.sale-surcharge .field {
+  max-width: 140px;
+}
+
+.sale-surcharge__preview {
+  font-size: 0.82rem;
+}
+
+.sale-surcharge__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

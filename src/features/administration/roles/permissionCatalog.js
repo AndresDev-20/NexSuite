@@ -42,6 +42,11 @@ export const PERMISSION_CATALOG = [
         label: "Devolver fuera de plazo",
         description: "Hacer devoluciones de ventas que ya pasaron el plazo de Configuración del negocio (quedan marcadas «fuera de plazo»).",
       },
+      {
+        code: "sales.surcharge",
+        label: "Ajustar recargo de ventas",
+        description: "Ponerle o cambiarle el recargo de la financiera (Addi, Sistecrédito…) a una venta ya hecha. No toca la caja ni la ganancia; queda en la auditoría.",
+      },
     ],
   },
   {
@@ -89,6 +94,15 @@ export const PERMISSION_CATALOG = [
     permissions: [
       { code: "transfers.read", label: "Ver traslados", description: "Consultar los traslados que salen o llegan a sus sucursales." },
       { code: "transfers.create", label: "Registrar traslados", description: "Pasar mercancía de una de sus sucursales a otra." },
+    ],
+  },
+  {
+    key: "branch-requests",
+    title: "Inventarios · Pedidos entre sucursales",
+    permissions: [
+      { code: "branch-requests.read", label: "Ver pedidos entre sucursales", description: "Consultar los pedidos que hacen y reciben sus sucursales." },
+      { code: "branch-requests.create", label: "Pedir a otra sucursal", description: "Ver cuántas hay en cada sucursal, pedirle a otra, cancelar el pedido y confirmar «Recibido» cuando llega." },
+      { code: "branch-requests.dispatch", label: "Atender pedidos de otras sucursales", description: "Enviar lo pedido (elige los IMEI; puede ser parcial), rechazarlo con motivo o devolver un envío que no llegó." },
     ],
   },
   {

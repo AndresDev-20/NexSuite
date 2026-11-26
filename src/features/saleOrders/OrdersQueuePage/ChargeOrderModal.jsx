@@ -19,6 +19,7 @@ import UnitPickerModal from "../../sales/PosPage/UnitPickerModal";
 import { GiftLines, OfferBadge, OffersSummary } from "../../sales/offers/cartOffers";
 import { giftLinesOf, useCartOffers } from "../../sales/offers/cartOffersLogic";
 import { IMEI_NEEDS_CUSTOMER, countPhones } from "../../sales/sales/imeiCustomer";
+import { SurchargeField, surchargeCents, surchargePayload } from "../../sales/sales/surcharge";
 
 const cents = (value) => Math.round(Number(value || 0) * 100);
 const pesos = (value) => value / 100;
@@ -51,6 +52,8 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
   const { effectivePayments, creditOnly } = buildPayments({ payments, total, down });
   const paid = effectivePayments.reduce((sum, payment) => sum + cents(payment.amount), 0);
   const pending = total - paid;
+  // Fase 54: recargo de las financieras (aparte: no entra a la caja ni es ganancia)
+  const surchargeTotal = effectivePayments.reduce((sum, payment) => sum + surchargeCents(payment), 0);
 
   const customer = customers.find((item) => String(item.id) === customerId) ?? null;
   const { canCredit, overLimit, problem: creditProblem } = creditAccess(customer, can("sales.credit-override"));
@@ -100,6 +103,7 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
               amount: Number(payment.amount),
               ...(payment.method === "efectivo" && payment.received && { received: Number(payment.received) }),
               ...(payment.reference.trim() && { reference: payment.reference.trim() }),
+              ...surchargePayload(payment),
             })),
           ...(gifts.items.length > 0 && { gifts: gifts.items }),
           ...planPayload(plan, pesos(credit), customer?.creditDays),
@@ -122,6 +126,11 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
         </span>
         <strong className="orders-charge__total">{formatCurrency(pesos(total))}</strong>
       </div>
+      {surchargeTotal > 0 && (
+        <p className="orders-charge__surcharge">
+          Recargo de financieras + {formatCurrency(pesos(surchargeTotal))} · total con recargo <strong>{formatCurrency(pesos(total + surchargeTotal))}</strong>
+        </p>
+      )}
       <ul className="orders-card__items">
         {order.items.map((item) => (
           <li key={item.id}>
@@ -212,7 +221,7 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
       <ul className="pos__payments">
         {effectivePayments.map((payment) => (
           <li className="pos__payment" key={payment.key}>
-            <Select label="Medio" options={methods} value={payment.method} onChange={(event) => updatePayment(payment.key, { method: event.target.value, received: "", reference: "" })} />
+            <Select label="Medio" options={methods} value={payment.method} onChange={(event) => updatePayment(payment.key, { method: event.target.value, received: "", reference: "", surcharge: undefined })} />
             <Field
               label="Valor"
               inputMode="decimal"
@@ -248,6 +257,7 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
                 Queda fiado a {customer?.name}.{overLimit && " Sin cupo: con tu permiso «Fiar sin cupo»."}
               </p>
             )}
+            <SurchargeField payment={payment} onChange={(value) => updatePayment(payment.key, { surcharge: value })} />
             {!singlePayment && (
               <button type="button" className="pos__remove" aria-label="Quitar este pago" onClick={() => removePayment(payment.key)}>
                 <Icon name="x" />
@@ -288,7 +298,7 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
           Volver
         </Button>
         <Button icon="check" onClick={submit} disabled={busy || branchSessions.length === 0}>
-          {busy ? "Cobrando…" : `Cobrar ${formatCurrency(pesos(total))}`}
+          {busy ? "Cobrando…" : `Cobrar ${formatCurrency(pesos(total + surchargeTotal))}`}
         </Button>
       </FormActions>
 

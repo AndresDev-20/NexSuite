@@ -27,6 +27,8 @@ export const normalizeTransfer = (transfer) => ({
   fromName: transfer.from?.nameBranch ?? "",
   toId: transfer.idbranchto,
   toName: transfer.to?.nameBranch ?? "",
+  // Fase 52: el envío de un pedido va «en camino» hasta que lo reciben (los demás, «recibido»)
+  status: transfer.status ?? "recibido",
   createdBy: transfer.user ? getFullName(transfer.user) : null,
   createdAt: transfer.createdat,
   productCount: transfer.productCount ?? transfer.items?.length ?? 0,

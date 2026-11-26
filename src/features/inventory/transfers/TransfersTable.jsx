@@ -2,6 +2,7 @@ import DataTable from "../../../components/tables/DataTable/DataTable";
 import { RowAction, RowActions } from "../../../components/tables/RowActions/RowActions";
 import { formatDay } from "../../purchases/orders/orderOptions";
 import "./transfers.css";
+import "../requests/requests.css";
 
 const unitsText = (count) => `${count} ${count === 1 ? "unidad" : "unidades"}`;
 
@@ -43,6 +44,15 @@ const columns = [
     ),
   },
   { key: "user", header: "Registrado por", render: (transfer) => transfer.createdBy ?? "—" },
+  {
+    key: "status",
+    header: "Estado",
+    render: (transfer) => (
+      <span className={`request-status request-status--${transfer.status}`}>
+        {transfer.status === "en_camino" ? "En camino" : transfer.status === "devuelto" ? "Devuelto" : "Recibido"}
+      </span>
+    ),
+  },
 ];
 
 const TransfersTable = ({ transfers, onView }) => (

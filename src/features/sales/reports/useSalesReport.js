@@ -46,6 +46,8 @@ const normalizeFigures = (row) => ({
   discount: toNumber(row.discount),
   total: toNumber(row.total),
   credit: toNumber(row.credit),
+  // Fase 54: recargo de las financieras (aparte de lo vendido)
+  surcharge: toNumber(row.surcharge ?? 0),
   cost: row.cost === undefined ? null : toNumber(row.cost),
   profit: row.profit === undefined ? null : toNumber(row.profit),
 });

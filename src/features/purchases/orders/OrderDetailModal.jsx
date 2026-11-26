@@ -5,6 +5,8 @@ import StateMessage from "../../../components/feadback/StateMessage/StateMessage
 import { formatDateTime } from "../../administration/audit/auditOptions";
 import { formatCurrency } from "../../../utils/money";
 import OrderStatusBadge from "./OrderStatusBadge";
+import CostCalc, { useCostHistory } from "./CostCalc";
+import usePermissions from "../../auth/usePermissions";
 import PaymentStatusBadge from "./PaymentStatusBadge";
 import { formatDay, paymentLabel } from "./orderOptions";
 import { dueLabel, getMethodLabel } from "./paymentOptions";
@@ -34,8 +36,8 @@ const SerialList = ({ branch }) => {
   );
 };
 
-/** Un producto: costo, total y su reparto por sucursal. */
-const ProductCard = ({ item }) => (
+/** Un producto: costo, total, su reparto por sucursal y (Fase 51.5) el cálculo del costo. */
+const ProductCard = ({ item, cost }) => (
   <li className="order-detail__product-card">
     <header className="order-detail__product-head">
       <div>
@@ -68,6 +70,7 @@ const ProductCard = ({ item }) => (
         </li>
       ))}
     </ul>
+    <CostCalc data={cost} />
   </li>
 );
 
@@ -185,6 +188,9 @@ const OrderDetailModal = ({
 }) => {
   const { order, loading, error } = state;
   const isDraft = order?.status === "borrador";
+  // Fase 51.5: el cálculo del costo, solo con «Ver precio de costo»
+  const { can } = usePermissions();
+  const costs = useCostHistory(order, open && can("costs.read"));
   // Compartida con sucursales ajenas: solo consulta (el servidor también lo impide, A8)
   const manage = order?.manageable !== false;
 
@@ -245,7 +251,7 @@ const OrderDetailModal = ({
           </h3>
           <ul className="order-detail__products">
             {order.items.map((item) => (
-              <ProductCard key={item.productId} item={item} />
+              <ProductCard key={item.productId} item={item} cost={costs?.[item.productId] ?? null} />
             ))}
           </ul>
           <p className="order-detail__grand-total">

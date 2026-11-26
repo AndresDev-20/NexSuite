@@ -370,6 +370,9 @@ const ReportsPage = () => {
           {costs && <Kpi index={1} label="Ganancia" value={totals.finalProfit} detail={profitDetail} tone="ok" />}
           <Kpi index={2} label="Fiado" value={totals.credit} detail="Queda en la cartera" tone={totals.credit > 0 ? "warning" : undefined} />
           <Kpi index={3} label="Descuentos" value={totals.discount} detail={`Sobre ${formatCurrency(totals.subtotal)} de lista`} />
+          {totals.surcharge > 0 && (
+            <Kpi index={4} label="Recargo de financieras" value={totals.surcharge} detail="Lo que pagan de más las financieras: no entra a la caja ni es ganancia" />
+          )}
         </div>
         {costs && (
           <p className="reports-note">

@@ -234,3 +234,80 @@
     animation: none !important;
   }
 }
+
+/* Fase 52.3: logo propio de la sucursal */
+.branch-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  background: var(--gray-50);
+  border: 1px dashed var(--color-border);
+  border-radius: 14px;
+}
+
+.branch-logo__preview {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  padding: 6px;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  opacity: 0.55;
+  transition: opacity 200ms ease, border-color 200ms ease;
+}
+
+.branch-logo__preview--own {
+  border-color: var(--red-600);
+  opacity: 1;
+  animation: branch-logo-pop 320ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+.branch-logo__preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.branch-logo__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.branch-logo__text small {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.branch-logo__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.branch-logo__later {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+@keyframes branch-logo-pop {
+  from {
+    transform: scale(0.9);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .branch-logo__preview--own {
+    animation: none;
+  }
+}

@@ -682,6 +682,49 @@ En **Administrativo → Roles → Permisos** de un rol que no sea del sistema:
 - [ ] Al marcarla salen las unidades ya cargadas, la cantidad sube sola y aparece el aviso amarillo de que pasan a valer el costo de esta compra.
 - [ ] En «Agregar producto» de la compra escribes parte del nombre (ej. «samsung a15») o el SKU y salen los que coinciden; al tocar uno se agrega a la compra.
 - [ ] En los IMEI de la compra, uno mal escrito, uno repetido o uno que ya existe salen en rojo con su número de línea mientras escribes; si todos están bien dice «Los N pasan».
+- [ ] Al confirmar una compra nueva, su detalle muestra en cada producto el «Cálculo del costo»: antes, si se documentó lo ya cargado, lo nuevo, la cuenta y «Hoy sigue en…».
+- [ ] Si después editas a mano el precio de costo del producto, el detalle de esa compra dice «Hoy está en… Editado a mano por (tu nombre) el…».
+- [ ] Un usuario sin «Ver precio de costo» ve la compra pero no el cuadro del cálculo.
+- [ ] Al registrar una compra o «Agregar productos», debajo de cada sucursal dice cuántas hay hoy de ese producto.
+
+## 14.37 Pedidos entre sucursales y NIT/logo por sucursal (Fase 52)
+
+- [ ] **Inventarios → Pedidos entre sucursales → Nuevo pedido**: buscas un producto y ves en qué sucursales hay y cuántas; tocas una, pones la cantidad y lo envías. Queda PED-… «Pendiente».
+- [ ] La otra sucursal lo ve en «Para mi sucursal» y en la campana; «Atender y enviar»: elige los IMEI (o la cantidad) y puede mandar menos. Queda «En camino» y en Traslados sale «En camino».
+- [ ] Mientras va en camino, en ninguna de las dos sucursales se puede vender ese IMEI; en Unidades con serial dice «En camino».
+- [ ] La sucursal que pidió toca «Recibido»: entra a su inventario; si mandaron menos, queda «Recibido parcial» con el faltante.
+- [ ] Rechazar (con motivo), cancelar un pendiente y «Devolver el envío» (vuelve a la que envió) funcionan; tirilla y carta del pedido.
+- [ ] En **Roles**, los permisos nuevos están en «Inventarios · Pedidos entre sucursales»; Gerente e Inventario tienen los 3; Cajero / vendedor, pedir y consultar.
+- [ ] **Sucursales → Editar**: pones el NIT y subes un logo; la tirilla y la carta de una venta de esa sucursal salen con ese logo y ese NIT. Otra sucursal sin logo ni NIT sigue saliendo con los de Datos del negocio.
+
+## 14.38 Recargo de las financieras (Fase 54)
+
+- [ ] **Configuración → Medios de pago**: a Addi le pones 10 % de recargo y se guarda.
+- [ ] En **Vender**, un celular de $3.300.000 por Addi muestra «Addi paga $3.630.000»; puedes cambiar el % a mano; el resumen dice «Recargo de financieras» y «Total con recargo».
+- [ ] Mixta (efectivo + Addi): el recargo solo va sobre lo de Addi; el efectivo entra a la caja igual que siempre.
+- [ ] La tirilla muestra «Recargo Addi (10 %)» y el total con recargo; la ganancia de la venta no cambia; en Reportes sale «Recargo de financieras» aparte.
+- [ ] En una venta vieja por Addi, «Ajustar recargo» (con el permiso) le pone el 10 % y queda en la auditoría.
+- [ ] Devolver una venta con recargo devuelve también su parte del recargo por Addi.
+
+## 14.39 Pantallas en portátiles pequeños (54.2) — verificado el 2026-11-26
+
+Prueba en un portátil de las tiendas (1366×768 o 1280×720), con el zoom al 100 % y al 110 %:
+
+- [x] **Vender** con un celular por Addi: Medio y Valor en una fila, Referencia y % recargo en otra, «Addi paga…» abajo a lo ancho; nada cortado. «Recargo de financieras» y «Total con recargo» se leen bien sobre el rojo.
+- [x] **Cobrar pedido**: la misma fila de pago, ordenada; con Addi al 10 % el botón dice el total con recargo (el mismo valor de «Addi paga…»). — verificado el 2026-11-26
+- [x] **Inicio**: los filtros de arriba no se salen; **Ventas**, **Pagos por medio** y **Reportes**: las fechas se ven completas.
+- [x] **Productos**: los filtros se leen completos; **Sucursales**: el botón «Nueva sucursal» no se sale.
+- [x] Ninguna pantalla tiene barra de desplazamiento horizontal (solo dentro de alguna tabla ancha).
+- [x] En el celular y la tablet todo sigue como antes.
+
+## 14.40 Auditoría legible (54.3) — verificado el 2026-11-26
+
+- [x] En **Administrativo → Auditoría** ya no sale ningún código como `branch-request.dispatch` ni «[object Object]»: cada fila dice lo que pasó en español, el área, la hora y el número del documento.
+- [x] El detalle de un **pedido entre sucursales enviado** muestra el traslado y una tabla con el nombre del producto, la cantidad y los IMEI.
+- [x] El detalle de una **venta** muestra total, cliente, vendedor, productos y pagos con el nombre del medio.
+- [x] El detalle de una **edición** (usuario, producto, proveedor) muestra «Qué cambió» con lo de antes tachado y lo nuevo en verde.
+- [x] El filtro **Área** trae Ventas, Caja, Pedidos entre sucursales, Bodega, Gastos, etc.
+- [x] Se ve bien en modo noche.
 
 ## 15. Producción (cuando montes el VPS)
 

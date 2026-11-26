@@ -454,8 +454,9 @@
     grid-template-columns: 1fr 1fr;
   }
 
+  /* Fila del pago en dos columnas: medio + valor, luego referencia + % recargo; el aviso de la financiera abajo */
   .pos__payment {
-    grid-template-columns: 1fr 1fr 1fr auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: end;
   }
 
@@ -966,9 +967,36 @@
 }
 
 .pos__payment {
+  position: relative;
+  column-gap: 12px;
+  row-gap: 10px;
   border: 1px solid var(--color-border);
   border-radius: 14px;
   animation: pos-line-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Los campos nunca empujan la fila: se encogen dentro de su columna */
+.pos__payment > *,
+.pos__payment .field,
+.pos__payment .select {
+  min-width: 0;
+}
+
+/* Con la X de quitar, deja espacio arriba a la derecha para que no tape la etiqueta */
+.pos__payment:has(> .pos__remove) {
+  padding-right: 44px;
+}
+
+.pos__payment > .pos__remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+/* El aviso de fiado ocupa todo el ancho */
+.pos__payment > .pos__hint {
+  grid-column: 1 / -1;
+  margin: 0;
 }
 
 /* Los cambios, grandes y en verde */

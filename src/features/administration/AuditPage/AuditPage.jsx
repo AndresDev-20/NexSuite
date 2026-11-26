@@ -8,7 +8,7 @@ import Pagination from "../../../components/tables/Pagination/Pagination";
 import usePermissions from "../../../features/auth/usePermissions";
 import AuditDetailModal from "../../../features/administration/audit/AuditDetailModal";
 import AuditTable from "../../../features/administration/audit/AuditTable";
-import { AUDIT_AREAS, ENTITY_LABELS } from "../../../features/administration/audit/auditOptions";
+import { AUDIT_AREAS, getEntityLabel } from "../../../features/administration/audit/auditOptions";
 import useAuditLogs from "../../../features/administration/audit/useAuditLogs";
 import useUsers from "../../../features/administration/users/useUsers";
 import { todayInColombia } from "../../../utils/dates";
@@ -81,7 +81,7 @@ const AuditPage = () => {
 
   const hasFilters = FILTER_KEYS.some((key) => filters[key]);
   const recordFilter = filters.entity
-    ? `${ENTITY_LABELS[filters.entity] ?? filters.entity}${filters.entityid ? ` #${filters.entityid}` : ""}`
+    ? `${getEntityLabel(filters.entity)}${filters.entityid ? ` #${filters.entityid}` : ""}`
     : null;
   const clearRecordFilter = () =>
     setSearchParams((current) => {

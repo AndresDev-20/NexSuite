@@ -1,82 +1,180 @@
+/* ==========================================================================
+   audit-detail — ficha de un evento: encabezado con lo que pasó, quién/cuándo/dónde y los datos
+   ========================================================================== */
 .audit-detail {
+  --audit-tone: var(--info);
   display: flex;
   flex-direction: column;
   gap: 18px;
-}
-
-.audit-detail__head {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.audit-detail__title {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.audit-detail__meta {
-  margin: 0;
-  font-size: 0.88rem;
-  color: var(--color-text-muted);
-  overflow-wrap: anywhere;
-}
-
-.audit-detail__caption {
-  margin: 0 0 8px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-align: left;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
-}
-
-/* Tabla de cambios: en móvil cada celda se puede partir, nunca se sale del modal */
-.audit-detail__table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  font-size: 0.9rem;
-}
-
-.audit-detail__table th,
-.audit-detail__table td {
-  padding: 8px 10px;
-  overflow-wrap: anywhere;
-  text-align: left;
-  vertical-align: top;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.audit-detail__table thead th {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
-  background-color: var(--gray-50);
-}
-
-.audit-detail__table tbody th {
-  font-weight: 600;
-  color: var(--gray-700);
-}
-
-.audit-detail__section {
   min-width: 0;
 }
 
-.audit-detail__list {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
+.audit-detail__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Encabezado ---------- */
+.audit-detail__hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 16px 18px 16px 22px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--audit-tone) 7%, var(--white));
+  border: 1px solid color-mix(in srgb, var(--audit-tone) 22%, var(--color-border));
+  border-radius: 16px;
+  animation: audit-detail-in 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.audit-detail__hero::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  content: "";
+  background: var(--audit-tone);
+}
+
+.audit-detail__hero--success { --audit-tone: var(--success); }
+.audit-detail__hero--info { --audit-tone: var(--info); }
+.audit-detail__hero--danger { --audit-tone: var(--danger); }
+.audit-detail__hero--warning { --audit-tone: var(--warning); }
+.audit-detail__hero--neutral { --audit-tone: var(--gray-500); }
+
+.audit-detail__title {
   margin: 0;
-  padding: 14px;
-  background-color: var(--gray-50);
+  font-size: clamp(1.1rem, 1rem + 0.5vw, 1.35rem);
+  font-weight: 800;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.audit-detail__subject {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--gray-700);
+}
+
+.audit-detail__id {
+  color: var(--color-text-muted);
+}
+
+.audit-detail__ref {
+  padding: 2px 9px;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-text);
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+}
+
+/* ---------- Quién, cuándo, dónde ---------- */
+.audit-detail__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: 10px;
+}
+
+.audit-detail__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.audit-detail__meta-icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--red-600);
+  background: var(--red-50);
+  border-radius: 9px;
+}
+
+.audit-detail__meta-icon .icon {
+  width: 17px;
+  height: 17px;
+}
+
+.audit-detail__meta-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.audit-detail__meta-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.audit-detail__meta-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.audit-detail__meta-value small {
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Secciones de datos ---------- */
+.audit-detail__section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.audit-detail__section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.audit-detail__section-icon {
+  width: 17px;
+  height: 17px;
+  color: var(--red-600);
+}
+
+.audit-detail__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  gap: 12px 20px;
+  margin: 0;
+  padding: 14px 16px;
+  background: var(--gray-50);
   border: 1px solid var(--color-border);
   border-radius: 14px;
+}
+
+.audit-detail__grid--nested {
+  background: var(--white);
 }
 
 .audit-detail__item {
@@ -84,9 +182,9 @@
 }
 
 .audit-detail__label {
-  margin-bottom: 2px;
-  font-size: 0.72rem;
-  font-weight: 600;
+  margin-bottom: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-text-muted);
@@ -94,18 +192,242 @@
 
 .audit-detail__value {
   margin: 0;
-  overflow-wrap: anywhere;
   font-size: 0.92rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Listas (productos, pagos, ajustes…) a todo el ancho */
+.audit-detail__block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.audit-detail__block-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.audit-detail__count {
+  min-width: 20px;
+  padding: 1px 7px;
+  font-size: 0.72rem;
+  text-align: center;
+  color: var(--red-700);
+  background: var(--red-50);
+  border-radius: 999px;
+}
+
+/* La tabla se desplaza dentro de su caja si tiene muchas columnas; el modal nunca se sale */
+.audit-detail__table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.audit-detail__records {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.audit-detail__records th,
+.audit-detail__records td {
+  padding: 9px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.audit-detail__records th {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+  background: var(--gray-50);
+}
+
+.audit-detail__records td {
+  font-variant-numeric: tabular-nums;
+}
+
+.audit-detail__records tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.audit-detail__records tbody tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--gray-50) 60%, transparent);
+}
+
+.audit-detail__product {
+  font-weight: 600;
+}
+
+.audit-detail__product small {
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+/* Etiquetas (IMEI, permisos, números) */
+.audit-detail__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.audit-detail__chip {
+  padding: 2px 8px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  overflow-wrap: anywhere;
+}
+
+.audit-detail__chips--mono .audit-detail__chip {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- Qué cambió: antes → después ---------- */
+.audit-detail__changes {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+}
+
+.audit-detail__change {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.audit-detail__change:last-child {
+  border-bottom: 0;
+}
+
+.audit-detail__change-field {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gray-700);
+}
+
+.audit-detail__change-values {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  min-width: 0;
+}
+
+.audit-detail__change-from,
+.audit-detail__change-to {
+  min-width: 0;
+  padding: 2px 8px;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+  border-radius: 7px;
+}
+
+.audit-detail__change-from {
+  color: var(--danger);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--danger) 55%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}
+
+.audit-detail__change-to {
+  font-weight: 600;
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+}
+
+.audit-detail__change-arrow {
+  width: 14px;
+  height: 14px;
+  color: var(--gray-500);
+  transform: rotate(-90deg);
 }
 
 .audit-detail__empty {
   margin: 0;
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  background: var(--gray-50);
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+}
+
+.audit-detail__code {
+  margin: 0;
+  font-size: 0.75rem;
   color: var(--color-text-muted);
 }
 
-@media (min-width: 768px) {
-  .audit-detail__list {
-    grid-template-columns: 1fr 1fr;
-    gap: 14px 24px;
+.audit-detail__code code {
+  font-size: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .audit-detail__change {
+    grid-template-columns: minmax(140px, 0.35fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+/* ---------- Modo noche ---------- */
+:root[data-theme="dark"] .audit-detail__hero {
+  background: color-mix(in srgb, var(--audit-tone) 12%, var(--white));
+}
+
+:root[data-theme="dark"] .audit-detail__change-from {
+  color: #fca5a5;
+}
+
+:root[data-theme="dark"] .audit-detail__change-to {
+  color: #86efac;
+}
+
+@keyframes audit-detail-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .audit-detail__hero {
+    animation: none;
   }
 }

@@ -30,6 +30,7 @@ import LayawayDetailModal from "../layaways/LayawayDetailModal";
 import { GiftLines, OfferBadge, OffersSummary } from "../offers/cartOffers";
 import { giftLinesOf, useCartOffers } from "../offers/cartOffersLogic";
 import { IMEI_NEEDS_CUSTOMER, countPhones } from "../sales/imeiCustomer";
+import { SurchargeField, SurchargeTotals, surchargeCents, surchargePayload } from "../sales/surcharge";
 import "../../../styles/listPage.css";
 import "./pos.css";
 
@@ -215,6 +216,8 @@ const PosPage = () => {
   const { effectivePayments, creditOnly } = buildPayments({ payments, total, down });
   const paid = effectivePayments.reduce((sum, payment) => sum + cents(payment.amount), 0);
   const pending = total - paid;
+  // Fase 54: recargo de las financieras (aparte del total: no entra a la caja ni es ganancia)
+  const surchargeTotal = effectivePayments.reduce((sum, payment) => sum + surchargeCents(payment), 0);
 
   const customer = customers.find((item) => String(item.id) === customerId) ?? null;
   // Con cupo, o sin cupo con «Fiar sin cupo» (19.3)
@@ -302,6 +305,7 @@ const PosPage = () => {
             amount: Number(payment.amount),
             ...(payment.method === "efectivo" && payment.received && { received: Number(payment.received) }),
             ...(payment.reference.trim() && { reference: payment.reference.trim() }),
+            ...surchargePayload(payment),
           })),
         ...planPayload(plan, pesos(credit), customer?.creditDays),
         ...(notes.trim() && { notes: notes.trim() }),
@@ -712,6 +716,7 @@ const PosPage = () => {
               <dt>Total a cobrar</dt>
               <dd key={total}>{formatCurrency(pesos(total))}</dd>
             </div>
+            <SurchargeTotals surcharge={surchargeTotal} total={total} />
           </dl>
 
           <OffersSummary offers={offers} />
@@ -746,7 +751,7 @@ const PosPage = () => {
                   label="Medio"
                   options={methods}
                   value={payment.method}
-                  onChange={(event) => updatePayment(payment.key, { method: event.target.value, received: "", reference: "" })}
+                  onChange={(event) => updatePayment(payment.key, { method: event.target.value, received: "", reference: "", surcharge: undefined })}
                 />
                 <Field
                   label="Valor"
@@ -783,6 +788,8 @@ const PosPage = () => {
                     Queda fiado a {customer?.name}.{overLimit && " Sin cupo: con tu permiso «Fiar sin cupo»."}
                   </p>
                 )}
+                {/* Fase 54: el recargo de la financiera (el % del medio; el vendedor lo puede cambiar) */}
+                <SurchargeField payment={payment} onChange={(value) => updatePayment(payment.key, { surcharge: value })} />
                 {!singlePayment && (
                   <button type="button" className="pos__remove" aria-label="Quitar este pago" onClick={() => removePayment(payment.key)}>
                     <Icon name="x" />
@@ -842,7 +849,7 @@ const PosPage = () => {
               onClick={charge}
               disabled={busy || lines.length === 0}
             >
-              {busy ? "Registrando…" : `Cobrar ${formatCurrency(pesos(total))}`}
+              {busy ? "Registrando…" : `Cobrar ${formatCurrency(pesos(total + surchargeTotal))}`}
             </Button>
           </div>
         </div>

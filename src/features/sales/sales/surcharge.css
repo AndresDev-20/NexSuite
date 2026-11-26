@@ -1,0 +1,96 @@
+/* Fase 54: recargo de las financieras */
+.surcharge-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.surcharge-field .field {
+  max-width: 120px;
+}
+
+/*
+ * Dentro de la fila del pago (Vender y Cobrar pedido) el campo y el aviso pasan a ser celdas de la grilla:
+ * el «% recargo» toma su columna y «Addi paga…» baja a todo el ancho.
+ */
+.pos__payment > .surcharge-field {
+  display: contents;
+}
+
+.pos__payment > .surcharge-field .field {
+  max-width: none;
+  min-width: 0;
+}
+
+.pos__payment .surcharge-field__total {
+  grid-column: 1 / -1;
+}
+
+.surcharge-field__total {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 8px;
+  row-gap: 2px;
+  align-items: baseline;
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 0.86rem;
+  line-height: 1.35;
+  color: #1d4ed8;
+  overflow-wrap: anywhere;
+  background: color-mix(in srgb, #3b82f6 12%, transparent);
+  border: 1px solid color-mix(in srgb, #3b82f6 28%, transparent);
+  border-radius: 10px;
+  animation: surcharge-in 260ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+.surcharge-field__total small {
+  flex-basis: 100%;
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+}
+
+:root[data-theme="dark"] .surcharge-field__total {
+  color: #93c5fd;
+}
+
+/* Resumen sobre el degradado oscuro/rojo: el azul no se leía, va en un ámbar claro que contrasta en las dos puntas */
+.surcharge-total__row dd {
+  color: #fde68a;
+}
+
+.surcharge-total__row--grand {
+  padding-top: 4px;
+}
+
+.surcharge-total__row--grand dt {
+  font-weight: 700;
+  color: #fff;
+}
+
+.surcharge-total__row--grand dd {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  animation: surcharge-in 260ms ease both;
+}
+
+@keyframes surcharge-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surcharge-field__total,
+  .surcharge-total__row--grand dd {
+    animation: none;
+  }
+}

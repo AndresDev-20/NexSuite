@@ -11,9 +11,14 @@ const columns = [
     header: "Acción",
     primary: true,
     render: (log) => (
-      <div className="audit-cell">
-        <span className={`audit-cell__badge audit-cell__badge--${log.tone}`}>{log.actionLabel}</span>
-        <span className="audit-cell__secondary">{formatDateTime(log.createdAt)}</span>
+      <div className="audit-cell audit-cell--action">
+        <span className={`audit-cell__dot audit-cell__dot--${log.tone}`} aria-hidden="true" />
+        <div className="audit-cell">
+          <span className="audit-cell__action">{log.actionLabel}</span>
+          <span className="audit-cell__secondary">
+            {log.areaLabel} · {formatDateTime(log.createdAt)}
+          </span>
+        </div>
       </div>
     ),
   },
@@ -34,10 +39,13 @@ const columns = [
     key: "record",
     header: "Registro",
     render: (log) => (
-      <span>
-        {log.entityLabel}
-        {log.entityId && <span className="audit-cell__secondary"> #{log.entityId}</span>}
-      </span>
+      <div className="audit-cell">
+        <span>
+          {log.entityLabel}
+          {log.entityId && <span className="audit-cell__secondary"> #{log.entityId}</span>}
+        </span>
+        {log.reference && <span className="audit-cell__ref">{log.reference}</span>}
+      </div>
     ),
   },
   { key: "branch", header: "Sucursal", render: (log) => log.branchName || EMPTY },
@@ -53,7 +61,7 @@ const AuditTable = ({ logs, onView }) => (
       <RowActions>
         <RowAction
           icon="eye"
-          label={`Ver el detalle: ${log.actionLabel} · ${log.entityLabel}`}
+          label={`Ver el detalle: ${log.actionLabel} · ${log.entityLabel}${log.entityId ? ` #${log.entityId}` : ""}`}
           onClick={() => onView(log)}
         />
       </RowActions>

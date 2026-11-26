@@ -167,6 +167,35 @@
   }
 }
 
+/* Tarjetas: un valor largo (correo, IMEI, nombre) parte la línea en vez de salirse de la tarjeta */
+.data-table__cell {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Tabla en portátil pequeño (contenedor 880–1179px): celdas más compactas para que quepan las columnas */
+@container data-table (min-width: 880px) and (max-width: 1179px) {
+  .data-table__element th {
+    padding: 10px 10px;
+  }
+
+  .data-table__cell {
+    padding: 12px 10px;
+    font-size: 0.86rem;
+  }
+
+  .data-table__cell:last-child {
+    padding-bottom: 12px;
+  }
+}
+
+/* La tabla no parte palabras: si una columna es larga, la tabla se desplaza dentro de su caja */
+@container data-table (min-width: 880px) {
+  .data-table__cell {
+    overflow-wrap: normal;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .data-table__row {
     animation-duration: 1ms;

@@ -247,3 +247,19 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Fase 54: recargo de las financieras al cobrar el pedido */
+.orders-charge__surcharge {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  color: #1d4ed8;
+  overflow-wrap: anywhere;
+  background: color-mix(in srgb, #3b82f6 12%, transparent);
+  border: 1px solid color-mix(in srgb, #3b82f6 28%, transparent);
+  border-radius: 10px;
+}
+
+:root[data-theme="dark"] .orders-charge__surcharge {
+  color: #93c5fd;
+}

@@ -11,6 +11,10 @@ import { formatDateTime } from "../../administration/audit/auditOptions";
 import { formatDay } from "../../purchases/orders/orderOptions";
 import ReceiptActions from "./ReceiptActions";
 import { getMethodLabel } from "./useSales";
+import api from "../../../api/client";
+import Field from "../../../components/forms/Field/Field";
+import { sanitizeDecimal } from "../../../utils/validators";
+import { NO_SURCHARGE } from "./paymentMethods";
 import ReturnWizard from "../returns/ReturnWizard";
 import ReturnDetailModal from "../returns/ReturnDetailModal";
 import "../../../styles/sheet.css";
@@ -19,6 +23,47 @@ import "./saleDetail.css";
 
 const RETURN_LABELS = { devuelta: "Devuelta", "devuelta-parcial": "Devuelta en parte" };
 
+/**
+ * Fase 54: ajustar el recargo de la financiera de un pago (ventas hechas antes, sin recargo). Con «Ajustar recargo de
+ * ventas»; no toca la caja ni la ganancia.
+ */
+const SurchargeEditor = ({ sale, payment, onDone, onCancel }) => {
+  const toast = useToast();
+  const base = payment.amount - payment.surcharge;
+  const current = base > 0 ? Math.round((payment.surcharge / base) * 1000) / 10 : 0;
+  const [percent, setPercent] = useState(String(current || ""));
+  const [busy, setBusy] = useState(false);
+  const preview = Math.round(base * (Number(percent) || 0)) / 100;
+  const save = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      const response = await api.put(`/sales/${sale.id}/surcharge`, { idpayment: payment.id, surchargepercent: Math.min(Math.max(Number(percent) || 0, 0), 100) });
+      toast.success(response.data?.message ?? "Recargo actualizado.");
+      onDone();
+    } catch (error) {
+      toast.error(getErrorMessage(error, "No se pudo ajustar el recargo."));
+      setBusy(false);
+    }
+  };
+  return (
+    <form className="sale-surcharge" onSubmit={save}>
+      <Field label="% recargo" inputMode="decimal" maxLength={6} value={percent} onInput={sanitizeDecimal} onChange={(event) => setPercent(event.target.value)} data-autofocus />
+      <span className="sale-surcharge__preview">
+        {getMethodLabel(payment.method)} pagaría <strong>{formatCurrency(base + preview)}</strong> (recargo {formatCurrency(preview)})
+      </span>
+      <div className="sale-surcharge__actions">
+        <Button type="submit" icon="check" disabled={busy}>
+          {busy ? "Guardando…" : "Guardar recargo"}
+        </Button>
+        <Button variant="outline" disabled={busy} onClick={onCancel}>
+          Cancelar
+        </Button>
+      </div>
+    </form>
+  );
+};
+
 /* ---------- Contenido (se monta por venta) ---------- */
 const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onReturned, onClose }) => {
   const [state, setState] = useState({ sale: null, loading: true, error: "" });
@@ -26,6 +71,7 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onReturned, onClose })
   const [returning, setReturning] = useState(false);
   const [viewingReturn, setViewingReturn] = useState(null);
   const [version, setVersion] = useState(0);
+  const [surchargeOf, setSurchargeOf] = useState(null); // id del pago cuyo recargo se ajusta
   const { can } = usePermissions();
   const toast = useToast();
 
@@ -103,6 +149,12 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onReturned, onClose })
           <span className="sheet__kpi-value">{formatCurrency(sale.total)}</span>
           <span className="sheet__kpi-label">Total</span>
         </div>
+        {sale.surcharge > 0 && (
+          <div className="sheet__kpi sheet__kpi--money">
+            <span className="sheet__kpi-value">+ {formatCurrency(sale.surcharge)}</span>
+            <span className="sheet__kpi-label">Recargo financieras · total {formatCurrency(sale.total + sale.surcharge)}</span>
+          </div>
+        )}
         {sale.discount > 0 && (
           <div className="sheet__kpi">
             <span className="sheet__kpi-value">{formatCurrency(sale.discount)}</span>
@@ -173,6 +225,29 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onReturned, onClose })
               <div className="sheet__row-main">
                 <span className="sheet__row-title">{getMethodLabel(payment.method)}</span>
                 {payment.reference && <span className="sheet__row-meta">Referencia {payment.reference}</span>}
+                {payment.surcharge > 0 && (
+                  <span className="sheet__row-meta sale-surcharge__tag">Incluye recargo {formatCurrency(payment.surcharge)} · no entra a la caja ni es ganancia</span>
+                )}
+                {surchargeOf === payment.id ? (
+                  <SurchargeEditor
+                    sale={sale}
+                    payment={payment}
+                    onCancel={() => setSurchargeOf(null)}
+                    onDone={() => {
+                      setSurchargeOf(null);
+                      setVersion((value) => value + 1);
+                    }}
+                  />
+                ) : (
+                  can("sales.surcharge") &&
+                  !sale.isVoided &&
+                  sale.returnedTotal === 0 &&
+                  !NO_SURCHARGE.includes(payment.method) && (
+                    <button type="button" className="sale-surcharge__open" onClick={() => setSurchargeOf(payment.id)}>
+                      {payment.surcharge > 0 ? "Cambiar recargo" : "Ajustar recargo"}
+                    </button>
+                  )
+                )}
                 {payment.received !== null && (
                   <span className="sheet__row-meta">
                     Recibido {formatCurrency(payment.received)} · cambios {formatCurrency(payment.change ?? 0)}

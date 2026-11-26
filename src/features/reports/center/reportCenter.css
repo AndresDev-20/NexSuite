@@ -241,9 +241,11 @@
   margin-bottom: 16px;
 }
 
+/* La cifra va en un renglón cuando cabe; si trae texto («Arriendo · $ …») parte la línea en vez de salirse */
 .report-center-kpis .reports-kpi__value {
-  font-size: 1.35rem;
-  white-space: nowrap;
+  font-size: clamp(1.1rem, 0.85rem + 0.45vw, 1.35rem);
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* El realce de la tarjeta (reportsPage.css) anima sombra y borde: aquí solo el movimiento */

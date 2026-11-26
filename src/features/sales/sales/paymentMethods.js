@@ -58,6 +58,17 @@ export const loadPaymentMethods = ({ force = false } = {}) => {
 /** Nombre de un medio («m8» → «Bancolombia»). */
 export const paymentLabel = (code) => snapshot.labels[code] ?? code;
 
+/** Fase 54: los que nunca llevan recargo. */
+export const NO_SURCHARGE = ["efectivo", "credito", "apartado"];
+/** Fase 54: % de recargo configurado del medio (0 si no tiene). */
+export const surchargeOf = (code) => Number(snapshot.methods.find((method) => method.code === code)?.surchargepercent ?? 0);
+/** Fase 54: ¿se le muestra el recargo? Las financieras siempre; los demás, si tienen un % configurado. */
+export const takesSurcharge = (code) => {
+  if (NO_SURCHARGE.includes(code)) return false;
+  const method = snapshot.methods.find((item) => item.code === code);
+  return method?.kind === "financiado" || Number(method?.surchargepercent ?? 0) > 0;
+};
+
 const toOption = (method) => ({ value: method.code, label: method.name });
 
 /**

@@ -9,6 +9,7 @@ import useToast from "../../components/feadback/Toast/useToast";
 import { unwrap } from "../../utils/apiResponse";
 import getErrorMessage from "../../utils/getErrorMessage";
 import { loadPaymentMethods } from "../sales/sales/paymentMethods";
+import { sanitizeDecimal } from "../../utils/validators";
 import "./paymentMethodsSettings.css";
 
 const KINDS = [
@@ -22,6 +23,13 @@ const MethodRow = ({ method, busy, onSave, onToggle }) => {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(method.name);
   const trimmed = name.trim();
+  // Fase 54: % de recargo (se guarda al salir del campo o con Enter)
+  const [percent, setPercent] = useState(String(method.surchargepercent ?? 0));
+  const savePercent = async () => {
+    const value = Math.min(Math.max(Number(percent) || 0, 0), 100);
+    if (value === Number(method.surchargepercent ?? 0)) return setPercent(String(value));
+    if (!(await onSave(method, { surchargepercent: value }))) setPercent(String(method.surchargepercent ?? 0));
+  };
 
   const save = async () => {
     if (trimmed.length < 2 || trimmed === method.name) {
@@ -64,12 +72,32 @@ const MethodRow = ({ method, busy, onSave, onToggle }) => {
             <span className="pay-methods__meta">
               {KIND_LABELS[method.kind]} · {method.builtin ? "del sistema" : "creado por el negocio"} ·{" "}
               {method.payments === 1 ? "1 pago" : `${method.payments ?? 0} pagos`}
+              {Number(method.surchargepercent) > 0 && <span className="pay-methods__surcharge"> · recargo {Number(method.surchargepercent)} %</span>}
             </span>
           </>
         )}
       </div>
       {!editing && (
         <div className="pay-methods__actions">
+          <form
+            className="pay-methods__percent"
+            onSubmit={(event) => {
+              event.preventDefault();
+              savePercent();
+            }}
+          >
+            <Field
+              label="% recargo"
+              inputMode="decimal"
+              maxLength={6}
+              value={percent}
+              disabled={busy}
+              hint="Se suma a lo que paga este medio"
+              onInput={sanitizeDecimal}
+              onChange={(event) => setPercent(event.target.value)}
+              onBlur={savePercent}
+            />
+          </form>
           <Button variant="outline" icon="edit" disabled={busy} onClick={() => setEditing(true)}>
             Renombrar
           </Button>
@@ -93,6 +121,7 @@ const PaymentMethodsSettings = () => {
   const [busy, setBusy] = useState(false);
   const [name, setName] = useState("");
   const [kind, setKind] = useState("transferencia");
+  const [newPercent, setNewPercent] = useState("0");
   const [formError, setFormError] = useState("");
 
   const load = useCallback(async () => {
@@ -124,7 +153,7 @@ const PaymentMethodsSettings = () => {
     setBusy(true);
     setFormError("");
     try {
-      const response = await api.post("/payment-methods", { name: name.trim(), kind });
+      const response = await api.post("/payment-methods", { name: name.trim(), kind, surchargepercent: Math.min(Math.max(Number(newPercent) || 0, 0), 100) });
       toast.success(response.data?.message ?? "Medio de pago creado.");
       setName("");
       await afterChange();
@@ -158,12 +187,13 @@ const PaymentMethodsSettings = () => {
       <p className="pay-methods__note">
         <strong>Efectivo</strong> y <strong>Crédito (fiado)</strong> siempre están. Los demás aparecen al vender, al cobrar pedidos y en los abonos de
         crédito y de apartados (las financieras, solo al vender). Los que crees funcionan como Nequi: <strong>no entran a la caja</strong> y salen
-        con su nombre en el cuadre, Pagos y los reportes. No se borran: ocúltalos y los pagos viejos siguen mostrando su nombre.
+        con su nombre en el cuadre, Pagos y los reportes. No se borran: ocúltalos y los pagos viejos siguen mostrando su nombre. El <strong>% de recargo</strong> (ej. Addi 10 %) se suma a lo que paga ese medio al vender; no entra a la caja ni es ganancia, y el vendedor lo puede cambiar en cada venta.
       </p>
 
       <form className="pay-methods__new" onSubmit={create}>
         <Field label="Nuevo medio de pago" placeholder="Ej. Bancolombia" maxLength={40} value={name} error={formError} onChange={(event) => setName(event.target.value)} />
         <Select label="Tipo" options={KINDS} value={kind} onChange={(event) => setKind(event.target.value)} />
+        <Field label="% recargo" inputMode="decimal" maxLength={6} value={newPercent} onInput={sanitizeDecimal} onChange={(event) => setNewPercent(event.target.value)} />
         <Button type="submit" icon="plus" disabled={busy}>
           Crear
         </Button>

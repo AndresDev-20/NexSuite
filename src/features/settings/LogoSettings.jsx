@@ -17,7 +17,7 @@ const ACCEPTED = ["image/png", "image/jpeg", "image/webp"];
  * Convierte la imagen a PNG de máximo 512 px por lado con el canvas del navegador (sin librerías). Si aun
  * así pesa más de 300 KB, la reduce un poco más. → { blob, url, width, height }
  */
-const toPng = async (file) => {
+export const toPng = async (file) => {
   const source = URL.createObjectURL(file);
   try {
     const image = await new Promise((resolve, reject) => {

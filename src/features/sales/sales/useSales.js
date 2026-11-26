@@ -79,6 +79,8 @@ export const normalizeSale = (sale) => ({
   subtotal: toNumber(sale.subtotal),
   discount: toNumber(sale.discount),
   total: toNumber(sale.total),
+  // Fase 54: recargo de las financieras (aparte del total)
+  surcharge: toNumber(sale.surcharge ?? 0),
   costTotal: sale.costtotal === undefined ? null : toNumber(sale.costtotal),
   profit: sale.profit === undefined ? null : toNumber(sale.profit),
   creditAmount: toNumber(sale.creditamount),
@@ -107,6 +109,7 @@ export const normalizeSale = (sale) => ({
     id: payment.id,
     method: payment.method,
     amount: toNumber(payment.amount),
+    surcharge: toNumber(payment.surcharge ?? 0),
     received: payment.received == null ? null : toNumber(payment.received),
     change: payment.change == null ? null : toNumber(payment.change),
     reference: payment.reference ?? "",

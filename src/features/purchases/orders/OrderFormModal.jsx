@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import api from "../../../api/client";
+import { toList } from "../../../utils/apiResponse";
+import usePermissions from "../../auth/usePermissions";
 import Button from "../../../components/ui/Button/Button";
 import Field from "../../../components/forms/Field/Field";
 import Select from "../../../components/forms/Select/Select";
@@ -36,6 +39,36 @@ const toOptions = (list, getLabel) => list.map((item) => ({ value: String(item.i
 const unitsText = (count) => `${count} ${count === 1 ? "unidad" : "unidades"}`;
 const MAX_SHOWN_SERIAL_ERRORS = 4;
 
+/**
+ * Cuántas hay hoy del producto en cada sucursal (pedido del 2026-11-26: «que nos muestre cuántas tiene cada
+ * sucursal, así sabemos si le asignamos o no»). Con «Consultar existencias»; sin él, no se muestra nada.
+ */
+const useStockByBranch = (productId) => {
+  const { can } = usePermissions();
+  const allowed = can("branch-stock.read");
+  const [stock, setStock] = useState({ productId: null, byBranch: null });
+  useEffect(() => {
+    if (!allowed) return undefined;
+    let active = true;
+    api
+      .get("/branch-stock", { params: { idproduct: productId } })
+      .then((response) => {
+        if (!active) return;
+        setStock({ productId, byBranch: Object.fromEntries(toList(response).map((row) => [row.idbranch, row.quantity])) });
+      })
+      .catch(() => active && setStock({ productId, byBranch: null }));
+    return () => {
+      active = false;
+    };
+  }, [allowed, productId]);
+  return stock.productId === productId ? stock.byBranch : null;
+};
+const stockHint = (byBranch, branchId) => {
+  if (!byBranch) return undefined;
+  const quantity = byBranch[branchId] ?? 0;
+  return quantity === 0 ? "Hoy: no hay" : `Hoy hay ${quantity}`;
+};
+
 /* ---------- Un producto de la compra: costo, reparto por sucursal e IMEIs ---------- */
 const ProductLine = ({ line, index, leaving = false, branches, errors, onChange, onRemove }) => {
   const quantity = lineQuantity(line);
@@ -45,6 +78,7 @@ const ProductLine = ({ line, index, leaving = false, branches, errors, onChange,
   const serialLabel = line.serialType === "imei" ? "IMEI" : "Seriales";
   // 2026-11-26: mientras se escriben, avisa si un IMEI no pasa, está repetido o ya está registrado
   const serialErrors = useSerialCheck(line, allocationsOf(line).map((allocation) => allocation.branchId));
+  const stockNow = useStockByBranch(line.productId);
 
   return (
     <li className={`purchase-line ${leaving ? "purchase-line--leaving" : ""}`.trim()}>
@@ -152,6 +186,7 @@ const ProductLine = ({ line, index, leaving = false, branches, errors, onChange,
               autoComplete="off"
               maxLength={MAX_QUANTITY_LENGTH}
               placeholder="0"
+              hint={stockHint(stockNow, branch.id)}
               value={line.quantities[branch.id] ?? ""}
               onInput={stripNonDigits}
               onChange={(event) => setQuantity(branch.id, event.target.value)}

@@ -3,7 +3,7 @@ import api from "../../../api/client";
 import { unwrap } from "../../../utils/apiResponse";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { getFullName } from "../../../utils/userDisplay";
-import { ENTITY_LABELS, getActionLabel, getActionTone } from "./auditOptions";
+import { getActionLabel, getActionTone, getAreaLabel, getEntityLabel } from "./auditOptions";
 
 const AUDIT_PATH = "/audit-logs";
 
@@ -11,10 +11,15 @@ const normalizeLog = (log) => ({
   id: log.id,
   createdAt: log.createdat,
   action: log.action,
-  actionLabel: getActionLabel(log.action),
+  actionLabel: getActionLabel(log.action, log.entity),
   tone: getActionTone(log.action),
+  areaLabel: getAreaLabel(log.action),
   entity: log.entity,
-  entityLabel: ENTITY_LABELS[log.entity] ?? log.entity,
+  entityLabel: getEntityLabel(log.entity),
+  // El número del documento (venta, traslado, devolución…) para reconocer el evento en la tabla
+  reference: [log.details?.number, log.details?.document, log.details?.transfer, log.details?.sale].find(
+    (value) => typeof value === "string" && /[A-Z]/.test(value)
+  ) ?? null,
   entityId: log.entityid,
   branchName: log.branch?.nameBranch ?? "",
   // null: evento sin sesión (por ejemplo, un login con una cédula que no existe)
