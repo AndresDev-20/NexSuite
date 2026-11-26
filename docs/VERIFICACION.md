@@ -740,6 +740,17 @@ Prueba en un portátil de las tiendas (1366×768 o 1280×720), con el zoom al 10
 - [ ] Borra el campo y guarda: la tirilla vuelve a salir con «TIENDA MOVIL 1».
 - [ ] (54.6) En la tirilla de una sucursal **con logo propio** ya no sale «Recarga Movil» entre el logo y el bloque de la sucursal; en una **sin logo propio** sí sigue saliendo.
 
+## 14.43 Filtros rápidos de fechas en Ventas (55.1)
+
+- [ ] **Ventas → Ventas** abre en **Hoy** con las ventas de hoy; debajo de los botones dice la fecha.
+- [ ] **Ayer**, **Últimos 7 días**, **Últimos 15 días**, **Últimos 30 días**, **Este mes** y **Mes anterior** cambian la lista y el rango escrito.
+- [ ] **Este año** trae desde el 1 de enero hasta hoy; **Por año** muestra la lista de años y al cambiarla trae ese año completo.
+- [ ] **Todas** muestra todas las ventas, con páginas, y dice «Todas las fechas».
+- [ ] **Elegir fechas** muestra Desde y Hasta; Hasta no deja elegir un día antes de Desde.
+- [ ] Al escribir un número, cliente o IMEI en Buscar, los botones se apagan y busca en todas las fechas; al borrarlo vuelven.
+- [ ] Desde **Reportes**, al abrir las ventas de un vendedor o un día, llegan con sus fechas y el botón que corresponde.
+- [ ] En el celular, la fila de botones se desliza de lado sin mover la página; en el computador se ven todos.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

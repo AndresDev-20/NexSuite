@@ -27,6 +27,83 @@
   border-radius: 12px;
 }
 
+/* Filtros rápidos de fechas (2026-11-26): en el celular, una fila que se desliza; en pantalla ancha, se acomodan */
+.sales-ranges {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  min-width: 0;
+}
+
+.sales-ranges__chips {
+  position: relative; /* offsetLeft de los botones se mide desde la fila */
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  margin: 0 -4px;
+  padding: 2px 4px 4px;
+}
+
+.sales-ranges__chips::-webkit-scrollbar {
+  display: none;
+}
+
+.sales-ranges__chips .sheet__chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  scroll-snap-align: start;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.sales-ranges__chips .sheet__chip:not(.sheet__chip--on):not(:disabled):hover {
+  border-color: var(--red-600);
+}
+
+.sales-ranges__chips .sheet__chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.sales-ranges__icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.sales-ranges__summary {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.sales-ranges__year {
+  min-width: 140px;
+}
+
+@media (min-width: 1024px) {
+  .sales-ranges__chips {
+    flex-wrap: wrap;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sales-ranges__chips .sheet__chip {
+    transition: none;
+  }
+}
+
 /* Venta anulada (Fase 11.1): etiqueta junto al número y total tachado */
 .sales-cell__voided {
   display: inline-block;

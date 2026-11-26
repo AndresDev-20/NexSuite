@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import Button from "../../../components/ui/Button/Button";
 import Field from "../../../components/forms/Field/Field";
+import Select from "../../../components/forms/Select/Select";
 import SearchInput from "../../../components/forms/SearchInput/SearchInput";
 import StateMessage from "../../../components/feadback/StateMessage/StateMessage";
 import DataTable from "../../../components/tables/DataTable/DataTable";
@@ -14,7 +14,9 @@ import SaleDetailModal from "../sales/SaleDetailModal";
 import useSales, { getMethodLabel } from "../sales/useSales";
 import { todayInColombia } from "../../../utils/dates";
 import { formatCurrency } from "../../../utils/money";
+import { CUSTOM_RANGE, SALES_RANGES, YEAR_RANGE, describeRange, rangeOf, yearOptions, yearRange } from "./salesRanges";
 import "../../../styles/listPage.css";
+import "../../../styles/sheet.css";
 import "../returns/returns.css";
 import "./salesPage.css";
 
@@ -84,7 +86,38 @@ const SalesPage = () => {
   // Por defecto, las de hoy; con un número buscado, sin fechas; desde Reportes llegan from y to
   const [from, setFrom] = useState(searchParams.get("from") ?? (searchParams.get("search") ? "" : today));
   const [to, setTo] = useState(searchParams.get("to") ?? (searchParams.get("search") ? "" : today));
+  // Filtro rápido elegido (Hoy, Ayer, Últimos 7 días…); "fechas" muestra Desde y Hasta
+  const [rangeKey, setRangeKey] = useState(() => rangeOf(from, to, today));
   const [currentPage, setCurrentPage] = useState(1);
+
+  // En el celular la fila de botones se desliza: el elegido queda a la vista
+  const chipsRef = useRef(null);
+  useEffect(() => {
+    const chips = chipsRef.current;
+    const active = chips?.querySelector(".sheet__chip--on");
+    if (!chips || !active || chips.scrollWidth <= chips.clientWidth) return;
+    chips.scrollTo({ left: active.offsetLeft - 16, behavior: "smooth" });
+  }, [rangeKey]);
+
+  const chooseRange = (value) => {
+    setRangeKey(value);
+    setCurrentPage(1);
+    if (value === YEAR_RANGE) {
+      // Por año parte de este año; el año se cambia en la lista
+      const range = yearRange(yearOptions(today)[0], today);
+      setFrom(range.from);
+      setTo(range.to);
+      return;
+    }
+    if (value === CUSTOM_RANGE) {
+      // Elegir fechas parte de las que ya están; sin fechas ("Todas"), de hoy
+      if (!from && !to) (setFrom(today), setTo(today));
+      return;
+    }
+    const range = SALES_RANGES.find((item) => item.value === value).range(today);
+    setFrom(range.from);
+    setTo(range.to);
+  };
   const sellerFilter = searchParams.get("iduser") ?? "";
   const [viewing, setViewing] = useState(null);
 
@@ -172,6 +205,32 @@ const SalesPage = () => {
       </header>
 
       <div className="list-page__card">
+        <div className="sales-ranges">
+          <div ref={chipsRef} className="sheet__chips sales-ranges__chips" role="group" aria-label="Fechas de las ventas">
+            {[...SALES_RANGES, { value: YEAR_RANGE, label: "Por año" }, { value: CUSTOM_RANGE, label: "Elegir fechas" }].map((item) => (
+              <button
+                key={item.value}
+                type="button"
+                className={`sheet__chip ${!searching && rangeKey === item.value ? "sheet__chip--on" : ""}`.trim()}
+                aria-pressed={!searching && rangeKey === item.value}
+                disabled={searching}
+                title={searching ? "Al buscar se busca en todas las fechas" : undefined}
+                onClick={() => chooseRange(item.value)}
+              >
+                {item.value === CUSTOM_RANGE && (
+                  <svg className="sales-ranges__icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+                    <path d="M3.5 10h17M8 3v4M16 3v4" />
+                  </svg>
+                )}
+                {item.label}
+              </button>
+            ))}
+          </div>
+          <p className="sales-ranges__summary" aria-live="polite">
+            {searching ? "Buscando en todas las fechas" : describeRange(from, to)}
+          </p>
+        </div>
         <div className="list-page__bar">
           <div className="list-page__search">
             <SearchInput
@@ -184,35 +243,38 @@ const SalesPage = () => {
               }}
             />
           </div>
-          <Field
-            label="Desde"
-            type="date"
-            max={today}
-            value={from}
-            disabled={searching}
-            title={searching ? "Al buscar se busca en todas las fechas" : undefined}
-            onChange={(event) => (setFrom(event.target.value), setCurrentPage(1))}
-          />
-          <Field
-            label="Hasta"
-            type="date"
-            max={today}
-            value={to}
-            disabled={searching}
-            title={searching ? "Al buscar se busca en todas las fechas" : undefined}
-            onChange={(event) => (setTo(event.target.value), setCurrentPage(1))}
-          />
-          {!searching && (from !== today || to !== today) && (
-            <Button
-              variant="outline"
-              onClick={() => {
-                setFrom(today);
-                setTo(today);
+          {!searching && rangeKey === YEAR_RANGE && (
+            <Select
+              label="Año"
+              className="sales-ranges__year"
+              value={from.slice(0, 4)}
+              options={yearOptions(today).map((year) => ({ value: year, label: year }))}
+              onChange={(event) => {
+                const range = yearRange(event.target.value, today);
+                setFrom(range.from);
+                setTo(range.to);
                 setCurrentPage(1);
               }}
-            >
-              Hoy
-            </Button>
+            />
+          )}
+          {!searching && rangeKey === CUSTOM_RANGE && (
+            <>
+              <Field
+                label="Desde"
+                type="date"
+                max={to || today}
+                value={from}
+                onChange={(event) => (setFrom(event.target.value), setCurrentPage(1))}
+              />
+              <Field
+                label="Hasta"
+                type="date"
+                min={from || undefined}
+                max={today}
+                value={to}
+                onChange={(event) => (setTo(event.target.value), setCurrentPage(1))}
+              />
+            </>
           )}
           {!loading && !error && (
             <span className="list-page__count">
