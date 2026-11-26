@@ -732,6 +732,13 @@ Prueba en un portátil de las tiendas (1366×768 o 1280×720), con el zoom al 10
 - [ ] **Sucursales → Editar** una sucursal con NIT: el campo sale con el NIT y el logo propio se ve; cambias otra cosa, guardas y el NIT sigue ahí (en la tirilla también).
 - [ ] **Pedidos entre sucursales → Atender y enviar**: cada producto se ve compacto y los IMEI aparecen enseguida, sin espacio vacío.
 
+## 14.42 Nombre de la sucursal en los comprobantes (54.5)
+
+- [ ] **Sucursales → Editar TIENDA MOVIL 1**: en «Nombre en los comprobantes» escribe «Klick y Listo» y guarda; la vista previa lo muestra.
+- [ ] Imprime la tirilla de una venta de esa sucursal: dice «SUCURSAL DE VENTA · KLICK Y LISTO».
+- [ ] En el menú, el selector de sucursal y los reportes sigue saliendo «TIENDA MOVIL 1».
+- [ ] Borra el campo y guarda: la tirilla vuelve a salir con «TIENDA MOVIL 1».
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

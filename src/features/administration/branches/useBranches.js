@@ -21,6 +21,8 @@ const normalizeBranch = (branch) => ({
   invoicePrefix: branch.invoiceprefix ?? "",
   // Fase 52.3: NIT y logo propios. Sin esto, «Editar sucursal» abría el NIT vacío y al guardar lo borraba
   nit: branch.nit ?? "",
+  // Nombre con el que sale en tirillas y cartas (vacío: nameBranch)
+  receiptName: branch.receiptname ?? "",
   logoVersion: branch.logoupdatedat ?? null,
   users: (branch.users ?? []).map(({ id, firstNames, lastNames }) => ({
     id,

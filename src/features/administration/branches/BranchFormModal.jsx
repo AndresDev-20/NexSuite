@@ -83,6 +83,7 @@ const toFormValues = (branch) => ({
   web: branch?.web ?? "",
   invoiceprefix: branch?.invoicePrefix ?? "",
   nit: branch?.nit ?? "",
+  receiptname: branch?.receiptName ?? "",
 });
 
 /**
@@ -117,6 +118,9 @@ const RULES = {
   web: {
     validate: (value) => !value.trim() || isHttpUrl(value.trim()) || "Debe empezar por http:// o https://",
   },
+  receiptname: {
+    validate: (value) => !value.trim() || value.trim().length >= 2 || "Debe tener al menos 2 caracteres.",
+  },
   nit: {
     validate: (value) => !value.trim() || /^[0-9][0-9. -]{3,28}[0-9]$/.test(value.trim()) || "Solo números, puntos y guion (ej. 900123456-7).",
   },
@@ -136,7 +140,7 @@ const BranchForm = ({ branch, busy, onCancel, onSubmit }) => {
     watch,
     formState: { errors },
   } = useForm({ defaultValues: toFormValues(branch) });
-  const [name, address, email, phone, web, prefix, nit] = watch(["nameBranch", "address", "email", "number", "web", "invoiceprefix", "nit"]);
+  const [name, address, email, phone, web, prefix, nit, receiptName] = watch(["nameBranch", "address", "email", "number", "web", "invoiceprefix", "nit", "receiptname"]);
   const businessLogo = useBrand().logoUrl;
   const [ownLogo, setOwnLogo] = useState(null); // Fase 52.3: para la vista previa
   const typedPrefix = String(prefix ?? "").replace(/\s+/g, "").toUpperCase();
@@ -170,6 +174,17 @@ const BranchForm = ({ branch, busy, onCancel, onSubmit }) => {
               data-autofocus
               error={errors.nameBranch?.message}
               {...register("nameBranch", RULES.nameBranch)}
+            />
+
+            {/* Cómo sale en tirillas y cartas: la sucursal puede llamarse «TIENDA MOVIL 1» y salir como «Klick y Listo» */}
+            <Field
+              label="Nombre en los comprobantes"
+              autoComplete="off"
+              maxLength={100}
+              placeholder={`Opcional · ej. Klick y Listo`}
+              hint="Es el que sale en tirillas y cartas. Vacío: sale el nombre de la sucursal. En el sistema se sigue viendo el nombre de arriba."
+              error={errors.receiptname?.message}
+              {...register("receiptname", RULES.receiptname)}
             />
 
             <Field
@@ -244,7 +259,7 @@ const BranchForm = ({ branch, busy, onCancel, onSubmit }) => {
         </div>
 
         <ReceiptPreview
-          name={name.trim()}
+          name={String(receiptName ?? "").trim() || name.trim()}
           address={address.trim()}
           email={email.trim()}
           phone={phone.trim()}
