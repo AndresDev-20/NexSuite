@@ -1,0 +1,212 @@
+/* Filtro con buscador (Fase 56): mismo aspecto que SearchInput, con lista de coincidencias y chip del elegido */
+.lookup {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.lookup__label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gray-700);
+}
+
+.lookup__field {
+  position: relative;
+}
+
+.lookup__icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  color: var(--gray-500);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.lookup__control {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px 0 42px;
+  font: inherit;
+  font-size: 1rem; /* 16px: sin zoom en iOS */
+  color: var(--color-text);
+  background: var(--white);
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.lookup__control::placeholder {
+  color: var(--gray-500);
+  opacity: 0.75;
+}
+
+.lookup__control:hover {
+  border-color: var(--gray-300);
+}
+
+.lookup__control:focus {
+  outline: none;
+  border-color: var(--red-600);
+  box-shadow: 0 0 0 4px rgba(214, 24, 46, 0.14);
+}
+
+.lookup__list {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  max-height: 280px;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  list-style: none;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+  transform-origin: top center;
+  animation: lookup-open 160ms ease-out;
+}
+
+.lookup__option {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-height: 44px;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  animation: lookup-item 180ms ease-out both;
+  animation-delay: calc(var(--i, 0) * 25ms);
+}
+
+.lookup__option--active {
+  background: var(--red-50);
+}
+
+.lookup__option-label {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.lookup__option-detail {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.lookup__note {
+  padding: 10px;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.lookup__note--error {
+  color: var(--danger, #b91c1c);
+}
+
+/* El elegido: chip con el nombre y la «×» */
+.lookup__chosen {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 4px 6px 4px 12px;
+  background: var(--red-50);
+  border: 1.5px solid var(--red-200, var(--red-600));
+  border-radius: 12px;
+  animation: lookup-pop 200ms ease-out;
+}
+
+.lookup__chosen-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--red-600);
+}
+
+.lookup__chosen-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.lookup__chosen-text strong {
+  overflow: hidden;
+  color: var(--color-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lookup__chosen-text small {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.lookup__clear {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--gray-700);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.lookup__clear svg {
+  width: 18px;
+  height: 18px;
+}
+
+.lookup__clear:hover {
+  color: var(--red-700);
+  background: var(--white);
+}
+
+.lookup__clear:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 1px;
+}
+
+@keyframes lookup-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+@keyframes lookup-item {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes lookup-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lookup__list,
+  .lookup__option,
+  .lookup__chosen {
+    animation: none;
+  }
+}

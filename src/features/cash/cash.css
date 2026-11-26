@@ -652,3 +652,105 @@
 :root[data-theme="dark"] .cash-bills__count {
   background-color: transparent;
 }
+
+/* ==========================================================================
+   Fase 56: qué billetes dejar en la caja para la base y cuáles entregar
+   ========================================================================== */
+.kept-bills {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background-color: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  animation: kept-bills-in 220ms ease-out;
+}
+
+.kept-bills__head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kept-bills__head span {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.kept-bills__table {
+  width: 100%;
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+  border-collapse: collapse;
+}
+
+.kept-bills__table th,
+.kept-bills__table td {
+  padding: 6px 4px;
+  text-align: left;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.kept-bills__table thead th {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.kept-bills__table tbody tr {
+  animation: kept-bills-in 200ms ease-out both;
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+
+.kept-bills__table tbody th small {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.kept-bills__table tfoot th,
+.kept-bills__table tfoot td {
+  font-weight: 800;
+  border-bottom: 0;
+}
+
+.kept-bills__keep {
+  font-weight: 600;
+  color: var(--success-text, #166534);
+}
+
+.kept-bills__give {
+  font-weight: 600;
+  color: var(--red-600);
+}
+
+.kept-bills__none {
+  color: var(--gray-300);
+}
+
+.kept-bills--view {
+  padding: 0;
+  border: 0;
+}
+
+@media (max-width: 420px) {
+  .kept-bills__table {
+    font-size: 0.8rem;
+  }
+}
+
+@keyframes kept-bills-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kept-bills,
+  .kept-bills__table tbody tr {
+    animation: none;
+  }
+}

@@ -312,7 +312,7 @@ const ReportsPage = () => {
   // Cambiar periodo, vendedor o sucursal vuelve a animar el reporte
   const animKey = `${from}-${to}-${activeBranchId ?? "all"}-${iduser}`;
   const periodLabel = singleDay ? formatDay(from) : `${formatDay(from)} al ${formatDay(to)}`;
-  const historyLink = `/ventas/historial?from=${from}&to=${to}${iduser ? `&iduser=${iduser}` : ""}`;
+  const historyLink = `/ventas/historial?from=${from}&to=${to}${iduser ? `&iduser=${iduser}${sellerName ? `&vendedor=${encodeURIComponent(sellerName)}` : ""}` : ""}`;
 
   const renderReport = () => {
     if (loading && !report) {

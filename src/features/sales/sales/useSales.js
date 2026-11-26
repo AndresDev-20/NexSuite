@@ -95,6 +95,8 @@ export const normalizeSale = (sale) => ({
   // Devoluciones (Fase 46): "devuelta", "devuelta-parcial" o null
   returnState: sale.returnstate ?? null,
   returnedTotal: toNumber(sale.returnedtotal ?? 0),
+  // Fase 56: cambios de vendedor (de la auditoría)
+  sellerChanges: (sale.sellerchanges ?? []).map((change) => ({ at: change.at, by: change.by ?? "", from: change.from ?? "", to: change.to ?? "", reason: change.reason ?? "" })),
   returns: (sale.returns ?? []).map((item) => ({
     id: item.id,
     number: item.number,
@@ -155,7 +157,29 @@ const useSales = () => {
     return { sale: normalizeSale(data.data), message: data.message };
   }, []);
 
-  return { ...result, loading, error, getSales, getSale, createSale, voidSale };
+  /** Fase 56: corrige el vendedor (solo con «Cambiar el vendedor de una venta»). Lanza el error del servidor. */
+  const changeSeller = useCallback(async (id, iduser, reason) => {
+    const { data } = await api.put(`${SALES_PATH}/${id}/seller`, { iduser, reason });
+    return { sale: normalizeSale(data.data), message: data.message };
+  }, []);
+
+  return { ...result, loading, error, getSales, getSale, createSale, voidSale, changeSeller };
 };
 
 export default useSales;
+
+/** Fase 56: vendedores para el filtro de Ventas (con «Ventas de todos»), por nombre o cédula. */
+export const searchSaleSellers = async (search, idbranch) =>
+  unwrap(await api.get(`${SALES_PATH}/sellers`, { params: { ...(search && { search }), ...(idbranch && { idbranch }) } })).map((user) => ({
+    id: user.id,
+    label: user.name,
+    detail: [user.cc && `CC ${user.cc}`, user.isActive === false && "Inactivo"].filter(Boolean).join(" · "),
+  }));
+
+/** Fase 56: clientes con ventas que la persona puede ver, por nombre o documento. */
+export const searchSaleCustomers = async (search, idbranch) =>
+  unwrap(await api.get(`${SALES_PATH}/customers`, { params: { ...(search && { search }), ...(idbranch && { idbranch }) } })).map((customer) => ({
+    id: customer.id,
+    label: customer.name,
+    detail: [customer.document && `${customer.typeidentification || "Doc."} ${customer.document}`, customer.phone].filter(Boolean).join(" · "),
+  }));

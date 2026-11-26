@@ -122,6 +122,30 @@ const SessionView = ({ session, actions }) => (
             </div>
           </dl>
         )}
+        {session.keptDenominations && session.countDenominations.length > 0 && (
+          <div className="kept-bills kept-bills--view">
+            <header className="kept-bills__head">
+              <strong>Qué se dejó en la caja (base) y qué se entregó</strong>
+            </header>
+            <dl className="cash-split cash-denominations">
+              {session.countDenominations.map((row) => {
+                const kept = session.keptDenominations.find((item) => item.value === row.value)?.count ?? 0;
+                return (
+                  <div key={row.value}>
+                    <dt>{formatCurrency(row.value)}</dt>
+                    <dd>
+                      Deja {kept} · entrega {row.count - kept}
+                    </dd>
+                  </div>
+                );
+              })}
+              <div className="cash-split__main">
+                <dt>Base {formatCurrency(session.keptAmount)} · entrega {formatCurrency(session.handoverAmount)}</dt>
+                <dd />
+              </div>
+            </dl>
+          </div>
+        )}
         <p className="my-cash__since">
           Contado el {formatDateTime(session.closedAt)}
           {session.closedByName && ` por ${session.closedByName}`}

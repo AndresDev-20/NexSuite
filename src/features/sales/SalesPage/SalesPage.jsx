@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import Field from "../../../components/forms/Field/Field";
 import Select from "../../../components/forms/Select/Select";
 import SearchInput from "../../../components/forms/SearchInput/SearchInput";
+import LookupFilter from "../../../components/forms/LookupFilter/LookupFilter";
 import StateMessage from "../../../components/feadback/StateMessage/StateMessage";
 import DataTable from "../../../components/tables/DataTable/DataTable";
 import Pagination from "../../../components/tables/Pagination/Pagination";
@@ -11,7 +12,7 @@ import usePermissions from "../../auth/usePermissions";
 import useActiveBranch from "../../branches/useActiveBranch";
 import { formatDateTime } from "../../administration/audit/auditOptions";
 import SaleDetailModal from "../sales/SaleDetailModal";
-import useSales, { getMethodLabel } from "../sales/useSales";
+import useSales, { getMethodLabel, searchSaleCustomers, searchSaleSellers } from "../sales/useSales";
 import { todayInColombia } from "../../../utils/dates";
 import { formatCurrency } from "../../../utils/money";
 import { CUSTOM_RANGE, SALES_RANGES, YEAR_RANGE, describeRange, rangeOf, yearOptions, yearRange } from "./salesRanges";
@@ -72,11 +73,11 @@ const buildColumns = (showProfit) => [
 ];
 
 const SalesPage = () => {
-  const { items, total, page, pages, loading, error, getSales, getSale, voidSale } = useSales();
+  const { items, total, page, pages, loading, error, getSales, getSale, voidSale, changeSeller } = useSales();
   const [reload, setReload] = useState(0);
   const { activeBranchId, activeBranch } = useActiveBranch();
   const { can } = usePermissions();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const today = todayInColombia();
 
   const seesAll = can("sales.read-all");
@@ -118,7 +119,25 @@ const SalesPage = () => {
     setFrom(range.from);
     setTo(range.to);
   };
+  // Fase 56: filtros por vendedor y por cliente; quedan en la dirección (también llegan desde Reportes)
   const sellerFilter = searchParams.get("iduser") ?? "";
+  const customerFilter = searchParams.get("idcustomer") ?? "";
+  const seller = sellerFilter ? { id: Number(sellerFilter), label: searchParams.get("vendedor") || "Vendedor elegido" } : null;
+  const customer = customerFilter ? { id: Number(customerFilter), label: searchParams.get("cliente") || "Cliente elegido" } : null;
+  const setFilter = (idKey, labelKey, value) => {
+    setCurrentPage(1);
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        if (value) (next.set(idKey, String(value.id)), next.set(labelKey, value.label));
+        else (next.delete(idKey), next.delete(labelKey));
+        return next;
+      },
+      { replace: true }
+    );
+  };
+  const findSellers = useCallback((term) => searchSaleSellers(term, activeBranchId), [activeBranchId]);
+  const findCustomers = useCallback((term) => searchSaleCustomers(term, activeBranchId), [activeBranchId]);
   const [viewing, setViewing] = useState(null);
 
   // Fase 44: al buscar (número, cliente o IMEI) se busca en todas las fechas; las fechas vuelven al borrar la búsqueda
@@ -133,10 +152,11 @@ const SalesPage = () => {
       ...(activeBranchId && { idbranch: activeBranchId }),
       // Desde Reportes, filtrado por un vendedor (solo aplica con "Consultar ventas de todos")
       ...(seesAll && sellerFilter && { iduser: sellerFilter }),
+      ...(customerFilter && { idcustomer: customerFilter }),
     };
     const timer = setTimeout(() => getSales(params), SEARCH_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [query, searching, from, to, activeBranchId, currentPage, getSales, seesAll, sellerFilter, reload]);
+  }, [query, searching, from, to, activeBranchId, currentPage, getSales, seesAll, sellerFilter, customerFilter, reload]);
 
   const columns = useMemo(() => buildColumns(showProfit), [showProfit]);
   // Las anuladas no suman
@@ -160,7 +180,7 @@ const SalesPage = () => {
     }
     if (items.length === 0) {
       return (
-        <StateMessage icon="cart" title="No hay ventas" text={searching ? "Ninguna venta de esta sucursal coincide con lo buscado, en ninguna fecha." : "No encontramos ventas en esas fechas."}>
+        <StateMessage icon="cart" title="No hay ventas" text={searching ? "Ninguna venta de esta sucursal coincide con lo buscado, en ninguna fecha." : seller || customer ? "No encontramos ventas con esos filtros en esas fechas." : "No encontramos ventas en esas fechas."}>
           {can("sales.create") && (
             <Link className="pos-new-sale" to="/ventas/vender">
               Ir a Vender
@@ -231,6 +251,28 @@ const SalesPage = () => {
             {searching ? "Buscando en todas las fechas" : describeRange(from, to)}
           </p>
         </div>
+        <div className={`sales-filters ${seesAll ? "" : "sales-filters--single"}`.trim()}>
+          {seesAll && (
+            <LookupFilter
+              label="Vendedor"
+              icon="users"
+              placeholder="Nombre o cédula del vendedor"
+              value={seller}
+              onChange={(value) => setFilter("iduser", "vendedor", value)}
+              search={findSellers}
+              emptyText="Ningún vendedor con ventas coincide"
+            />
+          )}
+          <LookupFilter
+            label="Cliente"
+            icon="users"
+            placeholder="Nombre o documento del cliente"
+            value={customer}
+            onChange={(value) => setFilter("idcustomer", "cliente", value)}
+            search={findCustomers}
+            emptyText="Ningún cliente con ventas coincide"
+          />
+        </div>
         <div className="list-page__bar">
           <div className="list-page__search">
             <SearchInput
@@ -291,6 +333,8 @@ const SalesPage = () => {
         saleId={viewing}
         getSale={getSale}
         voidSale={voidSale}
+        changeSeller={changeSeller}
+        onSellerChanged={() => setReload((value) => value + 1)}
         onVoided={() => setReload((value) => value + 1)}
         onReturned={() => setReload((value) => value + 1)}
         onClose={() => setViewing(null)}

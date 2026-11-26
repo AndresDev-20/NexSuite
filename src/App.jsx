@@ -38,6 +38,7 @@ const OrderPage = lazy(() => import("./features/saleOrders/OrderPage/OrderPage")
 const OrdersQueuePage = lazy(() => import("./features/saleOrders/OrdersQueuePage/OrdersQueuePage"));
 const PosPage = lazy(() => import("./features/sales/PosPage/PosPage"));
 const SalesPage = lazy(() => import("./features/sales/SalesPage/SalesPage"));
+const CommissionsPage = lazy(() => import("./features/sales/CommissionsPage/CommissionsPage"));
 const ReceivablesPage = lazy(() => import("./features/sales/ReceivablesPage/ReceivablesPage"));
 const LayawaysPage = lazy(() => import("./features/sales/LayawaysPage/LayawaysPage"));
 const OffersPage = lazy(() => import("./features/sales/OffersPage/OffersPage"));
@@ -123,6 +124,11 @@ function App() {
           {/* Devoluciones (Fase 46): consultar y reimprimir; se devuelve desde el detalle de la venta */}
           <Route element={<PermissionRoute permission={["sales.return", "sales.read-all"]} />}>
             <Route path="/ventas/devoluciones" element={<ReturnsPage />} />
+          </Route>
+
+          {/* Comisiones (Fase 56): las propias o las de todos; las reglas con «Configurar comisiones» */}
+          <Route element={<PermissionRoute permission={["commissions.read", "commissions.read-all", "commissions.configure"]} />}>
+            <Route path="/ventas/comisiones" element={<CommissionsPage />} />
           </Route>
 
           {/* Reportes: mismo acceso que el historial (las suyas o las de todos) */}

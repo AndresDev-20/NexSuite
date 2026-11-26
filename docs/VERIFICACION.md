@@ -751,6 +751,43 @@ Prueba en un portátil de las tiendas (1366×768 o 1280×720), con el zoom al 10
 - [ ] Desde **Reportes**, al abrir las ventas de un vendedor o un día, llegan con sus fechas y el botón que corresponde.
 - [ ] En el celular, la fila de botones se desliza de lado sin mover la página; en el computador se ven todos.
 
+## 14.44 Filtros por vendedor y cliente, comisiones, cambio de vendedor y billetes de la base (Fase 56)
+
+**Filtros en Ventas**
+- [ ] En **Ventas → Ventas**, debajo de las fechas, salen **Vendedor** y **Cliente** uno al lado del otro (en el celular, uno debajo del otro).
+- [ ] En Vendedor, al escribir parte del nombre o la cédula salen coincidencias; al elegir uno, la lista muestra solo sus ventas y la «×» lo quita.
+- [ ] En Cliente, por nombre o documento; al elegirlo salen todas las ventas que se le han hecho (con las fechas elegidas).
+- [ ] Los dos filtros se combinan con las fechas; al recargar la página siguen puestos.
+- [ ] Con un vendedor o cajero (solo ve sus ventas) no sale el filtro de Vendedor y solo ve sus ventas.
+
+**Comisiones**
+- [ ] En **Ventas → Comisiones → Configurar reglas**, crea «Desde $500.000 → $10.000» y «Desde $1.000.000 → 1,5 %».
+- [ ] Una venta de $700.000 deja $10.000 al vendedor; una de $1.200.000 deja $18.000 (gana la regla mayor).
+- [ ] Una venta de menos de $500.000 no deja comisión.
+- [ ] Una venta fiada comisiona el día de la venta; una con Addi comisiona sobre el precio, sin el recargo.
+- [ ] Al anular una venta su comisión desaparece de lo pendiente.
+- [ ] Con una devolución parcial la comisión baja (o desaparece si quedó por debajo de $500.000).
+- [ ] La tarjeta de cada vendedor muestra pendiente y pagado; al abrirla salen sus ventas y ajustes.
+- [ ] **Pagar comisiones** marca todo como pagado y enseguida deja imprimir la tirilla y la carta del pago (COM-…). La caja no cambia.
+- [ ] **Estado en tirilla** y **Estado en carta** imprimen las comisiones del periodo.
+- [ ] Un vendedor ve solo sus comisiones; no puede ver las de otro.
+- [ ] Desactivar o cambiar una regla no cambia las comisiones ya calculadas.
+
+**Cambiar el vendedor**
+- [ ] En el detalle de una venta, el administrador ve **Cambiar vendedor**; elige al correcto, escribe el motivo y guarda.
+- [ ] La venta queda a nombre del nuevo, con la nota «Vendedor cambiado el … por …: de … a … · motivo».
+- [ ] La comisión pasa al nuevo vendedor (si ya estaba pagada, al anterior le sale un ajuste negativo para su siguiente pago).
+- [ ] Un vendedor, un cajero y un gerente **no** ven el botón.
+- [ ] El cambio sale en **Auditoría**.
+
+**Billetes de la base**
+- [ ] Al contar la caja por billetes y monedas, sale **«Qué dejar en la caja»** con cuántos de cada valor dejar y cuántos entregar; lo que se deja suma la base.
+- [ ] Se dejan las monedas y los billetes pequeños; se entregan los grandes.
+- [ ] Si no hay cambio para dejar la base exacta, avisa cuánto falta.
+- [ ] La **tirilla del cuadre** trae «DEJAR EN LA CAJA (BASE)» y «ENTREGAR» billete por billete.
+- [ ] El detalle del turno (Caja → Turnos) muestra qué se dejó y qué se entregó.
+- [ ] Al escribir el total a mano (sin billetes) todo funciona como antes.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

@@ -76,3 +76,77 @@
   flex-wrap: wrap;
   gap: 6px;
 }
+
+/* Fase 56: cambiar el vendedor (solo administradores) y su historial */
+.sale-seller__open {
+  margin: 2px 0 8px;
+  min-height: 32px;
+}
+
+.sale-seller {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 6px 0 10px;
+  padding: 12px;
+  background: var(--gray-50);
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+  animation: sale-seller-in 200ms ease-out;
+}
+
+.sale-seller__lead {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--gray-700);
+}
+
+.sale-seller__fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 10px;
+}
+
+.sale-seller__problem {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--danger, #b91c1c);
+}
+
+.sale-seller__history {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 2px 0 8px;
+  padding: 8px 12px;
+  list-style: none;
+  font-size: 0.84rem;
+  color: var(--gray-700);
+  background: var(--warning-soft, #fff7e6);
+  border-left: 3px solid var(--warning, #f59e0b);
+  border-radius: 8px;
+}
+
+.sale-seller__reason {
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 640px) {
+  .sale-seller__fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@keyframes sale-seller-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sale-seller {
+    animation: none;
+  }
+}

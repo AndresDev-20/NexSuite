@@ -72,6 +72,8 @@ export const normalizeSession = (session) => ({
   countedAmount: session.countedamount != null ? toNumber(session.countedamount) : null,
   // Fase 38: el conteo billete por billete, si se contó así ([{ value, count }])
   countDenominations: Array.isArray(session.countdenominations) ? session.countdenominations : [],
+  // Fase 56: qué billetes quedaron en la caja para la base (null si no se contó por billetes)
+  keptDenominations: Array.isArray(session.keptdenominations) ? session.keptdenominations : null,
   difference: session.difference != null ? toNumber(session.difference) : null,
   closingNotes: session.closingnotes ?? "",
   closedByName: session.closer ? getFullName(session.closer) : "",

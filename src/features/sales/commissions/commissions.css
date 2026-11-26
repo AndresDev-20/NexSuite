@@ -1,0 +1,378 @@
+/* Comisiones por vendedor (Fase 56) */
+.commission-totals {
+  margin-bottom: 16px;
+}
+
+/* Tarjetas por vendedor: en celular una columna; en portátil pequeño (1366) dos o tres */
+.commission-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transition: opacity 150ms ease;
+}
+
+.commission-cards--loading {
+  opacity: 0.6;
+}
+
+.commission-cards > li {
+  animation: commission-in 260ms ease-out both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+.commission-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  font: inherit;
+  color: var(--color-text);
+  text-align: left;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.commission-card:hover {
+  border-color: var(--red-200, var(--gray-300));
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
+}
+
+.commission-card:focus-visible {
+  outline: 3px solid rgba(214, 24, 46, 0.35);
+  outline-offset: 2px;
+}
+
+.commission-card--skeleton {
+  height: 150px;
+  cursor: default;
+  background: linear-gradient(90deg, var(--gray-100) 0%, var(--gray-50) 50%, var(--gray-100) 100%);
+  background-size: 200% 100%;
+  animation: commission-shimmer 1.2s linear infinite;
+}
+
+.commission-card__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.commission-card__avatar {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  font-weight: 800;
+  color: var(--red-600);
+  background: var(--red-50);
+  border-radius: 12px;
+}
+
+.commission-card__who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.commission-card__who strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commission-card__who small,
+.commission-card__amounts small {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.commission-card__amounts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.commission-card__amounts > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.commission-card__amounts strong {
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.commission-card__pending {
+  color: var(--red-600);
+}
+
+/* Barra: pagado (verde) y pendiente (rojo), relativa al vendedor que más lleva */
+.commission-card__bar {
+  display: flex;
+  height: 6px;
+  overflow: hidden;
+  background: var(--gray-100);
+  border-radius: 999px;
+}
+
+.commission-card__bar-paid,
+.commission-card__bar-pending {
+  width: var(--w, 0%);
+  height: 100%;
+  transform-origin: left center;
+  animation: commission-grow 500ms ease-out both;
+}
+
+.commission-card__bar-paid {
+  background: var(--success, #16a34a);
+}
+
+.commission-card__bar-pending {
+  background: var(--red-600);
+}
+
+/* Detalle del vendedor */
+.commission-detail__actions,
+.commissions-print {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.commission-detail__actions {
+  margin: 4px 0 8px;
+}
+
+.commission-pay {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 4px 0 8px;
+  padding: 12px;
+  background: var(--gray-50);
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+  animation: commission-in 200ms ease-out;
+}
+
+.commission-paid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 4px 0 8px;
+  padding: 12px 14px;
+  background: var(--success-soft, #e8f7ef);
+  border-radius: 12px;
+  animation: commission-in 240ms ease-out;
+}
+
+.commission-paid > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.commission-paid span {
+  font-size: 0.85rem;
+  color: var(--gray-700);
+}
+
+.commission-row {
+  animation: commission-in 220ms ease-out both;
+  animation-delay: calc(var(--i, 0) * 25ms);
+}
+
+.commission-row--minus .sheet__number {
+  color: var(--danger, #b91c1c);
+}
+
+.commission-row .sheet__row-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.sheet__row .commissions-print {
+  margin-top: 6px;
+}
+
+.commission-status {
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.commission-status--pendiente {
+  color: var(--warning-text, #92400e);
+  background: var(--warning-soft, #fdf1d3);
+}
+
+.commission-status--pagada {
+  color: var(--success-text, #166534);
+  background: var(--success-soft, #e8f7ef);
+}
+
+.commission-status--anulada {
+  color: var(--gray-700);
+  background: var(--gray-100);
+}
+
+.commission-status--ajuste {
+  color: var(--danger, #b91c1c);
+  background: var(--red-50);
+}
+
+/* Reglas */
+.commission-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.commission-rules__empty {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.commission-rules__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.commission-rule {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  transition: opacity 160ms ease, border-color 160ms ease;
+  animation: commission-in 220ms ease-out both;
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+
+.commission-rule--off {
+  opacity: 0.55;
+}
+
+.commission-rule--editing {
+  border-color: var(--red-600);
+}
+
+.commission-rule__main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.commission-rule__from {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.commission-rule__value {
+  font-size: 1.1rem;
+  color: var(--red-600);
+}
+
+.commission-rule__scope {
+  font-size: 0.85rem;
+  color: var(--gray-700);
+}
+
+.commission-rule__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.commission-rules__form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.commission-rules__fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.commission-rules__preview {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+}
+
+@media (max-width: 900px) {
+  .commission-rules__fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .commission-rules__fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@keyframes commission-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes commission-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes commission-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .commission-cards > li,
+  .commission-card,
+  .commission-card--skeleton,
+  .commission-card__bar-paid,
+  .commission-card__bar-pending,
+  .commission-pay,
+  .commission-paid,
+  .commission-row,
+  .commission-rule {
+    animation: none;
+    transition: none;
+  }
+
+  .commission-card:hover {
+    transform: none;
+  }
+}

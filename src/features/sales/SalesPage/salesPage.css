@@ -123,3 +123,22 @@
   color: var(--color-text-muted);
   text-decoration: line-through;
 }
+
+/* Fase 56: filtros por vendedor y por cliente, uno al lado del otro (en el celular, uno debajo del otro) */
+.sales-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.sales-filters--single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 520px;
+}
+
+@media (max-width: 720px) {
+  .sales-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

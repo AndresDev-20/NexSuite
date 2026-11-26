@@ -43,10 +43,25 @@ export const PERMISSION_CATALOG = [
         description: "Hacer devoluciones de ventas que ya pasaron el plazo de Configuración del negocio (quedan marcadas «fuera de plazo»).",
       },
       {
+        code: "sales.change-seller",
+        label: "Cambiar el vendedor de una venta",
+        description: "Corregir el vendedor de una venta registrada a nombre de otro, con el motivo. La comisión pasa al vendedor correcto y queda en la auditoría. Pensado solo para administradores.",
+      },
+      {
         code: "sales.surcharge",
         label: "Ajustar recargo de ventas",
         description: "Ponerle o cambiarle el recargo de la financiera (Addi, Sistecrédito…) a una venta ya hecha. No toca la caja ni la ganancia; queda en la auditoría.",
       },
+    ],
+  },
+  {
+    key: "commissions",
+    title: "Ventas · Comisiones",
+    permissions: [
+      { code: "commissions.read", label: "Ver mis comisiones", description: "Consultar e imprimir las comisiones propias (Ventas → Comisiones)." },
+      { code: "commissions.read-all", label: "Ver comisiones de todos", description: "Consultar e imprimir las comisiones de todos los vendedores de sus sucursales." },
+      { code: "commissions.configure", label: "Configurar comisiones", description: "Crear, cambiar y desactivar las reglas de comisión. Cambiar una regla no cambia lo ya calculado." },
+      { code: "commissions.pay", label: "Pagar comisiones", description: "Marcar como pagadas las comisiones pendientes de un vendedor e imprimir el comprobante. No saca dinero de la caja." },
     ],
   },
   {

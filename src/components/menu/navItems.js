@@ -122,6 +122,8 @@ const NAV_ITEMS = [
       { label: "Cartera", to: "/ventas/cartera", permission: ["receivables.read", "receivables.pay"] },
       { label: "Apartados", to: "/ventas/apartados", permission: "layaways.read" },
       { label: "Ofertas", to: "/ventas/ofertas", permission: "offers.read" },
+      // Fase 56: comisiones por vendedor
+      { label: "Comisiones", to: "/ventas/comisiones", permission: ["commissions.read", "commissions.read-all", "commissions.configure"] },
       { label: "Reportes", to: "/ventas/reportes", permission: ["sales.read", "sales.read-all"] },
       { label: "Garantías", to: "/ventas/garantias", permission: "warranties.manage" },
       // Fase 16: WhatsApp del negocio (asistente y vendedores)

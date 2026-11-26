@@ -7,6 +7,7 @@ import Modal from "../../../components/feadback/Modal/Modal";
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { formatCurrency } from "../../../utils/money";
 import { sanitizeDecimal } from "../../../utils/validators";
+import { keptBills } from "./keptBills";
 
 const toCents = (value) => Math.round(Number(value) * 100);
 
@@ -31,6 +32,61 @@ const splitOf = (counted, base) => {
   if (counted === "" || !Number.isFinite(Number(counted)) || base == null) return null;
   const kept = Math.min(toCents(counted), toCents(base));
   return { kept: kept / 100, handover: (toCents(counted) - kept) / 100, short: kept < toCents(base) };
+};
+
+/**
+ * Fase 56: después de contar por billetes, cuántos de cada uno dejar en la caja para completar la base y cuántos
+ * entregar (se dejan los pequeños, para el cambio). plan: el de keptBills.
+ */
+const KeptBillsTable = ({ plan, base }) => {
+  const values = [...new Set([...plan.kept, ...plan.handover].map((row) => row.value))].sort((a, b) => b - a);
+  const countIn = (list, value) => list.find((row) => row.value === value)?.count ?? 0;
+  return (
+    <section className="kept-bills" aria-label="Qué dejar en la caja y qué entregar">
+      <header className="kept-bills__head">
+        <strong>Qué dejar en la caja</strong>
+        <span>Base de {formatCurrency(base)}: se dejan los billetes pequeños y las monedas para el cambio.</span>
+      </header>
+      <table className="kept-bills__table">
+        <thead>
+          <tr>
+            <th scope="col">Valor</th>
+            <th scope="col">Dejar en la caja</th>
+            <th scope="col">Entregar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {values.map((value, index) => {
+            const kept = countIn(plan.kept, value);
+            const given = countIn(plan.handover, value);
+            return (
+              <tr key={value} style={{ "--i": index }}>
+                <th scope="row">
+                  {formatCurrency(value)} <small>{value >= 2000 ? "billete" : "moneda"}</small>
+                </th>
+                <td className={kept ? "kept-bills__keep" : "kept-bills__none"}>{kept ? `${kept} × = ${formatCurrency(kept * value)}` : "—"}</td>
+                <td className={given ? "kept-bills__give" : "kept-bills__none"}>{given ? `${given} × = ${formatCurrency(given * value)}` : "—"}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row">Total</th>
+            <td className="kept-bills__keep">{formatCurrency(plan.keptAmount)}</td>
+            <td className="kept-bills__give">{formatCurrency(plan.handoverAmount)}</td>
+          </tr>
+        </tfoot>
+      </table>
+      {plan.missing > 0 && (
+        <p className="cash-split__warn" role="status">
+          {plan.handoverAmount > 0
+            ? `Faltan ${formatCurrency(plan.missing)} para completar la base: no hay billetes o monedas para dejarla exacta. Avísale al administrador.`
+            : `Lo contado no alcanza para la base: faltan ${formatCurrency(plan.missing)}. Avísale al administrador.`}
+        </p>
+      )}
+    </section>
+  );
 };
 
 const CloseForm = ({ session, base, busy, onCancel, onSubmit }) => {
@@ -65,7 +121,13 @@ const CloseForm = ({ session, base, busy, onCancel, onSubmit }) => {
 
   const counted = watch("countedamount");
   const result = blind ? null : differenceText(counted, expected);
-  const split = splitOf(counted, base);
+  // Fase 56: contado por billetes, qué dejar y qué entregar (como lo calcula el servidor al guardar)
+  const plan = byBills && base != null && sumOf(counts) > 0
+    ? keptBills([...BILLS, ...COINS].map((value) => ({ value, count: countOf(counts, value) })), Number(base))
+    : null;
+  const split = plan
+    ? { kept: plan.keptAmount, handover: plan.handoverAmount, short: plan.missing > 0 }
+    : splitOf(counted, base);
 
   const submit = handleSubmit(async (values) => {
     setServerError("");
@@ -147,6 +209,7 @@ const CloseForm = ({ session, base, busy, onCancel, onSubmit }) => {
           validate: (value) => (value !== "" && Number(value) >= 0) || "Cuenta los billetes y monedas, o escribe cuánto efectivo contaste (0 o más).",
         })}
       />
+      {plan && <KeptBillsTable plan={plan} base={Number(base)} />}
       {split && (
         <dl className="cash-split">
           <div>
@@ -157,7 +220,7 @@ const CloseForm = ({ session, base, busy, onCancel, onSubmit }) => {
             <dt>Se le entrega al administrador</dt>
             <dd>{formatCurrency(split.handover)}</dd>
           </div>
-          {split.short && <p className="cash-split__warn">No alcanza para la base de {formatCurrency(base)}: avísale al administrador.</p>}
+          {split.short && !plan && <p className="cash-split__warn">No alcanza para la base de {formatCurrency(base)}: avísale al administrador.</p>}
         </dl>
       )}
       <Field

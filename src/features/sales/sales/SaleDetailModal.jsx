@@ -13,6 +13,7 @@ import ReceiptActions from "./ReceiptActions";
 import { getMethodLabel } from "./useSales";
 import api from "../../../api/client";
 import Field from "../../../components/forms/Field/Field";
+import Select from "../../../components/forms/Select/Select";
 import { sanitizeDecimal } from "../../../utils/validators";
 import { NO_SURCHARGE } from "./paymentMethods";
 import ReturnWizard from "../returns/ReturnWizard";
@@ -64,14 +65,84 @@ const SurchargeEditor = ({ sale, payment, onDone, onCancel }) => {
   );
 };
 
+/**
+ * Fase 56: cambiar el vendedor (solo con «Cambiar el vendedor de una venta»): a quien puede vender en la sucursal de la
+ * venta, con el motivo. La comisión pasa al correcto y queda en la auditoría.
+ */
+const SellerEditor = ({ sale, changeSeller, onDone, onCancel }) => {
+  const toast = useToast();
+  const [options, setOptions] = useState(null);
+  const [iduser, setIduser] = useState("");
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState("");
+  useEffect(() => {
+    let current = true;
+    api
+      .get(`/sales/${sale.id}/seller-options`)
+      .then((response) => current && setOptions(response.data.data))
+      .catch((error) => current && (setOptions([]), setProblem(getErrorMessage(error, "No se pudieron cargar los vendedores."))));
+    return () => {
+      current = false;
+    };
+  }, [sale.id]);
+  const save = async (event) => {
+    event.preventDefault();
+    if (!iduser) return setProblem("Elige el vendedor correcto.");
+    if (reason.trim().length < 5) return setProblem("Escribe el motivo (mínimo 5 letras).");
+    setBusy(true);
+    setProblem("");
+    try {
+      const { sale: changed, message } = await changeSeller(sale.id, Number(iduser), reason.trim());
+      toast.success(message ?? "Vendedor cambiado.");
+      onDone(changed);
+    } catch (error) {
+      setProblem(getErrorMessage(error, "No se pudo cambiar el vendedor."));
+      setBusy(false);
+    }
+  };
+  return (
+    <form className="sale-seller" onSubmit={save}>
+      <p className="sale-seller__lead">
+        Ahora: <strong>{sale.sellerName || "—"}</strong>. La comisión de la venta pasa al vendedor que elijas y el cambio queda en la auditoría.
+      </p>
+      <div className="sale-seller__fields">
+        <Select
+          label="Vendedor correcto"
+          value={iduser}
+          disabled={options === null}
+          placeholder={options === null ? "Cargando…" : "Elige el vendedor"}
+          options={(options ?? []).map((option) => ({ value: String(option.id), label: option.name }))}
+          onChange={(event) => setIduser(event.target.value)}
+        />
+        <Field label="Motivo" maxLength={255} value={reason} placeholder="Ej.: se registró a nombre de otro vendedor" onChange={(event) => setReason(event.target.value)} />
+      </div>
+      {problem && (
+        <p className="sale-seller__problem" role="alert">
+          {problem}
+        </p>
+      )}
+      <div className="sale-surcharge__actions">
+        <Button type="submit" icon="check" disabled={busy}>
+          {busy ? "Guardando…" : "Cambiar vendedor"}
+        </Button>
+        <Button variant="outline" disabled={busy} onClick={onCancel}>
+          Cancelar
+        </Button>
+      </div>
+    </form>
+  );
+};
+
 /* ---------- Contenido (se monta por venta) ---------- */
-const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onReturned, onClose }) => {
+const SaleSheet = ({ saleId, getSale, voidSale, changeSeller, onSellerChanged, onVoided, onReturned, onClose }) => {
   const [state, setState] = useState({ sale: null, loading: true, error: "" });
   const [voiding, setVoiding] = useState(null);
   const [returning, setReturning] = useState(false);
   const [viewingReturn, setViewingReturn] = useState(null);
   const [version, setVersion] = useState(0);
   const [surchargeOf, setSurchargeOf] = useState(null); // id del pago cuyo recargo se ajusta
+  const [editingSeller, setEditingSeller] = useState(false);
   const { can } = usePermissions();
   const toast = useToast();
 
@@ -136,6 +207,37 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onReturned, onClose })
           <li>Vendió {sale.sellerName || "—"}</li>
           {sale.registrarName && sale.registrarId !== sale.sellerId && <li>Registró {sale.registrarName}</li>}
         </ul>
+        {sale.sellerChanges.length > 0 && (
+          <ul className="sale-seller__history" aria-label="Cambios de vendedor">
+            {sale.sellerChanges.map((change, index) => (
+              <li key={index}>
+                Vendedor cambiado el {formatDateTime(change.at)}
+                {change.by && ` por ${change.by}`}: de <strong>{change.from || "—"}</strong> a <strong>{change.to || "—"}</strong>
+                {change.reason && <span className="sale-seller__reason"> · {change.reason}</span>}
+              </li>
+            ))}
+          </ul>
+        )}
+        {editingSeller ? (
+          <SellerEditor
+            sale={sale}
+            changeSeller={changeSeller}
+            onCancel={() => setEditingSeller(false)}
+            onDone={(changed) => {
+              setEditingSeller(false);
+              setState({ sale: changed, loading: false, error: "" });
+              onSellerChanged?.(changed);
+            }}
+          />
+        ) : (
+          changeSeller &&
+          can("sales.change-seller") &&
+          !sale.isVoided && (
+            <button type="button" className="sale-surcharge__open sale-seller__open" onClick={() => setEditingSeller(true)}>
+              Cambiar vendedor
+            </button>
+          )
+        )}
         <ul className="sheet__facts">
           <li>
             Cliente: <strong>{sale.customer ? sale.customer.name : "Consumidor final"}</strong>
@@ -343,9 +445,9 @@ const SaleSheet = ({ saleId, getSale, voidSale, onVoided, onReturned, onClose })
  * saleId null = cerrado. voidSale(id, reason), onVoided(venta) y onReturned(devolución) son opcionales: sin
  * voidSale no aparece Anular.
  */
-const SaleDetailModal = ({ saleId, getSale, voidSale, onVoided, onReturned, onClose }) => (
+const SaleDetailModal = ({ saleId, getSale, voidSale, changeSeller, onSellerChanged, onVoided, onReturned, onClose }) => (
   <Modal icon="cart" open={Boolean(saleId)} title="Detalle de la venta" size="wide" onClose={onClose}>
-    {saleId && <SaleSheet key={saleId} saleId={saleId} getSale={getSale} voidSale={voidSale} onVoided={onVoided} onReturned={onReturned} onClose={onClose} />}
+    {saleId && <SaleSheet key={saleId} saleId={saleId} getSale={getSale} voidSale={voidSale} changeSeller={changeSeller} onSellerChanged={onSellerChanged} onVoided={onVoided} onReturned={onReturned} onClose={onClose} />}
   </Modal>
 );
 
