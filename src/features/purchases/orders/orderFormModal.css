@@ -745,3 +745,31 @@
     justify-content: space-between;
   }
 }
+
+/* 2026-11-26: documentar lo ya cargado les pone el costo de esta compra; se avisa al marcarlo */
+.purchase-line__loaded-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 2px 0 0;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--warning-strong);
+  background: var(--warning-soft);
+  border-radius: 8px;
+  animation: purchase-loaded-in 280ms ease both;
+}
+
+.purchase-line__loaded-warning .icon {
+  width: 17px;
+  height: 17px;
+  margin-top: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .purchase-line__loaded-warning {
+    animation: none;
+  }
+}

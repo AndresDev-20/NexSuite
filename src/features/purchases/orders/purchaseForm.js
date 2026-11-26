@@ -28,9 +28,11 @@ export const parseSerials = (text = "") =>
 const serialsToText = (units) => units.map((unit) => (unit.imei2 ? `${unit.serial}, ${unit.imei2}` : unit.serial)).join("\n");
 
 /**
- * Producto recién agregado: costo actual (vacío si no se puede ver). Si ya tiene existencias
- * cargadas sin compra (loadedStock), se autocompletan sus cantidades por sucursal, sus IMEI, el
- * tipo y la garantía; si no, 1 unidad en la sucursal por defecto.
+ * Producto recién agregado: costo actual (vacío si no se puede ver) y 1 unidad en la sucursal por
+ * defecto. Si ya tiene existencias cargadas sin compra (loadedStock), se guardan para documentarlas,
+ * pero desde el 2026-11-26 la casilla viene **desmarcada**: documentarlas les pone el costo de esta
+ * compra (un Samsung viejo de 270.000 quedó a 260.000 por venir marcada). Se marca solo si esas
+ * unidades venían en esta factura; al marcarla se autocompletan sus cantidades.
  */
 export const newProductLine = (product, defaultBranchId, loadedStock = null) => {
   const loadedBranches = loadedStock?.branches ?? [];
@@ -43,15 +45,10 @@ export const newProductLine = (product, defaultBranchId, loadedStock = null) => 
     unitCost: product.costPrice != null ? String(product.costPrice) : "",
     serialType: loadedStock?.serialType ?? "imei",
     warrantyMonths: loadedStock?.warrantyMonths ? String(loadedStock.warrantyMonths) : "",
-    quantities:
-      loadedBranches.length > 0
-        ? Object.fromEntries(loadedBranches.map((branch) => [branch.branchId, String(branch.quantity)]))
-        : defaultBranchId
-          ? { [defaultBranchId]: "1" }
-          : {},
+    quantities: defaultBranchId ? { [defaultBranchId]: "1" } : {},
     serials: {},
     loaded,
-    useLoaded: loadedBranches.length > 0,
+    useLoaded: false,
   };
 };
 

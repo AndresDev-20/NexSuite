@@ -675,6 +675,12 @@ En **Administrativo → Roles → Permisos** de un rol que no sea del sistema:
 - [ ] En **Existencias → Ajustar**, al disminuir ya no aparece el motivo «Vendido».
 - [ ] Un celular vendido en una venta real sigue sin dejar cambiar el estado («Lo cambia una devolución»).
 
+## 14.36 Compra: «Documentar lo ya cargado» desmarcado (Fase 51.2)
+
+- [ ] En **Compras → Compra de un proveedor**, agrega un producto que se creó con existencias: «Documentar lo ya cargado» viene **sin marcar** y explica cuándo marcarlo.
+- [ ] Sin marcarla, la compra solo suma lo nuevo y, al confirmar, el costo del producto queda en el promedio (ej. 1 a 270.000 + 1 a 260.000 → 265.000).
+- [ ] Al marcarla salen las unidades ya cargadas, la cantidad sube sola y aparece el aviso amarillo de que pasan a valer el costo de esta compra.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

@@ -86,9 +86,18 @@ const ProductLine = ({ line, index, leaving = false, branches, errors, onChange,
               .join(", ")}
             .{" "}
             {line.useLoaded
-              ? "Se autocompletó: esta compra lo documenta y al confirmar no suma esas unidades otra vez. Si compraste más, súbele la cantidad."
-              : "Sin documentarlo, todo lo de esta compra se suma como mercancía nueva."}
+              ? "Esta compra lo documenta: al confirmar no suma esas unidades otra vez. Si compraste más, súbele la cantidad."
+              : "Déjalo sin marcar si esas unidades no venían en esta factura: solo entra lo nuevo y el costo queda en el promedio. Márcalo solo si esta es la factura de esas unidades."}
           </p>
+          {line.useLoaded && (
+            <p className="purchase-line__loaded-warning" role="alert">
+              <Icon name="alert" />
+              <span>
+                Las unidades ya cargadas pasan a valer el <strong>costo de esta compra</strong>, y el costo del producto queda con ese precio. Si las
+                compraste antes a otro precio, desmarca esta casilla.
+              </span>
+            </p>
+          )}
         </div>
       )}
 
