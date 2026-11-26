@@ -19,6 +19,9 @@ const normalizeBranch = (branch) => ({
   web: branch.web ?? "",
   // Prefijo de sus comprobantes de venta (CEN → CEN-000001)
   invoicePrefix: branch.invoiceprefix ?? "",
+  // Fase 52.3: NIT y logo propios. Sin esto, «Editar sucursal» abría el NIT vacío y al guardar lo borraba
+  nit: branch.nit ?? "",
+  logoVersion: branch.logoupdatedat ?? null,
   users: (branch.users ?? []).map(({ id, firstNames, lastNames }) => ({
     id,
     firstNames,

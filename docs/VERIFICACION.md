@@ -726,6 +726,12 @@ Prueba en un portátil de las tiendas (1366×768 o 1280×720), con el zoom al 10
 - [x] El filtro **Área** trae Ventas, Caja, Pedidos entre sucursales, Bodega, Gastos, etc.
 - [x] Se ve bien en modo noche.
 
+## 14.41 Guías de la actualización y dos arreglos (54.4)
+
+- [ ] Abre los 3 PDF de `docs/manuales/Novedades-*.pdf` y revisa que lo que dicen sea como trabajan en las tiendas antes de repartirlos.
+- [ ] **Sucursales → Editar** una sucursal con NIT: el campo sale con el NIT y el logo propio se ve; cambias otra cosa, guardas y el NIT sigue ahí (en la tirilla también).
+- [ ] **Pedidos entre sucursales → Atender y enviar**: cada producto se ve compacto y los IMEI aparecen enseguida, sin espacio vacío.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:
