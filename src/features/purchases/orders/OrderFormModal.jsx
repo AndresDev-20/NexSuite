@@ -25,6 +25,7 @@ import {
   validate,
 } from "./purchaseForm";
 import { fetchLoadedStock } from "./useOrders";
+import PurchaseProductPicker from "./PurchaseProductPicker";
 import "./orderFormModal.css";
 
 const MAX_QUANTITY_LENGTH = 7; // hasta 1.000.000
@@ -289,12 +290,6 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
   const shown = onlyToday ? createdToday : available;
   const addAllToday = () => createdToday.forEach(addLine);
 
-  const handleAddProduct = (event) => {
-    const product = catalog.find((item) => item.id === Number(event.target.value));
-    event.target.value = "";
-    if (product) addLine(product);
-  };
-
   const handleCreateProduct = async (payload) => {
     const product = await creation.createProduct(payload);
     setExtraProducts((current) => [...current, product]);
@@ -358,16 +353,15 @@ const OrderForm = ({ order, suppliers, branches, defaultBranchId, products, hint
 
             <div className="purchase-form__picker">
               <div className="purchase-form__supplier">
-                <Select
-                  label="Agregar producto"
-                  placeholder={
-                    shown.length ? "Elige un producto para agregarlo" : onlyToday ? "No quedan productos creados hoy" : "No quedan productos por agregar"
-                  }
-                  options={toOptions(shown, (product) => `${product.name} · ${product.sku}${ofSupplier(product) ? " · de este proveedor" : ""}`)}
+                {/* 2026-11-26: buscador por nombre, SKU o código de barras (la lista solo buscaba por la primera letra) */}
+                <PurchaseProductPicker
+                  products={shown}
+                  isOfSupplier={ofSupplier}
                   disabled={shown.length === 0}
+                  emptyText={onlyToday ? "No quedan productos creados hoy" : "No quedan productos por agregar"}
+                  showAllWhenEmpty={onlyToday}
                   hint={hint}
-                  defaultValue=""
-                  onChange={handleAddProduct}
+                  onPick={addLine}
                 />
                 {creation.canCreateProduct && (
                   <Button variant="outline" icon="plus" className="purchase-form__inline" onClick={() => setCreating("product")}>
