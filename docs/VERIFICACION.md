@@ -738,6 +738,7 @@ Prueba en un portátil de las tiendas (1366×768 o 1280×720), con el zoom al 10
 - [ ] Imprime la tirilla de una venta de esa sucursal: dice «SUCURSAL DE VENTA · KLICK Y LISTO».
 - [ ] En el menú, el selector de sucursal y los reportes sigue saliendo «TIENDA MOVIL 1».
 - [ ] Borra el campo y guarda: la tirilla vuelve a salir con «TIENDA MOVIL 1».
+- [ ] (54.6) En la tirilla de una sucursal **con logo propio** ya no sale «Recarga Movil» entre el logo y el bloque de la sucursal; en una **sin logo propio** sí sigue saliendo.
 
 ## 15. Producción (cuando montes el VPS)
 
