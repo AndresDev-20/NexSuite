@@ -821,6 +821,16 @@ Prueba en un portátil de las tiendas (1366×768 o 1280×720), con el zoom al 10
 - [ ] Una rifa que empieza en el futuro no da participación todavía.
 - [ ] Al cobrar un **pedido a caja** con el producto de la rifa también sale el aviso.
 
+## 14.47 Elegir proveedor sin ver sus datos (Fase 58)
+
+- [ ] En Administrativo → Roles, «Compras · Proveedores» muestra «Ver proveedores» y el nuevo «Elegir proveedor (solo el nombre)».
+- [ ] Cajero, Gerente de sucursal y Vendedor ya no tienen «Ver proveedores» y sí «Elegir proveedor»; Inventario tiene los dos.
+- [ ] Con un cajero: el menú Compras → Proveedores no sale y #/compras/proveedores no abre.
+- [ ] Con un usuario que crea productos pero solo tiene «Elegir proveedor»: en Nuevo producto la lista de proveedores sale con los nombres y se guarda el producto con su proveedor.
+- [ ] En Unidades con serial y en la ficha del producto, ese usuario ve el nombre del proveedor pero no su teléfono ni su correo; el administrador sí los ve.
+- [ ] En una garantía, el teléfono del proveedor sale solo para quien tiene «Ver proveedores».
+- [ ] Si a un rol hecho a mano (por ejemplo el de Laura) se le quita «Ver proveedores» y se le da «Elegir proveedor», puede seguir creando productos con proveedor.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

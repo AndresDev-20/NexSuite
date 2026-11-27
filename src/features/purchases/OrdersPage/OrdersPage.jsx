@@ -107,7 +107,7 @@ const OrdersPage = () => {
   }, [params, getOrders, branchStatus, hasBranches]);
 
   // Proveedores, productos y categorías alimentan el formulario: sin permiso no se piden
-  const canReadSuppliers = can("suppliers.read");
+  const canReadSuppliers = can(["suppliers.read", "suppliers.pick"]);
   const canReadProducts = can("products.read");
 
   useEffect(() => {

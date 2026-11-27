@@ -125,7 +125,7 @@ const ProductsPage = () => {
   }, [getAllCategories, canReadCategories]);
 
   // Los proveedores solo hacen falta para asignar productos con serial (el ingreso de sus unidades)
-  const canReadSuppliers = can("suppliers.read");
+  const canReadSuppliers = can(["suppliers.read", "suppliers.pick"]);
   useEffect(() => {
     // Para el filtro por proveedor y para el ingreso de unidades con serial
     if (canReadSuppliers) getAllSuppliers();
@@ -133,7 +133,7 @@ const ProductsPage = () => {
 
   const activeSuppliers = useMemo(() => suppliers.filter((supplier) => supplier.isActive), [suppliers]);
   const suppliersHint = !canReadSuppliers
-    ? "Necesitas el permiso de consultar proveedores."
+    ? "Necesitas el permiso «Elegir proveedor» o «Ver proveedores»."
     : suppliersLoading
       ? "Cargando proveedores…"
       : activeSuppliers.length === 0

@@ -1,4 +1,5 @@
 import useCrudResource from "../../../hooks/useCrudResource";
+import usePermissions from "../../auth/usePermissions";
 
 // Contrato asumido: ajústalo aquí si tu ruta es otra
 const SUPPLIERS_PATH = "/suppliers";
@@ -28,8 +29,12 @@ const byCompanyName = (a, b) => a.companyname.localeCompare(b.companyname, "es")
 const LOAD_ERROR = "No se pudieron cargar los proveedores.";
 
 const useSuppliers = () => {
+  const { can } = usePermissions();
+  // Sin «Ver proveedores» pero con «Elegir proveedor», la lista trae solo los nombres
+  const listPath = can("suppliers.read") ? SUPPLIERS_PATH : `${SUPPLIERS_PATH}/options`;
   const { items, loading, error, getAll, create, update, remove } = useCrudResource({
     path: SUPPLIERS_PATH,
+    listPath,
     normalize: normalizeSupplier,
     compare: byCompanyName,
     loadError: LOAD_ERROR,

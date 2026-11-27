@@ -145,7 +145,8 @@ export const PERMISSION_CATALOG = [
     key: "suppliers",
     title: "Compras · Proveedores",
     permissions: [
-      { code: "suppliers.read", label: "Ver proveedores", description: "Consultar la lista de proveedores." },
+      { code: "suppliers.read", label: "Ver proveedores", description: "Abrir Compras → Proveedores y ver sus datos: NIT, teléfonos, correos, dirección y su resumen de compras." },
+      { code: "suppliers.pick", label: "Elegir proveedor (solo el nombre)", description: "Elegir el proveedor por su nombre al crear un producto, cargar IMEI o filtrar, sin ver sus datos de contacto." },
       { code: "suppliers.create", label: "Crear proveedores", description: "Registrar proveedores nuevos." },
       { code: "suppliers.update", label: "Editar proveedores", description: "Modificar los datos de un proveedor." },
       { code: "suppliers.delete", label: "Eliminar proveedores", description: "Quitar proveedores del sistema." },
@@ -287,7 +288,7 @@ export const PERMISSION_CATALOG = [
     // Fase 47: solo se muestra con la bodega activa (Datos del negocio → «Usar la bodega»)
     feature: "warehouse",
     permissions: [
-      { code: "warehouse.read", label: "Consultar bodega", description: "Ver lo prestado y vendido a relacionados (el hermano), quién debe y los préstamos vencidos." },
+      { code: "warehouse.read", label: "Consultar bodega", description: "Ver lo prestado y vendido a relacionados (colegas o clientes especiales), quién debe y los préstamos vencidos." },
       {
         code: "warehouse.manage",
         label: "Prestar a relacionados y recibir devoluciones",

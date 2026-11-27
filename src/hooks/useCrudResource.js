@@ -7,6 +7,7 @@ import { toList } from "../utils/apiResponse";
  * CRUD genérico sobre una ruta REST (GET / · POST / · PUT /:id · DELETE /:id).
  *
  * path:      ruta base, ej. "/categories".
+ * listPath:  (opcional) de dónde se lee la lista; por defecto path. Ej.: «/suppliers/options» (Fase 58).
  * normalize: convierte cada elemento del backend en lo que usa la interfaz.
  *            Deja fuera datos sensibles. Debe estar definida FUERA del componente.
  * compare:   opcional, para ordenar la lista. También fuera del componente.
@@ -15,7 +16,7 @@ import { toList } from "../utils/apiResponse";
  * Las acciones de escritura refrescan la lista y, si fallan, lanzan el error
  * para que lo muestre el formulario o el diálogo que las llamó.
  */
-const useCrudResource = ({ path, normalize, compare, loadError = "No se pudo cargar la lista." }) => {
+const useCrudResource = ({ path, listPath = path, normalize, compare, loadError = "No se pudo cargar la lista." }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -34,7 +35,7 @@ const useCrudResource = ({ path, normalize, compare, loadError = "No se pudo car
       }
 
       try {
-        const list = toList(await api.get(path, { params })).map(normalize);
+        const list = toList(await api.get(listPath, { params })).map(normalize);
         setItems(compare ? list.sort(compare) : list);
       } catch (err) {
         if (!silent) setError(getErrorMessage(err, loadError));
@@ -42,7 +43,7 @@ const useCrudResource = ({ path, normalize, compare, loadError = "No se pudo car
         if (!silent) setLoading(false);
       }
     },
-    [path, normalize, compare, loadError]
+    [listPath, normalize, compare, loadError]
   );
 
   const create = useCallback(

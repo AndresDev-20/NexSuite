@@ -56,7 +56,7 @@ const usePayments = () => {
 const originOf = (item) => {
   if (item.source === "devolucion") return `Devolución ${item.saleReturn?.number ?? ""}`.trim();
   if (item.source === "apartado") return `Apartado ${item.layaway?.number ?? ""}`.trim();
-  // Bodega (Fase 47): abono de un relacionado (el hermano)
+  // Bodega (Fase 47): abono de un relacionado (colega o cliente especial)
   if (item.source === "relacionado") return "Abono de relacionado";
   return item.sale ? `Venta ${item.sale.number}` : "Abono de cartera";
 };

@@ -49,7 +49,7 @@ const ProductUnitsPage = () => {
   }, [query, activeBranchId, statusFilter, getUnits]);
 
   // Los proveedores alimentan el formulario de corregir una unidad: sin permiso no se piden
-  const canReadSuppliers = can("suppliers.read");
+  const canReadSuppliers = can(["suppliers.read", "suppliers.pick"]);
 
   useEffect(() => {
     if (canReadSuppliers) getAllSuppliers();

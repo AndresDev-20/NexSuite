@@ -93,7 +93,7 @@ const AdjustForm = ({ row, busy, onCancel, onSubmit }) => {
   const { can } = usePermissions();
   const { canIncrease, canDecrease } = adjustPermissions(can, row.hasSerial);
   const { suppliers, getAllSuppliers } = useSuppliers();
-  const canReadSuppliers = can("suppliers.read");
+  const canReadSuppliers = can(["suppliers.read", "suppliers.pick"]);
 
   const [direction, setDirection] = useState(canDecrease ? -1 : 1);
   const [values, setValues] = useState({ quantity: "", reason: "", note: "", codes: "" });
@@ -286,7 +286,7 @@ const AdjustForm = ({ row, busy, onCancel, onSubmit }) => {
               required
               placeholder="¿Quién lo vendió?"
               options={suppliers.filter((supplier) => supplier.isActive).map((supplier) => ({ value: String(supplier.id), label: supplier.companyname }))}
-              hint={canReadSuppliers ? "Es a quien se le reclama la garantía." : "Necesitas el permiso de consultar proveedores."}
+              hint={canReadSuppliers ? "Es a quien se le reclama la garantía." : "Necesitas el permiso «Elegir proveedor» o «Ver proveedores»."}
               value={ingress.idsupplier}
               onChange={setIngressField("idsupplier")}
               error={show(errors.idsupplier)}

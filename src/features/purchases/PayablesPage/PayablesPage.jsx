@@ -94,7 +94,7 @@ const PayablesPage = () => {
   }, [params, getPayables, branchStatus, hasBranches]);
 
   // Los proveedores solo alimentan el filtro: sin permiso de consultarlos, el filtro queda vacío
-  const canReadSuppliers = can("suppliers.read");
+  const canReadSuppliers = can(["suppliers.read", "suppliers.pick"]);
 
   useEffect(() => {
     if (canReadSuppliers) getAllSuppliers();

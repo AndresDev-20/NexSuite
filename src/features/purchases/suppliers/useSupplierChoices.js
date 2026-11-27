@@ -13,7 +13,7 @@ import useSuppliers from "./useSuppliers";
 const useSupplierChoices = (current = null) => {
   const { can } = usePermissions();
   const toast = useToast();
-  const canRead = can("suppliers.read");
+  const canRead = can(["suppliers.read", "suppliers.pick"]);
   const canCreate = can("suppliers.create");
   const { suppliers, loading, error, getAllSuppliers, createSupplier } = useSuppliers();
 

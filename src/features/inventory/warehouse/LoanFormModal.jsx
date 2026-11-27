@@ -199,7 +199,7 @@ const LoanForm = ({ branches, defaultBranchId, onClose, onCreated }) => {
 
 /** Ventana «Prestar» (Fase 47). branches: las del usuario; defaultBranchId: la activa. */
 const LoanFormModal = ({ open, branches, defaultBranchId, onClose, onCreated }) => (
-  <Modal open={open} title="Prestar" subtitle="Productos de la sucursal al hermano u otro relacionado, por un plazo." icon="box" size="wide" onClose={onClose}>
+  <Modal open={open} title="Prestar" subtitle="Productos de la sucursal a un colega o cliente especial, por un plazo." icon="box" size="wide" onClose={onClose}>
     <LoanForm branches={branches} defaultBranchId={defaultBranchId} onClose={onClose} onCreated={onCreated} />
   </Modal>
 );

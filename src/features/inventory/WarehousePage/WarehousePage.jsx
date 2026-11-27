@@ -195,7 +195,7 @@ const LoansPanel = ({ branchId, filter, onFilter, reload, onOpen }) => {
         <StateMessage
           icon="box"
           title={query.trim() ? "Sin resultados" : filter === "vencido" ? "Nada vencido" : "No hay préstamos aquí"}
-          text={query.trim() ? "No encontramos préstamos con esa búsqueda." : filter === "vencido" ? "Todo lo prestado está dentro del plazo." : "Para prestarle algo al hermano, toca «Prestar»."}
+          text={query.trim() ? "No encontramos préstamos con esa búsqueda." : filter === "vencido" ? "Todo lo prestado está dentro del plazo." : "Para prestarle algo a un colega o cliente especial, toca «Prestar»."}
         />
       ) : (
         <>
@@ -276,7 +276,7 @@ const SalesPanel = ({ branchId, reload, onOpen }) => {
       ) : state.error ? (
         <StateMessage tone="error" icon="alert" title="No pudimos cargar las ventas" text={state.error} />
       ) : state.items.length === 0 ? (
-        <StateMessage icon="cart" title="Sin ventas aquí" text="Las ventas al hermano a precio especial aparecen aquí, aparte de las ventas normales." />
+        <StateMessage icon="cart" title="Sin ventas aquí" text="Las ventas a relacionados a precio especial aparecen aquí, aparte de las ventas normales." />
       ) : (
         <>
           <ul className="wh-rows">
@@ -437,7 +437,7 @@ const RelatedPanel = ({ reload, canEdit, canDelete, onEdit, onAccount, onChanged
       ) : state.error ? (
         <StateMessage tone="error" icon="alert" title="No pudimos cargar los relacionados" text={state.error} />
       ) : state.items.length === 0 ? (
-        <StateMessage icon="users" title="Sin relacionados" text="Crea al hermano (u otro negocio de la familia) con «Nuevo relacionado» o al prestar." />
+        <StateMessage icon="users" title="Sin relacionados" text="Crea a un colega o cliente especial con «Nuevo relacionado» o al prestar." />
       ) : (
         <div className="wh-people">
           {state.items.map((item, index) => {
@@ -495,7 +495,7 @@ const RelatedPanel = ({ reload, canEdit, canDelete, onEdit, onAccount, onChanged
 };
 
 /**
- * Inventario → Bodega (Fase 47, docs/PLAN-BODEGA.md): lo que se le presta o se le vende al hermano desde el
+ * Inventario → Bodega (Fase 47, docs/PLAN-BODEGA.md): lo que se le presta o se le vende a un colega o cliente especial desde el
  * inventario de cada sucursal. Opcional: si la bodega está apagada, avisa cómo prenderla.
  */
 const WarehousePage = () => {
@@ -539,7 +539,7 @@ const WarehousePage = () => {
   if (!enabled) {
     return (
       <section className="list-page wh-page">
-        <StateMessage icon="box" title="La bodega no está activa" text="Para prestar o venderle productos al hermano, actívala en Configuración → Datos del negocio → «Usar la bodega»." />
+        <StateMessage icon="box" title="La bodega no está activa" text="Para prestarles o venderles productos a colegas o clientes especiales, actívala en Configuración → Datos del negocio → «Usar la bodega»." />
       </section>
     );
   }
@@ -549,7 +549,7 @@ const WarehousePage = () => {
       <header className="list-page__header">
         <div>
           <h1 className="list-page__title">Bodega</h1>
-          <p className="list-page__subtitle">Lo que le prestas o le vendes al hermano desde el inventario de cada sucursal: a quién, desde cuándo y cuándo vence.</p>
+          <p className="list-page__subtitle">Lo que les prestas o les vendes a colegas o clientes especiales desde el inventario de cada sucursal: a quién, desde cuándo y cuándo vence.</p>
         </div>
         <div className="wh-actions">
           {can("warehouse.manage") && (
@@ -636,7 +636,7 @@ const WarehousePage = () => {
           setOpenSale(id);
         }}
       />
-      <Modal open={Boolean(editing)} title={editing === "new" ? "Nuevo relacionado" : "Editar relacionado"} subtitle="El hermano u otro negocio de la familia." icon="users" onClose={() => setEditing(null)}>
+      <Modal open={Boolean(editing)} title={editing === "new" ? "Nuevo relacionado" : "Editar relacionado"} subtitle="Un colega o un cliente especial." icon="users" onClose={() => setEditing(null)}>
         <RelatedForm
           related={editing === "new" ? null : editing}
           onCancel={() => setEditing(null)}

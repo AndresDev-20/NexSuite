@@ -23,7 +23,7 @@ const validate = (form) => {
 };
 
 /**
- * Crear o editar un relacionado (el hermano u otro negocio de la familia). related: el que se edita (o null).
+ * Crear o editar un relacionado (un colega o un cliente especial). related: el que se edita (o null).
  * onSaved(related, message).
  */
 export const RelatedForm = ({ related = null, onCancel, onSaved }) => {
@@ -62,14 +62,14 @@ export const RelatedForm = ({ related = null, onCancel, onSaved }) => {
 
   return (
     <FormLayout error={serverError} onSubmit={submit}>
-      <Field label="Nombre" required maxLength={100} data-autofocus placeholder="Ej: Armando Pérez" value={form.name} error={errors.name} onChange={set("name")} />
+      <Field label="Nombre" required maxLength={100} data-autofocus placeholder="Ej: Juan Pérez" value={form.name} error={errors.name} onChange={set("name")} />
       <div className="form-layout__row">
         <Select label="Tipo de documento" required options={ID_TYPES} value={form.typeidentification} onChange={set("typeidentification")} />
         <Field label="Número" required maxLength={20} autoComplete="off" value={form.document} error={errors.document} onChange={set("document")} />
       </div>
       <div className="form-layout__row">
         <Field label="Teléfono" required maxLength={20} inputMode="tel" value={form.phone} error={errors.phone} onChange={set("phone")} />
-        <Field label="Negocio" maxLength={100} placeholder="Ej: Mundo celumovil" value={form.business} onChange={set("business")} />
+        <Field label="Negocio" maxLength={100} placeholder="Ej: Celulares La 14" value={form.business} onChange={set("business")} />
       </div>
       <Field label="Notas" maxLength={255} multiline value={form.notes} onChange={set("notes")} />
       <FormActions>

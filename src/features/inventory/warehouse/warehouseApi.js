@@ -6,7 +6,7 @@ import { downloadPdf, fetchPdf, printPdf } from "../../sales/sales/receipt";
 
 /*
  * Bodega: préstamos y ventas a relacionados (Fase 47, docs/PLAN-BODEGA.md). La bodega es el inventario de cada
- * sucursal; desde aquí se le presta o se le vende al hermano. El servidor revisa permisos, sucursal, existencias y caja.
+ * sucursal; desde aquí se le presta o se le vende a un colega o cliente especial. El servidor revisa permisos, sucursal, existencias y caja.
  */
 const PATH = "/warehouse";
 

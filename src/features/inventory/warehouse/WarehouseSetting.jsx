@@ -34,7 +34,7 @@ const WarehouseSetting = () => {
     <section className="business-settings__section wh-setting" aria-label="Bodega">
       <Switch
         label="Usar la bodega"
-        description="Para prestarle o venderle productos al hermano (u otro negocio de la familia) desde el inventario de cada sucursal, con plazos, precio especial y lo que deben. Si no la usas, déjala apagada: no aparece en ningún lado."
+        description="Para prestarles o venderles productos a colegas o clientes especiales desde el inventario de cada sucursal, con plazos, precio especial y lo que deben. Si no la usas, déjala apagada: no aparece en ningún lado."
         checked={enabled}
         disabled={!allowed || busy}
         onChange={change}

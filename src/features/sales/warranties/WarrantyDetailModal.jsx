@@ -58,7 +58,7 @@ const CaseSheet = ({ id, getWarranty, act, getSettleOptions, onChanged, onClose 
   const [state, setState] = useState({ item: null, loading: true, error: "" });
   const [step, setStep] = useState(null);
   const [settling, setSettling] = useState(false);
-  const canReadSuppliers = can("suppliers.read");
+  const canReadSuppliers = can(["suppliers.read", "suppliers.pick"]);
   const canApprove = can("warranties.approve");
 
   useEffect(() => {
