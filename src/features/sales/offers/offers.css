@@ -5,11 +5,13 @@
 .offer-tone--price { --offer: #ea580c; --offer-soft: #fff7ed; }
 .offer-tone--second { --offer: #2563eb; --offer-soft: #eff6ff; }
 .offer-tone--combo { --offer: #059669; --offer-soft: #ecfdf5; }
+.offer-tone--raffle { --offer: #7c3aed; --offer-soft: #f5f3ff; }
 
 :root[data-theme="dark"] .offer-tone--gift { --offer-soft: color-mix(in srgb, #db2777 16%, transparent); }
 :root[data-theme="dark"] .offer-tone--price { --offer-soft: color-mix(in srgb, #ea580c 16%, transparent); }
 :root[data-theme="dark"] .offer-tone--second { --offer-soft: color-mix(in srgb, #2563eb 18%, transparent); }
 :root[data-theme="dark"] .offer-tone--combo { --offer-soft: color-mix(in srgb, #059669 18%, transparent); }
+:root[data-theme="dark"] .offer-tone--raffle { --offer-soft: color-mix(in srgb, #7c3aed 18%, transparent); }
 
 /* ---------- Filtros ---------- */
 .offer-filters {
@@ -701,3 +703,120 @@
     animation: none !important;
   }
 }
+
+/* Fase 57: Regalo en 3 pasos y rifa */
+.offer-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.offer-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+  background: var(--offer-soft, #fdf2f8);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  animation: offer-in 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 60ms);
+}
+
+.offer-step__number {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--offer, #db2777);
+  border-radius: 50%;
+}
+
+.offer-step__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.offer-step__body > small,
+.offer-hint {
+  font-size: 0.78rem;
+  color: var(--color-text-muted, #71717a);
+}
+
+.offer-sentence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-weight: 600;
+}
+
+.offer-sentence input {
+  width: 64px;
+  padding: 6px 8px;
+  font: inherit;
+  text-align: center;
+  color: inherit;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.offer-note {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  color: #5b21b6;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 12px;
+}
+
+:root[data-theme="dark"] .offer-note { color: #ddd6fe; background: color-mix(in srgb, #7c3aed 16%, transparent); border-color: color-mix(in srgb, #7c3aed 40%, transparent); }
+
+/* Participantes de una rifa */
+.raffle-entries__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.raffle-entries__totals {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted, #71717a);
+}
+
+.raffle-entries__totals strong { display: block; font-size: 1.3rem; color: #7c3aed; }
+
+.raffle-entries__table-wrap { overflow-x: auto; }
+
+.raffle-entries__table {
+  width: 100%;
+  font-size: 0.85rem;
+  border-collapse: collapse;
+}
+
+.raffle-entries__table th,
+.raffle-entries__table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.raffle-entries__table th { font-size: 0.72rem; text-transform: uppercase; color: var(--color-text-muted, #71717a); }
+.raffle-entries__table td:last-child,
+.raffle-entries__table th:last-child { text-align: center; }
+.raffle-entries__row--anulada { opacity: 0.5; text-decoration: line-through; }

@@ -3,6 +3,7 @@ import Icon from "../../../components/ui/Icon/Icon";
 import Select from "../../../components/forms/Select/Select";
 import { formatCurrency } from "../../../utils/money";
 import { giftChoiceOf } from "./cartOffersLogic";
+import { drawDayText } from "./offerApi";
 import "./cartOffers.css";
 
 /* Ofertas en el carrito (Fase 31): la etiqueta, los regalos y el resumen. La lógica está en cartOffersLogic.js. */
@@ -84,6 +85,30 @@ export const GiftLines = ({ gifts, choices, onChange, freeOf, onPickUnits }) =>
           </li>
         );
       })}
+    </ul>
+  );
+
+/** Fase 57: las rifas en las que participa la compra (para avisarle al cliente). */
+export const RaffleNotice = ({ raffles }) =>
+  raffles?.length > 0 && (
+    <ul className="cart-raffles" aria-label="Rifas">
+      {raffles.map((raffle, index) => (
+        <li key={raffle.idoffer} className="cart-raffle" style={{ "--i": index }}>
+          <span className="cart-raffle__icon" aria-hidden="true">
+            🎟️
+          </span>
+          <span className="cart-raffle__body">
+            <strong>Participa en la rifa «{raffle.name}»</strong>
+            <small>
+              {[raffle.prize && `Premio: ${raffle.prize}`, raffle.drawdate && `Sorteo: ${drawDayText(raffle.drawdate)}`].filter(Boolean).join(" · ")}
+            </small>
+          </span>
+          <span className="cart-raffle__chances">
+            <strong>{raffle.chances}</strong>
+            <small>{raffle.chances === 1 ? "oportunidad" : "oportunidades"}</small>
+          </span>
+        </li>
+      ))}
     </ul>
   );
 

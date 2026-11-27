@@ -96,6 +96,8 @@ export const normalizeSale = (sale) => ({
   returnState: sale.returnstate ?? null,
   returnedTotal: toNumber(sale.returnedtotal ?? 0),
   // Fase 56: cambios de vendedor (de la auditoría)
+  // Fase 57: rifas en las que participa la venta
+  raffles: (sale.raffles ?? []).map((raffle) => ({ ...raffle, chances: Number(raffle.chances) || 0, voided: Number(raffle.voided) || 0 })),
   sellerChanges: (sale.sellerchanges ?? []).map((change) => ({ at: change.at, by: change.by ?? "", from: change.from ?? "", to: change.to ?? "", reason: change.reason ?? "" })),
   returns: (sale.returns ?? []).map((item) => ({
     id: item.id,

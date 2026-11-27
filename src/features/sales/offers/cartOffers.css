@@ -187,3 +187,51 @@
     animation: none !important;
   }
 }
+
+/* Fase 57: aviso de rifa en el carrito */
+.cart-raffles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cart-raffle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  background: linear-gradient(120deg, #f5f3ff, var(--white) 70%);
+  border: 1px solid #c4b5fd;
+  border-left: 5px solid #7c3aed;
+  border-radius: 12px;
+  animation: cart-offer-in 420ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  animation-delay: calc(var(--i) * 70ms);
+}
+
+:root[data-theme="dark"] .cart-raffle { background: color-mix(in srgb, #7c3aed 14%, transparent); }
+
+.cart-raffle__icon { font-size: 1.4rem; }
+
+.cart-raffle__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cart-raffle__body strong { color: #5b21b6; font-size: 0.88rem; }
+:root[data-theme="dark"] .cart-raffle__body strong { color: #c4b5fd; }
+.cart-raffle__body small { color: var(--color-text-muted, #71717a); font-size: 0.76rem; }
+
+.cart-raffle__chances {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+
+.cart-raffle__chances strong { font-size: 1.15rem; color: #7c3aed; }
+.cart-raffle__chances small { font-size: 0.68rem; color: var(--color-text-muted, #71717a); }

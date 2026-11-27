@@ -11,7 +11,7 @@ import { FormActions } from "../../../components/forms/FormLayout/FormLayout";
 import useActiveBranch from "../../branches/useActiveBranch";
 import { normalizeProduct } from "../../inventory/products/useProducts";
 import UnitPickerModal from "../../sales/PosPage/UnitPickerModal";
-import { OfferBadge, OffersSummary } from "../../sales/offers/cartOffers";
+import { OfferBadge, OffersSummary, RaffleNotice } from "../../sales/offers/cartOffers";
 import { useCartOffers } from "../../sales/offers/cartOffersLogic";
 import NewCustomerButton from "../../sales/customers/NewCustomerButton";
 import { newSaleKey } from "../../sales/sales/useSales";
@@ -445,6 +445,7 @@ const OrderPage = () => {
           )}
 
           <OffersSummary offers={offers} />
+          <RaffleNotice raffles={offers.raffles} />
           {offers.gifts.length > 0 && (
             <p className="pos__hint" role="status">
               🎁 Le toca regalo: {offers.gifts.map((gift) => gift.name).join(" · ")}. La caja lo agrega al cobrar (el cliente elige cuál).

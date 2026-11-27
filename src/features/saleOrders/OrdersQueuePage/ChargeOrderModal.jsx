@@ -16,7 +16,7 @@ import getErrorMessage from "../../../utils/getErrorMessage";
 import { formatCurrency } from "../../../utils/money";
 import { sanitizeDecimal } from "../../../utils/validators";
 import UnitPickerModal from "../../sales/PosPage/UnitPickerModal";
-import { GiftLines, OfferBadge, OffersSummary } from "../../sales/offers/cartOffers";
+import { GiftLines, OfferBadge, OffersSummary, RaffleNotice } from "../../sales/offers/cartOffers";
 import { giftLinesOf, useCartOffers } from "../../sales/offers/cartOffersLogic";
 import { IMEI_NEEDS_CUSTOMER, countPhones } from "../../sales/sales/imeiCustomer";
 import { SurchargeField, surchargeCents, surchargePayload } from "../../sales/sales/surcharge";
@@ -156,6 +156,7 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
         onPickUnits={({ gift, option, units }) => setPicking({ productId: option.idproduct, name: option.name, hasSerial: true, units, giftOffer: gift.idoffer })}
       />
       <OffersSummary offers={offers} />
+      <RaffleNotice raffles={offers.raffles} />
 
       {branchSessions.length === 0 ? (
         <p className="pos__error">No hay cajas abiertas en {order.branchName}: abre el turno de una caja para cobrarlo.</p>

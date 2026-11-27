@@ -7,7 +7,7 @@ import { unwrap } from "../../../utils/apiResponse";
  * cálculo se repite al registrar la venta. Lo usan Vender y el cobro de los pedidos a caja.
  */
 const cents = (value) => Math.round(Number(value || 0) * 100);
-const EMPTY = { lines: new Map(), gifts: [], applied: [], savings: 0 };
+const EMPTY = { lines: new Map(), gifts: [], raffles: [], applied: [], savings: 0 };
 const DELAY_MS = 250;
 
 /**
@@ -41,6 +41,8 @@ export const useCartOffers = (branchId, items) => {
           offers: {
             lines: new Map(data.lines.map((line) => [line.idproduct, { ...line, discount: cents(line.discount) }])),
             gifts: data.gifts,
+            // Fase 57: rifas en las que participa la compra
+            raffles: data.raffles ?? [],
             applied: data.applied,
             savings: data.lines.reduce((sum, line) => sum + cents(line.discount), 0),
           },

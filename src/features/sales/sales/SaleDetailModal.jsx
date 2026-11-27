@@ -20,6 +20,7 @@ import ReturnWizard from "../returns/ReturnWizard";
 import ReturnDetailModal from "../returns/ReturnDetailModal";
 import "../../../styles/sheet.css";
 import "../returns/returns.css";
+import { RaffleNotice } from "../offers/cartOffers";
 import "./saleDetail.css";
 
 const RETURN_LABELS = { devuelta: "Devuelta", "devuelta-parcial": "Devuelta en parte" };
@@ -391,6 +392,14 @@ const SaleSheet = ({ saleId, getSale, voidSale, changeSeller, onSellerChanged, o
       )}
 
       {sale.notes && <p className="sheet__more">Notas: {sale.notes}</p>}
+
+      {/* Fase 57: rifas en las que participa (las anuladas o devueltas ya no cuentan) */}
+      {sale.raffles?.some((raffle) => raffle.chances > 0) && (
+        <section className="sheet__section">
+          <h3 className="sheet__section-title">Rifas</h3>
+          <RaffleNotice raffles={sale.raffles.filter((raffle) => raffle.chances > 0)} />
+        </section>
+      )}
 
       <section className="sheet__section">
         <h3 className="sheet__section-title">Comprobante</h3>

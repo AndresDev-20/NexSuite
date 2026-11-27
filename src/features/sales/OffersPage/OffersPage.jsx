@@ -15,6 +15,7 @@ import getErrorMessage from "../../../utils/getErrorMessage";
 import { formatCurrency } from "../../../utils/money";
 import { OFFER_STATES, OFFER_TYPES, STATE_LABELS, deleteOffer, listOffers, periodText, setOfferStatus, typeOf } from "../offers/offerApi";
 import OfferFormModal from "../offers/OfferFormModal";
+import RaffleEntriesModal from "../offers/RaffleEntriesModal";
 import "../../../styles/listPage.css";
 import "../offers/offers.css";
 
@@ -25,11 +26,12 @@ const contentOf = (offer) => {
   const names = (list) => list.map((row) => row.name).join(", ");
   if (offer.type === "regalo") return `${names(offer.triggers)} → gratis: ${offer.gifts.map((row) => row.name).join(" o ")}`;
   if (offer.type === "precio") return offer.items.map((row) => `${row.name} a ${formatCurrency(row.price)}`).join(" · ");
+  if (offer.type === "rifa") return `Premio: ${offer.prize} · por comprar ${names(offer.triggers)}`;
   if (offer.type === "combo") return offer.items.map((row) => `${row.quantity > 1 ? `${row.quantity} × ` : ""}${row.name}`).join(" + ");
   return names(offer.items);
 };
 
-const OfferCard = ({ offer, index, canManage, onEdit, onToggle, onDelete }) => {
+const OfferCard = ({ offer, index, canManage, onEdit, onToggle, onDelete, onEntries }) => {
   const type = typeOf(offer.type);
   const limited = offer.limitqty !== null;
   const progress = limited ? Math.min(100, Math.round((offer.used / offer.limitqty) * 100)) : null;
@@ -57,7 +59,7 @@ const OfferCard = ({ offer, index, canManage, onEdit, onToggle, onDelete }) => {
           <dd>{offer.allbranches ? "Todas" : offer.branches.map((branch) => branch.name).join(", ")}</dd>
         </div>
         <div>
-          <dt>{offer.type === "regalo" ? "Regalos entregados" : "Usos"}</dt>
+          <dt>{offer.type === "regalo" ? "Regalos entregados" : offer.type === "rifa" ? "Oportunidades dadas" : "Usos"}</dt>
           <dd>
             {offer.used}
             {limited && ` de ${offer.limitqty}`}
@@ -68,6 +70,11 @@ const OfferCard = ({ offer, index, canManage, onEdit, onToggle, onDelete }) => {
         <span className="offer-card__meter" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Uso del límite">
           <span style={{ "--value": `${progress}%` }} />
         </span>
+      )}
+      {offer.type === "rifa" && (
+        <Button variant="outline" icon="ticket" onClick={() => onEntries(offer)}>
+          Ver participantes
+        </Button>
       )}
       {canManage && (
         <footer className="offer-card__actions">
@@ -100,6 +107,7 @@ const OffersPage = () => {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({ open: false, offer: null });
   const [deleting, setDeleting] = useState(null);
+  const [raffle, setRaffle] = useState(null);
   const [reload, setReload] = useState(0);
 
   const load = useCallback(async () => {
@@ -143,7 +151,7 @@ const OffersPage = () => {
       <header className="list-page__header">
         <div>
           <h1 className="list-page__title">Ofertas</h1>
-          <p className="list-page__subtitle">Regalos, precios especiales, 2x1 y combos. Se aplican solas al vender en las sucursales y fechas que elijas.</p>
+          <p className="list-page__subtitle">Regalos, precios especiales, 2x1, combos y rifas. Se aplican solas al vender en las sucursales y fechas que elijas.</p>
         </div>
         {canManage && (
           <Button className="list-page__add" icon="plus" onClick={() => setForm({ open: true, offer: null })}>
@@ -192,7 +200,7 @@ const OffersPage = () => {
         ) : (
           <div className="offer-grid">
             {data.items.map((offer, index) => (
-              <OfferCard key={offer.id} offer={offer} index={index} canManage={canManage} onEdit={(item) => setForm({ open: true, offer: item })} onToggle={toggle} onDelete={setDeleting} />
+              <OfferCard key={offer.id} offer={offer} index={index} canManage={canManage} onEdit={(item) => setForm({ open: true, offer: item })} onToggle={toggle} onDelete={setDeleting} onEntries={setRaffle} />
             ))}
           </div>
         )}
@@ -210,6 +218,8 @@ const OffersPage = () => {
           refresh();
         }}
       />
+
+      <RaffleEntriesModal offer={raffle} onClose={() => setRaffle(null)} />
 
       <ConfirmDialog
         open={Boolean(deleting)}

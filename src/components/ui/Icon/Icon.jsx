@@ -200,6 +200,8 @@ const PATHS = {
       <path d="M15 13v-1h6v1M18 12v7M16.5 19h3" />
     </>
   ),
+  // Fase 57: boleta de rifa
+  ticket: <path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4zM14 6v12" />,
   sparkles: (
     <>
       <path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z" />

@@ -27,7 +27,7 @@ export const money = (value) => formatCurrency(Math.round(Number(value) || 0));
 
 /* ---------- Ofertas (Fase 31) ---------- */
 // Etiqueta de cada oferta: { id, type (regalo | precio | segundo | combo), label, price? }
-export const OFFER_ICONS = { regalo: "🎁", precio: "🔥", segundo: "✌️", combo: "🧩" };
+export const OFFER_ICONS = { regalo: "🎁", precio: "🔥", segundo: "✌️", combo: "🧩", rifa: "🎟️" };
 
 /** El precio especial de un producto (el más bajo) o null. */
 export const offerPriceOf = (product) => {

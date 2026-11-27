@@ -7,7 +7,7 @@ import { FormActions, FormLayout, FormSection } from "../../../components/forms/
 import getErrorMessage from "../../../utils/getErrorMessage";
 import { formatCurrency } from "../../../utils/money";
 import { sanitizeDecimal } from "../../../utils/validators";
-import { OFFER_TYPES, createOffer, typeOf, updateOffer } from "./offerApi";
+import { OFFER_TYPES, createOffer, drawDayText, typeOf, updateOffer } from "./offerApi";
 import ProductPicker from "./ProductPicker";
 import "./offers.css";
 
@@ -29,6 +29,8 @@ const toForm = (offer, type) => ({
   groupsize: String(offer?.groupsize ?? 2),
   percent: String(offer?.percent ?? 100),
   price: offer?.price ? String(offer.price) : "",
+  prize: offer?.prize ?? "",
+  drawdate: offer?.drawdate ?? "",
   triggers: offer?.triggers.map(asProduct) ?? [],
   gifts: offer?.gifts.map(asProduct) ?? [],
   items: offer?.items.map((row) => ({ product: asProduct(row), price: row.price ? String(row.price) : "", quantity: String(row.quantity ?? 1) })) ?? [],
@@ -49,6 +51,7 @@ const toPayload = (form) => ({
     triggers: form.triggers.map((product) => product.id),
     gifts: form.gifts.map((product) => product.id),
   }),
+  ...(form.type === "rifa" && { prize: form.prize.trim(), drawdate: form.drawdate, triggers: form.triggers.map((product) => product.id) }),
   ...(form.type === "precio" && { items: form.items.map((item) => ({ idproduct: item.product.id, price: Number(item.price) })) }),
   ...(form.type === "segundo" && { groupsize: Number(form.groupsize), percent: Number(form.percent), items: form.items.map((item) => ({ idproduct: item.product.id })) }),
   ...(form.type === "combo" && { price: Number(form.price), items: form.items.map((item) => ({ idproduct: item.product.id, quantity: Number(item.quantity) || 1 })) }),
@@ -58,8 +61,13 @@ const toPayload = (form) => ({
 const problemOf = (form) => {
   if (form.name.trim().length < 3) return "Escribe el nombre de la oferta.";
   if (form.type === "regalo") {
-    if (form.triggers.length === 0) return "Elige qué producto activa el regalo.";
-    if (form.gifts.length === 0) return "Elige al menos un regalo.";
+    if (form.triggers.length === 0) return "Paso 1: elige qué producto tiene que comprar el cliente.";
+    if (form.gifts.length === 0) return "Paso 2: elige al menos un regalo.";
+    if (!(Number(form.buyqty) >= 1) || !(Number(form.giftqty) >= 1)) return "Las cantidades deben ser 1 o más.";
+  } else if (form.type === "rifa") {
+    if (form.prize.trim().length < 3) return "Escribe el premio de la rifa.";
+    if (!form.drawdate) return "Elige la fecha del sorteo.";
+    if (form.triggers.length === 0) return "Elige al menos un producto que dé participación.";
   } else if (form.items.length === 0) return "Agrega al menos un producto.";
   if (form.type === "precio") {
     const bad = form.items.find((item) => !(cents(item.price) > 0) || cents(item.price) >= cents(item.product.salePrice));
@@ -80,7 +88,15 @@ const Preview = ({ form }) => {
   const names = (list) => list.map((product) => product.name).join(" o ");
   let headline = "";
   let detail = null;
-  if (form.type === "regalo") {
+  if (form.type === "rifa") {
+    headline = `🎟️ Participa en la rifa${form.prize.trim() ? ` de ${form.prize.trim()}` : "…"}`;
+    detail = (
+      <>
+        {form.triggers.length ? `Por cada ${names(form.triggers)} que compres` : "Elige los productos"}
+        {form.drawdate && <span className="offer-preview__save">Sorteo: {drawDayText(form.drawdate)}</span>}
+      </>
+    );
+  } else if (form.type === "regalo") {
     headline = form.gifts.length ? `🎁 Lleva gratis ${names(form.gifts)}` : "🎁 Lleva gratis…";
     detail = form.triggers.length ? `Por la compra de ${Number(form.buyqty) > 1 ? `${form.buyqty} ` : ""}${names(form.triggers)}` : "Elige qué se compra";
   } else if (form.type === "precio") {
@@ -190,18 +206,57 @@ const OfferForm = ({ offer, type, branches, products, onCancel, onSaved }) => {
       <div className="offer-form">
         <div className="offer-form__main">
           <FormSection icon={meta.icon} title={meta.label} description={meta.hint}>
-            <Field label="Nombre de la oferta" required maxLength={120} placeholder="Ej: Cabina + manos libres de regalo" data-autofocus value={form.name} onChange={(event) => set({ name: event.target.value })} />
+            <Field label="Nombre de la oferta" required maxLength={120} placeholder={form.type === "rifa" ? "Ej: Rifa de Navidad" : "Ej: Cabina + manos libres de regalo"} data-autofocus value={form.name} onChange={(event) => set({ name: event.target.value })} />
 
             {form.type === "regalo" && (
               <>
+                <ol className="offer-steps">
+                  <li className="offer-step" style={{ "--i": 0 }}>
+                    <span className="offer-step__number">1</span>
+                    <div className="offer-step__body">
+                      <strong>¿Qué tiene que comprar el cliente?</strong>
+                      <small>Si eliges varios, sirve cualquiera de ellos.</small>
+                      <ProductPicker label="Producto que se compra" products={products} exclude={usedIds} onPick={(product) => set({ triggers: [...form.triggers, product] })} />
+                      {chips("triggers")}
+                    </div>
+                  </li>
+                  <li className="offer-step" style={{ "--i": 1 }}>
+                    <span className="offer-step__number">2</span>
+                    <div className="offer-step__body">
+                      <strong>¿Qué se lleva gratis?</strong>
+                      <small>Si pones varios, al vender se escoge uno (el que haya en la sucursal).</small>
+                      <ProductPicker label="Regalo" products={products} exclude={usedIds} onPick={(product) => set({ gifts: [...form.gifts, product] })} />
+                      {chips("gifts")}
+                    </div>
+                  </li>
+                  <li className="offer-step" style={{ "--i": 2 }}>
+                    <span className="offer-step__number">3</span>
+                    <div className="offer-step__body">
+                      <strong>¿Cuántos?</strong>
+                      <div className="offer-sentence">
+                        <span>Por cada</span>
+                        <input type="number" min={1} aria-label="Unidades que compra" value={form.buyqty} onChange={(event) => set({ buyqty: event.target.value })} />
+                        <span>que compre, se lleva</span>
+                        <input type="number" min={1} aria-label="Regalos que se lleva" value={form.giftqty} onChange={(event) => set({ giftqty: event.target.value })} />
+                        <span>de regalo.</span>
+                      </div>
+                      <small>Lo normal es 1 y 1. Si compra el doble, se lleva el doble.</small>
+                    </div>
+                  </li>
+                </ol>
+              </>
+            )}
+
+            {form.type === "rifa" && (
+              <>
+                <p className="offer-note">El sistema no sortea ni da números: solo avisa en Vender y en la factura que la compra participa, y guarda la lista de quién participa. El sorteo lo hacen ustedes aparte.</p>
                 <div className="form-layout__row">
-                  <Field label="Por cada (unidades compradas)" type="number" min={1} value={form.buyqty} onChange={(event) => set({ buyqty: event.target.value })} />
-                  <Field label="Regalos que se lleva" type="number" min={1} value={form.giftqty} onChange={(event) => set({ giftqty: event.target.value })} />
+                  <Field label="Premio" required maxLength={160} placeholder="Ej: Un televisor de 50 pulgadas" value={form.prize} onChange={(event) => set({ prize: event.target.value })} />
+                  <Field label="Fecha del sorteo" required type="date" value={form.drawdate} onChange={(event) => set({ drawdate: event.target.value })} />
                 </div>
-                <ProductPicker label="Si compra…" products={products} exclude={usedIds} onPick={(product) => set({ triggers: [...form.triggers, product] })} />
+                <ProductPicker label="Productos que dan participación" products={products} exclude={usedIds} onPick={(product) => set({ triggers: [...form.triggers, product] })} />
                 {chips("triggers")}
-                <ProductPicker label="Se lleva gratis (el cliente elige uno)" products={products} exclude={usedIds} onPick={(product) => set({ gifts: [...form.gifts, product] })} />
-                {chips("gifts")}
+                <small className="offer-hint">Cada unidad que compre de estos productos es 1 oportunidad. Se junta con otras ofertas (no cambia el precio).</small>
               </>
             )}
 
@@ -225,7 +280,7 @@ const OfferForm = ({ offer, type, branches, products, onCancel, onSaved }) => {
               </>
             )}
 
-            {form.type !== "regalo" && (
+            {form.type !== "regalo" && form.type !== "rifa" && (
               <>
                 <ProductPicker label="Productos" products={products} exclude={usedIds} onPick={(product) => set({ items: [...form.items, { product, price: "", quantity: "1" }] })} />
                 {form.items.length > 0 && (
@@ -257,7 +312,7 @@ const OfferForm = ({ offer, type, branches, products, onCancel, onSaved }) => {
             )}
           </FormSection>
 
-          <FormSection icon="bell" title="Cuándo y dónde" description="Sin fechas, empieza ya y no vence. El límite es opcional.">
+          <FormSection icon="bell" title="Cuándo y dónde" description={form.type === "rifa" ? "Las fechas son hasta cuándo se puede participar (normalmente hasta el día del sorteo)." : "Sin fechas, empieza ya y no vence. El límite es opcional."}>
             <div className="form-layout__row">
               <Field label="Desde" type="date" value={form.startsat} onChange={(event) => set({ startsat: event.target.value })} />
               <Field label="Hasta" type="date" value={form.endsat} onChange={(event) => set({ endsat: event.target.value })} />
@@ -267,7 +322,7 @@ const OfferForm = ({ offer, type, branches, products, onCancel, onSaved }) => {
               type="number"
               min={1}
               placeholder="Sin límite"
-              hint={form.type === "regalo" ? "Máximo de regalos que se entregan." : form.type === "combo" ? "Máximo de combos." : form.type === "segundo" ? "Máximo de grupos con descuento." : "Máximo de unidades con el precio especial."}
+              hint={form.type === "rifa" ? "Máximo de oportunidades que se dan." : form.type === "regalo" ? "Máximo de regalos que se entregan." : form.type === "combo" ? "Máximo de combos." : form.type === "segundo" ? "Máximo de grupos con descuento." : "Máximo de unidades con el precio especial."}
               value={form.limit}
               onChange={(event) => set({ limit: event.target.value })}
             />

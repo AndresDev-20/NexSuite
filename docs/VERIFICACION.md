@@ -805,6 +805,22 @@ Prueba en un portátil de las tiendas (1366×768 o 1280×720), con el zoom al 10
 - [ ] En el celular, cada tramo se ve como una tarjeta y se puede quitar con la «×».
 - [ ] La tirilla y la carta del estado y del pago dicen el grupo y el tramo.
 
+## 14.46 Rifas en Ofertas y Regalo más fácil (Fase 57)
+
+- [ ] **Ofertas → Nueva oferta → Regalo**: se ven los 3 pasos (qué compra, qué se lleva gratis, cuántos) y la vista previa cambia mientras se llena.
+- [ ] **Nueva oferta → Rifa**: sin premio, sin fecha del sorteo o sin productos no deja guardar.
+- [ ] Crear «Rifa de Navidad» con premio, fecha y un producto (por ejemplo un parlante). La tarjeta dice «Participa en la rifa de … · sorteo el …».
+- [ ] En **Vender**, al agregar 2 parlantes sale el aviso morado «Participa en la rifa … · 2 oportunidades»; el total no cambia.
+- [ ] Con una oferta de precio sobre el mismo producto, se aplican las dos (precio especial y rifa).
+- [ ] La tirilla y la carta de esa venta traen el recuadro de la rifa; el detalle de la venta también.
+- [ ] **Ver participantes** muestra la venta con el cliente (o «Consumidor final»), su documento, teléfono y 2 oportunidades; el buscador encuentra por documento o número de venta.
+- [ ] **Imprimir lista** y **Descargar** dan el PDF carta con los participantes.
+- [ ] Anular esa venta (turno abierto): en la lista queda tachada y las oportunidades bajan.
+- [ ] Devolver 1 de 2 parlantes: la venta queda con 1 oportunidad.
+- [ ] Con límite de 2 oportunidades, una venta de 3 da solo 2 y la oferta queda agotada.
+- [ ] Una rifa que empieza en el futuro no da participación todavía.
+- [ ] Al cobrar un **pedido a caja** con el producto de la rifa también sale el aviso.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

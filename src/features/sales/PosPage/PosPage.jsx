@@ -27,7 +27,7 @@ import SaleDoneModal from "./SaleDoneModal";
 import UnitPickerModal from "./UnitPickerModal";
 import LayawayCreateModal from "../layaways/LayawayCreateModal";
 import LayawayDetailModal from "../layaways/LayawayDetailModal";
-import { GiftLines, OfferBadge, OffersSummary } from "../offers/cartOffers";
+import { GiftLines, OfferBadge, OffersSummary, RaffleNotice } from "../offers/cartOffers";
 import { giftLinesOf, useCartOffers } from "../offers/cartOffersLogic";
 import { IMEI_NEEDS_CUSTOMER, countPhones } from "../sales/imeiCustomer";
 import { SurchargeField, SurchargeTotals, surchargeCents, surchargePayload } from "../sales/surcharge";
@@ -720,6 +720,8 @@ const PosPage = () => {
           </dl>
 
           <OffersSummary offers={offers} />
+          {/* Fase 57: la compra participa en estas rifas (el sorteo es aparte) */}
+          <RaffleNotice raffles={offers.raffles} />
 
           {/* ---------- Pagos ---------- */}
           <h2 className="pos__section-title">
