@@ -19,7 +19,7 @@ import UnitPickerModal from "../../sales/PosPage/UnitPickerModal";
 import { GiftLines, OfferBadge, OffersSummary, RaffleNotice } from "../../sales/offers/cartOffers";
 import { giftLinesOf, useCartOffers } from "../../sales/offers/cartOffersLogic";
 import { IMEI_NEEDS_CUSTOMER, countPhones } from "../../sales/sales/imeiCustomer";
-import { SurchargeField, surchargeCents, surchargePayload } from "../../sales/sales/surcharge";
+import { PaymentAmountField, settleRounding, withSaleAmount, SurchargeField, surchargeCents, surchargePayload } from "../../sales/sales/surcharge";
 
 const cents = (value) => Math.round(Number(value || 0) * 100);
 const pesos = (value) => value / 100;
@@ -49,7 +49,10 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
 
   const total = Math.max(cents(order.total) - offers.savings, 0);
   const singlePayment = payments.length === 1;
-  const { effectivePayments, creditOnly } = buildPayments({ payments, total, down });
+  // Fase 54.1: con recargo se escribe lo que paga la financiera; la parte de la venta sale de ahí (y el redondeo se ajusta)
+  const built = buildPayments({ payments: payments.map(withSaleAmount), total, down });
+  const { creditOnly } = built;
+  const { payments: effectivePayments, adjusted: roundingAdjusted } = settleRounding(built.effectivePayments, total);
   const paid = effectivePayments.reduce((sum, payment) => sum + cents(payment.amount), 0);
   const pending = total - paid;
   // Fase 54: recargo de las financieras (aparte: no entra a la caja ni es ganancia)
@@ -62,7 +65,7 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
   const methods = saleMethods.filter((method) => method.value !== "credito" || canCredit);
 
   const updatePayment = (key, changes) => setPayments((current) => current.map((payment) => (payment.key === key ? { ...payment, ...changes } : payment)));
-  const addPayment = () => setPayments([...effectivePayments, emptyPayment("transferencia", pending > 0 ? String(pesos(pending)) : "")]);
+  const addPayment = () => setPayments([...effectivePayments.map((payment) => (singlePayment ? { ...payment, gross: undefined } : payment)), emptyPayment("transferencia", pending > 0 ? String(pesos(pending)) : "")]);
   const removePayment = (key) => setPayments((current) => current.filter((payment) => payment.key !== key));
 
   const cashPayment = effectivePayments.find((payment) => payment.method === "efectivo");
@@ -222,17 +225,8 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
       <ul className="pos__payments">
         {effectivePayments.map((payment) => (
           <li className="pos__payment" key={payment.key}>
-            <Select label="Medio" options={methods} value={payment.method} onChange={(event) => updatePayment(payment.key, { method: event.target.value, received: "", reference: "", surcharge: undefined })} />
-            <Field
-              label="Valor"
-              inputMode="decimal"
-              autoComplete="off"
-              maxLength={12}
-              readOnly={singlePayment}
-              onInput={sanitizeDecimal}
-              value={payment.amount}
-              onChange={(event) => updatePayment(payment.key, { amount: event.target.value })}
-            />
+            <Select label="Medio" options={methods} value={payment.method} onChange={(event) => updatePayment(payment.key, { method: event.target.value, received: "", reference: "", surcharge: undefined, gross: undefined })} />
+            <PaymentAmountField payment={payment} readOnly={singlePayment} onChange={(changes) => updatePayment(payment.key, changes)} />
             {payment.method === "efectivo" ? (
               <Field
                 label="Recibido"
@@ -259,6 +253,9 @@ const ChargeForm = ({ order, sessions, me, customers, canReadCustomers, onCustom
               </p>
             )}
             <SurchargeField payment={payment} onChange={(value) => updatePayment(payment.key, { surcharge: value })} />
+            {roundingAdjusted !== 0 && payment.gross !== undefined && (
+              <p className="pos__hint">Se ajustaron {formatCurrency(Math.round(Math.abs(roundingAdjusted) / 100))} por redondeo en la parte de la venta.</p>
+            )}
             {!singlePayment && (
               <button type="button" className="pos__remove" aria-label="Quitar este pago" onClick={() => removePayment(payment.key)}>
                 <Icon name="x" />

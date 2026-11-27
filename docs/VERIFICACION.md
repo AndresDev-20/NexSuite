@@ -831,6 +831,14 @@ Prueba en un portátil de las tiendas (1366×768 o 1280×720), con el zoom al 10
 - [ ] En una garantía, el teléfono del proveedor sale solo para quien tiene «Ver proveedores».
 - [ ] Si a un rol hecho a mano (por ejemplo el de Laura) se le quita «Ver proveedores» y se le da «Elegir proveedor», puede seguir creando productos con proveedor.
 
+## 14.48 Recargo: lo que paga la financiera (Fase 54.1)
+
+- [ ] Venta de $1.000.000 toda por Addi (10 %): el campo dice «Addi paga (con recargo)» con $1.100.000 y el botón «Cobrar $1.100.000».
+- [ ] Efectivo $200.000 + Addi: en «Addi paga» se escribe $880.000 (lo que dice Addi); sale «Parte de la venta $800.000» y se puede cobrar, sin «Los pagos pasan el total».
+- [ ] Si Addi redondea (por ejemplo $880.050), avisa «Se ajustaron $… por redondeo» y deja cobrar.
+- [ ] En el detalle y el reporte, la venta vale $1.000.000 y el recargo sale aparte; la utilidad no lo incluye y a la caja solo entra el efectivo.
+- [ ] Lo mismo en Ventas → Pedidos por cobrar (Cobrar pedido).
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:
