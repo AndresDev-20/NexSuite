@@ -236,11 +236,11 @@
   background: var(--red-50);
 }
 
-/* Reglas */
+/* Reglas (Fase 56.1: a qué productos aplica y sus tramos) */
 .commission-rules {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .commission-rules__empty {
@@ -249,9 +249,9 @@
 }
 
 .commission-rules__list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -259,13 +259,11 @@
 
 .commission-rule {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 10px;
   padding: 12px 14px;
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: 14px;
   transition: opacity 160ms ease, border-color 160ms ease;
   animation: commission-in 220ms ease-out both;
   animation-delay: calc(var(--i, 0) * 30ms);
@@ -277,48 +275,188 @@
 
 .commission-rule--editing {
   border-color: var(--red-600);
+  box-shadow: 0 0 0 3px rgba(214, 24, 46, 0.12);
 }
 
-.commission-rule__main {
+.commission-rule__top {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 10px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.commission-rule__from {
-  font-size: 0.85rem;
+.commission-rule__title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.commission-rule__title strong {
+  color: var(--color-text);
+}
+
+.commission-rule__title span {
+  font-size: 0.8rem;
   color: var(--color-text-muted);
-}
-
-.commission-rule__value {
-  font-size: 1.1rem;
-  color: var(--red-600);
-}
-
-.commission-rule__scope {
-  font-size: 0.85rem;
-  color: var(--gray-700);
 }
 
 .commission-rule__actions {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.commission-rule__tiers {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 8px 10px;
+  list-style: none;
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+  background: var(--gray-50);
+  border-radius: 10px;
+}
+
+.commission-rule__tiers li {
+  display: flex;
+  justify-content: space-between;
   gap: 10px;
+}
+
+.commission-rule__tiers span {
+  color: var(--gray-700);
+}
+
+.commission-rule__tiers strong {
+  color: var(--red-600);
+  white-space: nowrap;
+}
+
+.commission-rules__new {
+  align-self: flex-start;
 }
 
 .commission-rules__form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-top: 14px;
-  border-top: 1px solid var(--color-border);
+  gap: 12px;
+  padding: 14px;
+  background: var(--gray-50);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  animation: commission-in 200ms ease-out;
 }
 
-.commission-rules__fields {
+.commission-rules__scope {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 10px;
+}
+
+/* Tramos: una fila por tramo en pantalla ancha; en celular, una tarjeta por tramo */
+.commission-tiers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.commission-tiers__head,
+.commission-tier {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 40px;
+  gap: 8px;
+  align-items: end;
+}
+
+.commission-tiers__head {
+  padding: 0 2px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.commission-tier {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  animation: commission-in 180ms ease-out;
+}
+
+.commission-tier__legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+/* En la fila, las etiquetas de cada campo las da la cabecera */
+.commission-tier .field__label,
+.commission-tier label:not(.switch) > span:first-child {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.commission-tier__remove {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 44px;
+  padding: 0;
+  color: var(--gray-700);
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.commission-tier__remove svg {
+  width: 18px;
+  height: 18px;
+}
+
+.commission-tier__remove:hover:not(:disabled) {
+  color: var(--red-700);
+  background: var(--red-50);
+}
+
+.commission-tier__remove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.commission-tiers__add {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--red-600);
+  background: var(--white);
+  border: 1.5px dashed var(--red-200, var(--red-600));
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.commission-tiers__add svg {
+  width: 16px;
+  height: 16px;
+}
+
+.commission-tiers__add:hover {
+  background: var(--red-50);
 }
 
 .commission-rules__preview {
@@ -327,14 +465,53 @@
   color: var(--gray-700);
 }
 
-@media (max-width: 900px) {
-  .commission-rules__fields {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@media (max-width: 640px) {
+  .commission-tiers__head {
+    display: none;
   }
-}
 
-@media (max-width: 520px) {
-  .commission-rules__fields {
+  .commission-tier {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    padding: 34px 10px 10px;
+    position: relative;
+    background: var(--white);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+  }
+
+  /* En la tarjeta sí se ven las etiquetas y el número del tramo */
+  .commission-tier .field__label,
+  .commission-tier label:not(.switch) > span:first-child {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+  }
+
+  .commission-tier__legend {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+  }
+
+  .commission-tier__remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 32px;
+    height: 32px;
+    border: 0;
+  }
+
+  .commission-rules__list {
     grid-template-columns: minmax(0, 1fr);
   }
 }

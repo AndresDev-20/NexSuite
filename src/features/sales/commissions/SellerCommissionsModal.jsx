@@ -9,7 +9,11 @@ import { formatDateTime } from "../../administration/audit/auditOptions";
 import PrintButtons from "./PrintButtons";
 import { STATUS_LABELS, getCommissions, getPayouts, payCommissions, payoutReceiptPath, statementPath } from "./useCommissions";
 
-const ruleText = (rule) => (rule.kind === "porcentaje" ? `${rule.value.toLocaleString("es-CO")} % desde ${formatCurrency(rule.minAmount)}` : `${formatCurrency(rule.value)} desde ${formatCurrency(rule.minAmount)}`);
+// Fase 56.1: el tramo que le tocó («$10.000 de $400.001 a $1.000.000»)
+const ruleText = (rule) =>
+  `${rule.kind === "porcentaje" ? `${rule.value.toLocaleString("es-CO")} %` : formatCurrency(rule.value)} ${
+    rule.maxAmount != null ? `de ${formatCurrency(rule.minAmount)} a ${formatCurrency(rule.maxAmount)}` : `desde ${formatCurrency(rule.minAmount)}`
+  }`;
 
 /**
  * Comisiones de un vendedor en el periodo (Fase 56): cada venta, los ajustes, sus pagos; imprimir su estado (tirilla
@@ -143,7 +147,7 @@ const SellerCommissionsModal = ({ seller, filters, canPay, onClose, onPaid }) =>
                       <span className="sheet__row-meta">
                         {formatDateTime(row.createdAt)}
                         {row.branchName && ` · ${row.branchName}`}
-                        {row.kind === "comision" && ` · venta ${formatCurrency(row.base)} · ${ruleText(row.rule)}`}
+                        {row.kind === "comision" && ` · ${row.scope ? `${row.scope} ` : "venta "}${formatCurrency(row.base)} · ${ruleText(row.rule)}`}
                       </span>
                       {row.kind === "ajuste" && row.note && <span className="sheet__row-meta">{row.note}</span>}
                       {row.payout && <span className="sheet__row-meta">Pagada en {row.payout.number}</span>}

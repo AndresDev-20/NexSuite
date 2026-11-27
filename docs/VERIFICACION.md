@@ -788,6 +788,23 @@ Prueba en un portátil de las tiendas (1366×768 o 1280×720), con el zoom al 10
 - [ ] El detalle del turno (Caja → Turnos) muestra qué se dejó y qué se entregó.
 - [ ] Al escribir el total a mano (sin billetes) todo funciona como antes.
 
+## 14.45 Comisiones por categoría, subcategoría o producto, con tramos (Fase 56.1)
+
+- [ ] En **Ventas → Comisiones → Configurar reglas**, la regla de antes aparece como «Todos los productos» con sus tramos y da lo mismo que antes.
+- [ ] **Nueva regla** para una categoría (por ejemplo Celulares) con tres tramos: de $300.000 a $400.000 → $5.000; de $400.001 a $1.000.000 → $10.000; de $1.000.001 en adelante → 1,5 %.
+- [ ] Al tocar **+ Agregar tramo**, el nuevo empieza donde terminó el anterior.
+- [ ] Un celular de $350.000 deja $5.000; uno de $400.000 también $5.000; uno de $1.200.000 deja $18.000; uno de $250.000 no deja nada.
+- [ ] Una regla por **subcategoría** (por ejemplo iPhone) le gana a la de Celulares para los iPhone.
+- [ ] (Opcional) Una regla por **producto**: se busca el producto por nombre o código, y le gana a su subcategoría y categoría.
+- [ ] Una venta con un celular y accesorios da dos comisiones (Celulares y Todos los productos) que se suman; en el detalle del vendedor sale una línea por cada una con su tramo.
+- [ ] Con un descuento a toda la venta, la comisión se calcula sobre lo que de verdad se cobró de cada producto.
+- [ ] Al devolver solo un accesorio, baja solo la comisión de los accesorios; la del celular sigue igual.
+- [ ] Si los tramos se cruzan, o hay un tramo sin «Hasta» que no es el último, la ventana avisa y no guarda.
+- [ ] No deja crear dos reglas activas para lo mismo (misma sucursal y mismos productos).
+- [ ] Cambiar los tramos de una regla no cambia las comisiones ya calculadas.
+- [ ] En el celular, cada tramo se ve como una tarjeta y se puede quitar con la «×».
+- [ ] La tirilla y la carta del estado y del pago dicen el grupo y el tramo.
+
 ## 15. Producción (cuando montes el VPS)
 
 Sigue `docs/DESPLIEGUE.md` y su **lista final** (sección 19), una vez por empresa. Además:

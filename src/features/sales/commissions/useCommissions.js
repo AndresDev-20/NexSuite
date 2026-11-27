@@ -11,17 +11,28 @@ const clean = (params) => Object.fromEntries(Object.entries(params).filter(([, v
 
 export const STATUS_LABELS = { pendiente: "Pendiente", pagada: "Pagada", anulada: "Anulada" };
 
+// Fase 56.1: la regla aplica a unos productos (categoría, subcategoría o todos) y tiene tramos
+export const normalizeTier = (tier) => ({
+  minAmount: toNumber(tier.minamount),
+  maxAmount: tier.maxamount == null ? null : toNumber(tier.maxamount),
+  kind: tier.kind,
+  value: toNumber(tier.value),
+});
+
 export const normalizeRule = (rule) => ({
   id: rule.id,
   branchId: rule.idbranch,
   branchName: rule.branch?.nameBranch ?? "",
-  minAmount: toNumber(rule.minamount),
-  kind: rule.kind,
-  value: toNumber(rule.value),
+  categoryId: rule.idcategory ?? null,
+  subcategoryId: rule.idsubcategory ?? null,
+  // Opcional: la regla de un solo producto
+  productId: rule.idproduct ?? null,
+  productName: rule.product?.nameproduct ?? "",
+  productSku: rule.product?.sku ?? "",
+  scope: rule.scope ?? "Todos los productos",
+  tiers: (rule.tiers ?? []).map(normalizeTier),
   active: Boolean(rule.isactive),
 });
-
-export const describeRule = (rule) => (rule.kind === "porcentaje" ? `${rule.value.toLocaleString("es-CO")} % de la venta` : null);
 
 export const normalizeRow = (row) => ({
   id: row.id,
@@ -36,7 +47,8 @@ export const normalizeRow = (row) => ({
   status: row.status,
   base: toNumber(row.baseamount),
   amount: toNumber(row.amount),
-  rule: { kind: row.rulekind, value: toNumber(row.rulevalue), minAmount: toNumber(row.ruleminamount) },
+  rule: { kind: row.rulekind, value: toNumber(row.rulevalue), minAmount: toNumber(row.ruleminamount), maxAmount: row.rulemaxamount == null ? null : toNumber(row.rulemaxamount) },
+  scope: row.scope ?? "",
   note: row.note ?? "",
   payout: row.payout ? { id: row.payout.id, number: row.payout.number } : null,
 });
@@ -67,6 +79,14 @@ export const payCommissions = async (body) => {
   return { payout: normalizePayout(data.data), message: data.message };
 };
 
+/** Productos para una regla por producto: { id, label, detail } (para el buscador). */
+export const searchRuleProducts = async (search) =>
+  unwrap(await api.get(`${BASE}/products`, { params: clean({ search }) })).map((product) => ({
+    id: product.id,
+    label: product.name,
+    detail: [product.sku, product.category].filter(Boolean).join(" · "),
+  }));
+export const getCategoryOptions = async () => unwrap(await api.get(`${BASE}/categories`));
 export const getRules = async () => unwrap(await api.get(`${BASE}/rules`)).map(normalizeRule);
 export const saveRule = async (id, body) => {
   const { data } = id ? await api.put(`${BASE}/rules/${id}`, body) : await api.post(`${BASE}/rules`, body);
